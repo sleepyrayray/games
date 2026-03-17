@@ -7,9 +7,18 @@ import {
   type MoveSet,
   type PokemonDataset,
   type PokemonTypeId,
+  type RunStateRecord,
   type SpeciesId,
   type StarterPoolRecord,
 } from "../../src/types/pokechamp-data.ts";
+import {
+  advanceRunStateAfterVictory,
+  completeRunAfterFinalVictory,
+  createRunState,
+  getBlockedSpeciesFromRunState,
+  getRemainingFloorTypesFromRunState,
+  type CompletedRunRecord,
+} from "./run-state.ts";
 
 const STARTER_TYPES = ["grass", "fire", "water"] as const;
 const TYPE_INDEX = new Map(
@@ -128,11 +137,13 @@ export interface SimulateTowerRunOptions {
 }
 
 export interface SimulatedRun {
+  completedRun: CompletedRunRecord | null;
   seed: string;
   strategy: SimulationStrategy;
   starterOffer: GeneratedStarterOffer | null;
   chosenStarter: GeneratedStarterChoice | null;
   floors: SimulatedFloor[];
+  runStateHistory: RunStateRecord[];
   usedSpecies: SpeciesId[];
 }
 
@@ -671,77 +682,88 @@ export function simulateTowerRun(
 ): SimulatedRunResult {
   const strategy = options.strategy ?? "random";
   const rng = createSeededRandom(options.seed);
-  const blockedSpecies = new Set<SpeciesId>();
-  const remainingFloorTypes = new Set<PokemonTypeId>(POKEMON_TYPES);
   const run: SimulatedRun = {
+    completedRun: null,
     seed: options.seed,
     strategy,
     starterOffer: null,
     chosenStarter: null,
     floors: [],
+    runStateHistory: [],
     usedSpecies: [],
   };
+  let currentRunState: RunStateRecord | null = null;
 
   try {
     const starterOffer = sandbox.generateStarterOffer({
-      blockedSpecies,
+      blockedSpecies: new Set<SpeciesId>(),
       rng,
     });
     const chosenStarter = selectStarterChoice(starterOffer, rng);
+    const initialBlockedSpecies = new Set<SpeciesId>([chosenStarter.speciesId]);
+    const initialDoorOffer = sandbox.generateDoorOffer({
+      blockedSpecies: initialBlockedSpecies,
+      nextFloorNumber: 1,
+      remainingFloorTypes: new Set<PokemonTypeId>(POKEMON_TYPES),
+      rng,
+    });
+    const chosenInitialFloorType = selectDoorChoice(
+      initialDoorOffer,
+      rng,
+      strategy,
+    ).typeId;
 
     run.starterOffer = starterOffer;
     run.chosenStarter = chosenStarter;
-    blockSpecies(
-      blockedSpecies,
-      chosenStarter.speciesId,
-      "starter",
-      "duplicate-species",
-    );
+    currentRunState = createRunState({
+      chosenFloorType: chosenInitialFloorType,
+      chosenStarter,
+      doorOffer: initialDoorOffer,
+      playerName: "Simulation",
+      runId: `sim-${options.seed}`,
+      seed: options.seed,
+    });
+    run.runStateHistory.push(currentRunState);
 
     let currentPokemon: GeneratedBattlePokemon = chosenStarter;
-    let currentFloorType = selectInitialFloorType(
-      sandbox,
-      blockedSpecies,
-      remainingFloorTypes,
-      rng,
-      strategy,
-    );
 
     for (
       let floorNumber = 1;
       floorNumber <= FLOOR_LEVELS.length;
       floorNumber += 1
     ) {
+      if (!currentRunState) {
+        throw new Error("Missing run state before floor simulation");
+      }
+
       const floorLevel = sandbox.getFloorLevel(floorNumber);
-      remainingFloorTypes.delete(currentFloorType);
+      const blockedSpecies = getBlockedSpeciesFromRunState(currentRunState);
 
       const encounter = sandbox.generateEncounter({
         blockedSpecies,
         floorNumber,
-        floorType: currentFloorType,
+        floorType: currentRunState.currentFloorType,
         rng,
       });
-
-      blockSpecies(
-        blockedSpecies,
-        encounter.enemy.speciesId,
-        `encounter on floor ${floorNumber}`,
-        "duplicate-species",
-        floorNumber,
-      );
 
       const floorRecord: SimulatedFloor = {
         floorNumber,
         floorLevel,
-        floorType: currentFloorType,
+        floorType: currentRunState.currentFloorType,
         playerPokemon: currentPokemon,
         encounter,
       };
 
       if (floorNumber < FLOOR_LEVELS.length) {
         const nextFloorNumber = floorNumber + 1;
-        const rewardOffer = sandbox.generateRewardOffer({
+        const remainingFloorTypes =
+          getRemainingFloorTypesFromRunState(currentRunState);
+        const blockedSpeciesAfterEncounter = cloneSetWithSpecies(
           blockedSpecies,
+          encounter.enemy.speciesId,
+        );
+        const rewardOffer = sandbox.generateRewardOffer({
+          blockedSpecies: blockedSpeciesAfterEncounter,
           nextFloorNumber,
           remainingFloorTypes,
           rng,
@@ -749,22 +771,18 @@ export function simulateTowerRun(
         const chosenReward = selectRewardChoice(
           rewardOffer,
           sandbox,
-          blockedSpecies,
+          blockedSpeciesAfterEncounter,
           remainingFloorTypes,
           rng,
           strategy,
         );
-
-        blockSpecies(
-          blockedSpecies,
+        const blockedSpeciesAfterReward = cloneSetWithSpecies(
+          blockedSpeciesAfterEncounter,
           chosenReward.speciesId,
-          `reward after floor ${floorNumber}`,
-          "duplicate-species",
-          floorNumber,
         );
 
         const doorOffer = sandbox.generateDoorOffer({
-          blockedSpecies,
+          blockedSpecies: blockedSpeciesAfterReward,
           nextFloorNumber,
           remainingFloorTypes,
           rng,
@@ -779,25 +797,40 @@ export function simulateTowerRun(
         floorRecord.chosenReward = chosenReward;
         floorRecord.doorOffer = doorOffer;
         floorRecord.chosenNextFloorType = chosenNextFloorType;
+
+        currentRunState = advanceRunStateAfterVictory({
+          chosenNextFloorType,
+          chosenReward,
+          doorOffer,
+          encounter,
+          rewardOffer,
+          state: currentRunState,
+        });
+        run.runStateHistory.push(currentRunState);
         currentPokemon = chosenReward;
-        currentFloorType = chosenNextFloorType;
+      } else {
+        run.completedRun = completeRunAfterFinalVictory({
+          encounter,
+          state: currentRunState,
+        });
+        run.usedSpecies = [...run.completedRun.usedSpecies];
       }
 
       run.floors.push(floorRecord);
     }
 
-    run.usedSpecies = [...blockedSpecies].sort((left, right) =>
-      left.localeCompare(right, "en"),
-    );
+    if (run.completedRun === null && currentRunState) {
+      run.usedSpecies = [...currentRunState.usedSpecies];
+    }
 
     return {
       status: "completed",
       run,
     };
   } catch (error) {
-    run.usedSpecies = [...blockedSpecies].sort((left, right) =>
-      left.localeCompare(right, "en"),
-    );
+    if (currentRunState) {
+      run.usedSpecies = [...currentRunState.usedSpecies];
+    }
 
     if (error instanceof RulesSandboxError) {
       return {
@@ -808,6 +841,17 @@ export function simulateTowerRun(
           message: error.message,
           floorNumber: error.floorNumber,
           details: error.details,
+        },
+      };
+    }
+
+    if (error instanceof Error) {
+      return {
+        status: "failed",
+        run,
+        failure: {
+          kind: "invalid-data",
+          message: error.message,
         },
       };
     }
@@ -830,30 +874,6 @@ function assertUniqueSpecies(
       floorNumber,
     });
   }
-}
-
-function blockSpecies(
-  blockedSpecies: Set<SpeciesId>,
-  speciesId: SpeciesId,
-  context: string,
-  kind: RunFailureKind,
-  floorNumber?: number,
-): void {
-  if (blockedSpecies.has(speciesId)) {
-    throw new RulesSandboxError(
-      kind,
-      `Species ${speciesId} was already blocked before ${context}`,
-      {
-        details: {
-          context,
-          speciesId,
-        },
-        floorNumber,
-      },
-    );
-  }
-
-  blockedSpecies.add(speciesId);
 }
 
 function bucketRecordsBySpecies(
@@ -1027,63 +1047,6 @@ function selectDoorChoice(
   });
 
   return sortedChoices[0] ?? pickOne(doorOffer.choices, rng);
-}
-
-function selectInitialFloorType(
-  sandbox: RulesSandbox,
-  blockedSpecies: ReadonlySet<SpeciesId>,
-  remainingFloorTypes: ReadonlySet<PokemonTypeId>,
-  rng: RandomSource,
-  strategy: SimulationStrategy,
-): PokemonTypeId {
-  const floorLevel = sandbox.getFloorLevel(1);
-  const viableChoices = sandbox.getViableFloorTypeChoices(
-    floorLevel,
-    blockedSpecies,
-    remainingFloorTypes,
-  );
-
-  if (viableChoices.length === 0) {
-    throw new RulesSandboxError(
-      "dead-end-floor",
-      "No viable floor 1 types remain after starter selection",
-      {
-        details: {
-          floorLevel,
-        },
-        floorNumber: 0,
-      },
-    );
-  }
-
-  const selectedChoice =
-    strategy === "random"
-      ? pickOne(viableChoices, rng)
-      : [...viableChoices].sort((left, right) => {
-          if (
-            left.availableEncounterSpeciesCount !==
-            right.availableEncounterSpeciesCount
-          ) {
-            return (
-              left.availableEncounterSpeciesCount -
-              right.availableEncounterSpeciesCount
-            );
-          }
-
-          return compareDoorChoices(left, right);
-        })[0];
-
-  if (!selectedChoice) {
-    throw new RulesSandboxError(
-      "dead-end-floor",
-      "Unable to select an initial floor type",
-      {
-        floorNumber: 0,
-      },
-    );
-  }
-
-  return selectedChoice.typeId;
 }
 
 function selectRewardChoice(

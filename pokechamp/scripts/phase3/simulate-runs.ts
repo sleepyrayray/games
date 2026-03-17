@@ -396,8 +396,10 @@ function requireValue(value: string | undefined, flag: string): string {
 
 function summarizeRun(run: SimulatedRun): {
   chosenRewards: string[];
+  completedRun: SimulatedRun["completedRun"];
   encounterSpecies: string[];
   floorTypes: string[];
+  runStateHistory: SimulatedRun["runStateHistory"];
   seed: string;
   starter: string | null;
 } {
@@ -412,6 +414,8 @@ function summarizeRun(run: SimulatedRun): {
       (floor) => floor.encounter.enemy.battlePokemonId,
     ),
     floorTypes: run.floors.map((floor) => floor.floorType),
+    completedRun: run.completedRun,
+    runStateHistory: run.runStateHistory,
     seed: run.seed,
     starter: run.chosenStarter?.battlePokemonId ?? null,
   };

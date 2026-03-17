@@ -415,11 +415,13 @@ This is the minimum save shape needed for a run in progress.
   "runId": "run-20260317-001",
   "playerName": "Ray",
   "currentFloor": 5,
+  "currentFloorType": "rock",
   "usedSpecies": ["bulbasaur", "pidgeotto", "magnemite", "croconaw"],
   "usedBattlePokemon": ["bulbasaur", "pidgeotto", "magnemite", "croconaw"],
   "playerHistory": [
     {
       "floor": 1,
+      "floorType": "grass",
       "speciesId": "bulbasaur",
       "formId": "bulbasaur",
       "level": 8
@@ -442,6 +444,12 @@ Purpose:
 - Reconstruct prior choices
 - Enforce no-duplicate species rules
 - Replay the winning team in the outro
+
+Notes:
+
+- `currentFloorType` stores the chosen type for the active floor so the game can resume directly into the correct battle.
+- `playerHistory.floorType` preserves the consumed type path so future door offers can exclude already-used floor types.
+- `nextDoorTypes` may contain one or two entries. It drops to one when only a single legal unused type remains for the next floor.
 
 ## Import Rules
 

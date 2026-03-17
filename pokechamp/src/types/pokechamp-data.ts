@@ -197,10 +197,13 @@ export interface StarterPoolRecord {
 
 export interface PlayerHistoryEntry {
   floor: number;
+  floorType: PokemonTypeId;
   speciesId: SpeciesId;
   formId: FormId;
   level: FloorLevel;
 }
+
+export type DoorTypeSet = [PokemonTypeId] | [PokemonTypeId, PokemonTypeId];
 
 export interface CurrentRunPokemon {
   speciesId: SpeciesId;
@@ -213,11 +216,12 @@ export interface RunStateRecord {
   runId: string;
   playerName: string;
   currentFloor: number;
+  currentFloorType: PokemonTypeId;
   usedSpecies: SpeciesId[];
   usedBattlePokemon: BattlePokemonId[];
   playerHistory: PlayerHistoryEntry[];
   currentPokemon: CurrentRunPokemon;
-  nextDoorTypes: [PokemonTypeId, PokemonTypeId];
+  nextDoorTypes: DoorTypeSet;
   seed: string;
 }
 

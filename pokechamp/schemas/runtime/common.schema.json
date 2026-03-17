@@ -373,12 +373,15 @@
     "playerHistoryEntry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["floor", "speciesId", "formId", "level"],
+      "required": ["floor", "floorType", "speciesId", "formId", "level"],
       "properties": {
         "floor": {
           "type": "integer",
           "minimum": 1,
           "maximum": 18
+        },
+        "floorType": {
+          "$ref": "#/$defs/pokemonTypeId"
         },
         "speciesId": {
           "$ref": "#/$defs/idString"
@@ -417,6 +420,7 @@
         "runId",
         "playerName",
         "currentFloor",
+        "currentFloorType",
         "usedSpecies",
         "usedBattlePokemon",
         "playerHistory",
@@ -437,6 +441,9 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 18
+        },
+        "currentFloorType": {
+          "$ref": "#/$defs/pokemonTypeId"
         },
         "usedSpecies": {
           "type": "array",
@@ -463,7 +470,7 @@
         },
         "nextDoorTypes": {
           "type": "array",
-          "minItems": 2,
+          "minItems": 1,
           "maxItems": 2,
           "items": {
             "$ref": "#/$defs/pokemonTypeId"
