@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import { GAME_VIEWPORT } from "./gameRules";
 import { BootScene } from "../scenes/BootScene";
+import { DoorChoiceScene } from "../scenes/DoorChoiceScene";
+import { RewardDraftScene } from "../scenes/RewardDraftScene";
+import { StarterDraftScene } from "../scenes/StarterDraftScene";
 import { TowerLobbyScene } from "../scenes/TowerLobbyScene";
 
 export const buildPhaserConfig = (
@@ -19,5 +22,11 @@ export const buildPhaserConfig = (
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, TowerLobbyScene],
+  scene: [
+    BootScene,
+    TowerLobbyScene,
+    StarterDraftScene,
+    RewardDraftScene,
+    DoorChoiceScene,
+  ],
 });
