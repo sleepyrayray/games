@@ -4,6 +4,8 @@ PokeChamp is a small single-player Pokemon tower challenge game. The player crea
 
 The hook is simple: every Pokemon can only be used once. After each win, the player chooses one of three reward Pokemon and then picks between two revealed type doors for the next floor. If the player loses a single battle, the run restarts from floor 1.
 
+Live prototype: [https://sleepyrayray.github.io/games/pokechamp/](https://sleepyrayray.github.io/games/pokechamp/)
+
 ## Core Fantasy
 
 - Climb the PokeChamp tower from floor 1 to floor 18.
