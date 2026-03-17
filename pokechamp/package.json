@@ -17,7 +17,9 @@
     "data:import": "node --experimental-strip-types ./scripts/import/fetch-pokeapi.ts",
     "data:build": "node --experimental-strip-types ./scripts/build-data/build-runtime-data.ts",
     "data:validate": "node --experimental-strip-types ./scripts/build-data/validate-runtime-data.ts",
-    "data:sync": "npm run data:import && npm run data:build && npm run data:validate"
+    "data:sync": "npm run data:import && npm run data:build && npm run data:validate",
+    "phase3:simulate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts",
+    "phase3:validate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts --runs 500"
   },
   "dependencies": {
     "phaser": "^3.88.2"
