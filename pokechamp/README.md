@@ -135,6 +135,22 @@ Useful commands:
 - `npm run lint`
 - `npm run format:check`
 
+## Data Pipeline
+
+Phase 2 now has a first-pass Pokemon data pipeline.
+
+Commands:
+
+- `npm run data:import` to fetch and snapshot raw source data from PokeAPI into `data/raw/pokeapi/`
+- `npm run data:build` to normalize the raw snapshot and export local JSON datasets into `data/normalized/` and `data/runtime/`
+- `npm run data:validate` to validate the generated runtime datasets against the project rules and schema-aligned constraints
+- `npm run data:sync` to run the full import, build, and validation pipeline in sequence
+
+Network note:
+
+- `data:import` needs external network access to `pokeapi.co`
+- `data:build` and `data:validate` run offline against the saved local snapshot
+
 ## GitHub Pages
 
 The project is intended to deploy at `/games/pokechamp/` on GitHub Pages.

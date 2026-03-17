@@ -10,10 +10,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.scripts.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "data:import": "node --experimental-strip-types ./scripts/import/fetch-pokeapi.ts",
+    "data:build": "node --experimental-strip-types ./scripts/build-data/build-runtime-data.ts",
+    "data:validate": "node --experimental-strip-types ./scripts/build-data/validate-runtime-data.ts",
+    "data:sync": "npm run data:import && npm run data:build && npm run data:validate"
   },
   "dependencies": {
     "phaser": "^3.88.2"

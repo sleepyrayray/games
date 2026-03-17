@@ -1,0 +1,74 @@
+[
+  {
+    "floorNumber": 1,
+    "level": 8
+  },
+  {
+    "floorNumber": 2,
+    "level": 12
+  },
+  {
+    "floorNumber": 3,
+    "level": 15
+  },
+  {
+    "floorNumber": 4,
+    "level": 19
+  },
+  {
+    "floorNumber": 5,
+    "level": 23
+  },
+  {
+    "floorNumber": 6,
+    "level": 26
+  },
+  {
+    "floorNumber": 7,
+    "level": 30
+  },
+  {
+    "floorNumber": 8,
+    "level": 34
+  },
+  {
+    "floorNumber": 9,
+    "level": 37
+  },
+  {
+    "floorNumber": 10,
+    "level": 41
+  },
+  {
+    "floorNumber": 11,
+    "level": 44
+  },
+  {
+    "floorNumber": 12,
+    "level": 48
+  },
+  {
+    "floorNumber": 13,
+    "level": 52
+  },
+  {
+    "floorNumber": 14,
+    "level": 55
+  },
+  {
+    "floorNumber": 15,
+    "level": 59
+  },
+  {
+    "floorNumber": 16,
+    "level": 63
+  },
+  {
+    "floorNumber": 17,
+    "level": 66
+  },
+  {
+    "floorNumber": 18,
+    "level": 70
+  }
+]

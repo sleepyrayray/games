@@ -1,0 +1,416 @@
+[
+  {
+    "typeId": "normal",
+    "name": "Normal",
+    "color": "#A8A77A",
+    "uiAccent": "#C8C898",
+    "floorTheme": {
+      "palette": [
+        "#F4F1E8",
+        "#C8C3B0",
+        "#8D8874"
+      ],
+      "materialTags": [
+        "tile",
+        "plaster",
+        "wood"
+      ],
+      "propTags": [
+        "bench",
+        "planter",
+        "lamp"
+      ]
+    }
+  },
+  {
+    "typeId": "fire",
+    "name": "Fire",
+    "color": "#EE8130",
+    "uiAccent": "#FFB067",
+    "floorTheme": {
+      "palette": [
+        "#301814",
+        "#A43D1C",
+        "#F29C52"
+      ],
+      "materialTags": [
+        "basalt",
+        "metal",
+        "ember"
+      ],
+      "propTags": [
+        "torch",
+        "furnace",
+        "warning-sign"
+      ]
+    }
+  },
+  {
+    "typeId": "water",
+    "name": "Water",
+    "color": "#6390F0",
+    "uiAccent": "#90B6FF",
+    "floorTheme": {
+      "palette": [
+        "#10253C",
+        "#2E67A6",
+        "#8AD6E8"
+      ],
+      "materialTags": [
+        "glass",
+        "tile",
+        "water"
+      ],
+      "propTags": [
+        "tank",
+        "pipe",
+        "mist-vent"
+      ]
+    }
+  },
+  {
+    "typeId": "electric",
+    "name": "Electric",
+    "color": "#F7D02C",
+    "uiAccent": "#FFE97A",
+    "floorTheme": {
+      "palette": [
+        "#1D2230",
+        "#D4A917",
+        "#FFF0A2"
+      ],
+      "materialTags": [
+        "metal",
+        "cable",
+        "neon"
+      ],
+      "propTags": [
+        "generator",
+        "coil",
+        "warning-sign"
+      ]
+    }
+  },
+  {
+    "typeId": "grass",
+    "name": "Grass",
+    "color": "#7AC74C",
+    "uiAccent": "#A9E07D",
+    "floorTheme": {
+      "palette": [
+        "#162514",
+        "#4A7A2C",
+        "#B7E282"
+      ],
+      "materialTags": [
+        "moss",
+        "wood",
+        "soil"
+      ],
+      "propTags": [
+        "fern",
+        "trellis",
+        "stone-planter"
+      ]
+    }
+  },
+  {
+    "typeId": "ice",
+    "name": "Ice",
+    "color": "#96D9D6",
+    "uiAccent": "#C8F4F1",
+    "floorTheme": {
+      "palette": [
+        "#17313A",
+        "#7EB8C9",
+        "#D9FBFF"
+      ],
+      "materialTags": [
+        "ice",
+        "glass",
+        "steel"
+      ],
+      "propTags": [
+        "crystal",
+        "snow-drift",
+        "cold-lamp"
+      ]
+    }
+  },
+  {
+    "typeId": "fighting",
+    "name": "Fighting",
+    "color": "#C22E28",
+    "uiAccent": "#E56660",
+    "floorTheme": {
+      "palette": [
+        "#2D1616",
+        "#8B2C2A",
+        "#D8A06C"
+      ],
+      "materialTags": [
+        "mat",
+        "rope",
+        "stone"
+      ],
+      "propTags": [
+        "banner",
+        "training-bag",
+        "gong"
+      ]
+    }
+  },
+  {
+    "typeId": "poison",
+    "name": "Poison",
+    "color": "#A33EA1",
+    "uiAccent": "#CF6CCC",
+    "floorTheme": {
+      "palette": [
+        "#25142A",
+        "#713277",
+        "#D18FDF"
+      ],
+      "materialTags": [
+        "glass",
+        "sludge",
+        "metal"
+      ],
+      "propTags": [
+        "vat",
+        "flask",
+        "warning-light"
+      ]
+    }
+  },
+  {
+    "typeId": "ground",
+    "name": "Ground",
+    "color": "#E2BF65",
+    "uiAccent": "#F4D892",
+    "floorTheme": {
+      "palette": [
+        "#2C2116",
+        "#9C6E34",
+        "#E8C983"
+      ],
+      "materialTags": [
+        "clay",
+        "sand",
+        "stone"
+      ],
+      "propTags": [
+        "pillar",
+        "dig-site",
+        "crate"
+      ]
+    }
+  },
+  {
+    "typeId": "flying",
+    "name": "Flying",
+    "color": "#A98FF3",
+    "uiAccent": "#D3C4FF",
+    "floorTheme": {
+      "palette": [
+        "#1B2137",
+        "#6E72C8",
+        "#DFE6FF"
+      ],
+      "materialTags": [
+        "cloud",
+        "glass",
+        "marble"
+      ],
+      "propTags": [
+        "wind-vane",
+        "banner",
+        "sky-bridge"
+      ]
+    }
+  },
+  {
+    "typeId": "psychic",
+    "name": "Psychic",
+    "color": "#F95587",
+    "uiAccent": "#FF9CBC",
+    "floorTheme": {
+      "palette": [
+        "#2D1631",
+        "#B04274",
+        "#FFC5D7"
+      ],
+      "materialTags": [
+        "glass",
+        "velvet",
+        "mirror"
+      ],
+      "propTags": [
+        "orb",
+        "screen",
+        "sigil"
+      ]
+    }
+  },
+  {
+    "typeId": "bug",
+    "name": "Bug",
+    "color": "#A6B91A",
+    "uiAccent": "#CFDD6A",
+    "floorTheme": {
+      "palette": [
+        "#1E2410",
+        "#667B1C",
+        "#D2E38D"
+      ],
+      "materialTags": [
+        "bark",
+        "leaf",
+        "resin"
+      ],
+      "propTags": [
+        "lantern",
+        "cocoon",
+        "branch"
+      ]
+    }
+  },
+  {
+    "typeId": "rock",
+    "name": "Rock",
+    "color": "#B6A136",
+    "uiAccent": "#D7C266",
+    "floorTheme": {
+      "palette": [
+        "#221D16",
+        "#7B6640",
+        "#CDB585"
+      ],
+      "materialTags": [
+        "slate",
+        "ore",
+        "stone"
+      ],
+      "propTags": [
+        "monolith",
+        "cart",
+        "crystal-cluster"
+      ]
+    }
+  },
+  {
+    "typeId": "ghost",
+    "name": "Ghost",
+    "color": "#735797",
+    "uiAccent": "#A08BC6",
+    "floorTheme": {
+      "palette": [
+        "#141224",
+        "#4C3A68",
+        "#C4B8E8"
+      ],
+      "materialTags": [
+        "veil",
+        "stone",
+        "candle"
+      ],
+      "propTags": [
+        "lantern",
+        "portrait",
+        "archway"
+      ]
+    }
+  },
+  {
+    "typeId": "dragon",
+    "name": "Dragon",
+    "color": "#6F35FC",
+    "uiAccent": "#A882FF",
+    "floorTheme": {
+      "palette": [
+        "#171326",
+        "#4B2AB1",
+        "#D2C2FF"
+      ],
+      "materialTags": [
+        "obsidian",
+        "gold",
+        "scale"
+      ],
+      "propTags": [
+        "totem",
+        "brazer",
+        "crest"
+      ]
+    }
+  },
+  {
+    "typeId": "dark",
+    "name": "Dark",
+    "color": "#705746",
+    "uiAccent": "#A08975",
+    "floorTheme": {
+      "palette": [
+        "#151311",
+        "#46392F",
+        "#B7A791"
+      ],
+      "materialTags": [
+        "leather",
+        "iron",
+        "smoke"
+      ],
+      "propTags": [
+        "spotlight",
+        "crate",
+        "shutter"
+      ]
+    }
+  },
+  {
+    "typeId": "steel",
+    "name": "Steel",
+    "color": "#B7B7CE",
+    "uiAccent": "#D8D8EA",
+    "floorTheme": {
+      "palette": [
+        "#1D2129",
+        "#6D7487",
+        "#E3E6F2"
+      ],
+      "materialTags": [
+        "steel",
+        "glass",
+        "mesh"
+      ],
+      "propTags": [
+        "console",
+        "catwalk",
+        "robot-arm"
+      ]
+    }
+  },
+  {
+    "typeId": "fairy",
+    "name": "Fairy",
+    "color": "#D685AD",
+    "uiAccent": "#F2B7D1",
+    "floorTheme": {
+      "palette": [
+        "#2B1727",
+        "#A95D87",
+        "#F7D3E6"
+      ],
+      "materialTags": [
+        "silk",
+        "glass",
+        "flower"
+      ],
+      "propTags": [
+        "lantern",
+        "ribbon",
+        "fountain"
+      ]
+    }
+  }
+]

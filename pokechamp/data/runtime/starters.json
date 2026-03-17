@@ -1,0 +1,35 @@
+{
+  "grass": [
+    "bulbasaur",
+    "chikorita",
+    "treecko",
+    "turtwig",
+    "snivy",
+    "chespin",
+    "rowlet",
+    "grookey",
+    "sprigatito"
+  ],
+  "fire": [
+    "charmander",
+    "cyndaquil",
+    "torchic",
+    "chimchar",
+    "tepig",
+    "fennekin",
+    "litten",
+    "scorbunny",
+    "fuecoco"
+  ],
+  "water": [
+    "squirtle",
+    "totodile",
+    "mudkip",
+    "piplup",
+    "oshawott",
+    "froakie",
+    "popplio",
+    "sobble",
+    "quaxly"
+  ]
+}
