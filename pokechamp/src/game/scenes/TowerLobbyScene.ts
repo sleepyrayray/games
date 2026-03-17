@@ -189,7 +189,7 @@ export class TowerLobbyScene extends Phaser.Scene {
         layout.bodyY + 430,
         currentFloor
           ? `Resume will reopen floor ${currentFloor.state.currentFloor} with ${currentFloor.playerPokemon.name} directly inside the active room. Reward and door choices are still derived from the same saved run state when you win.`
-          : `The current vertical slice now includes starter drafting, a type-themed floor room, a simplified battle resolver, reward selection, and next-door choice on top of the same runtime service.`,
+          : `The current vertical slice now includes starter drafting, a type-themed floor room, an interactive battle prototype, reward selection, and next-door choice on top of the same runtime service.`,
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.accent,

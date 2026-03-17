@@ -2,6 +2,7 @@ import type {
   BattleReadyPokemonRecord,
   FloorLevel,
   MoveCategory,
+  MoveId,
   MoveRecord,
   PokemonTypeId,
 } from "../../types/pokechamp-data";
@@ -12,8 +13,12 @@ import {
 
 type BattleSide = "enemy" | "player";
 
-const FALLBACK_MOVE_ID = "__fallback-strike__";
-const MAX_BATTLE_TURNS = 12;
+const FALLBACK_MOVE_ID: MoveId = "__fallback-strike__";
+const UNSUPPORTED_MOVE_REASON = "Status and utility moves arrive later.";
+
+export const BATTLE_TURN_LIMIT = 12;
+
+export type BattleOutcome = "enemy-win" | "player-win";
 
 export interface BattleCombatantContext {
   generated: GeneratedBattlePokemon;
@@ -55,6 +60,12 @@ export interface BattleMovePlan {
   typeId: PokemonTypeId;
 }
 
+export interface BattleMoveChoice {
+  disabledReason: string | null;
+  isSelectable: boolean;
+  plan: BattleMovePlan;
+}
+
 export interface BattleActionLog {
   actorSide: BattleSide;
   damage: number;
@@ -70,11 +81,24 @@ export interface BattleTurnLog {
   turnNumber: number;
 }
 
+export interface BattleSessionState {
+  enemyCurrentHp: number;
+  enemyLastPlan: BattleMovePlan | null;
+  enemyStats: BattleDerivedStats;
+  outcome: BattleOutcome | null;
+  playerCurrentHp: number;
+  playerLastPlan: BattleMovePlan | null;
+  playerStats: BattleDerivedStats;
+  summary: string | null;
+  turns: BattleTurnLog[];
+  turnsResolved: number;
+}
+
 export interface BattleResolutionResult {
   enemyPlan: BattleMovePlan;
   enemyRemainingHp: number;
   enemyStats: BattleDerivedStats;
-  outcome: "enemy-win" | "player-win";
+  outcome: BattleOutcome;
   playerPlan: BattleMovePlan;
   playerRemainingHp: number;
   playerStats: BattleDerivedStats;
@@ -103,32 +127,89 @@ export function deriveBattleStats(
   };
 }
 
+export function createBattleSession(
+  context: BattleResolutionContext,
+): BattleSessionState {
+  const playerStats = deriveBattleStats(context.player.record, context.floorLevel);
+  const enemyStats = deriveBattleStats(context.enemy.record, context.floorLevel);
+
+  return {
+    enemyCurrentHp: enemyStats.hp,
+    enemyLastPlan: null,
+    enemyStats,
+    outcome: null,
+    playerCurrentHp: playerStats.hp,
+    playerLastPlan: null,
+    playerStats,
+    summary: null,
+    turns: [],
+    turnsResolved: 0,
+  };
+}
+
+export function buildBattleMoveChoices(options: {
+  attacker: BattleCombatantContext;
+  attackerStats: BattleDerivedStats;
+  defender: BattleCombatantContext;
+  defenderStats: BattleDerivedStats;
+}): BattleMoveChoice[] {
+  const choices = options.attacker.moveRecords.map((move) => {
+    if (!move.allowedInGame) {
+      return {
+        disabledReason: "This move is excluded from the current prototype ruleset.",
+        isSelectable: false,
+        plan: toDisabledBattleMovePlan(move),
+      };
+    }
+
+    if (move.category === "status" || move.power <= 0) {
+      return {
+        disabledReason: UNSUPPORTED_MOVE_REASON,
+        isSelectable: false,
+        plan: toDisabledBattleMovePlan(move),
+      };
+    }
+
+    return {
+      disabledReason: null,
+      isSelectable: true,
+      plan: toBattleMovePlan({
+        attacker: options.attacker,
+        attackerStats: options.attackerStats,
+        defenderStats: options.defenderStats,
+        move,
+      }),
+    };
+  });
+
+  if (choices.some((choice) => choice.isSelectable)) {
+    return choices;
+  }
+
+  return [
+    ...choices,
+    {
+      disabledReason: null,
+      isSelectable: true,
+      plan: buildFallbackMovePlan(options.attacker, options.attackerStats),
+    },
+  ];
+}
+
 export function selectBattleMove(options: {
   attacker: BattleCombatantContext;
   attackerStats: BattleDerivedStats;
   defender: BattleCombatantContext;
   defenderStats: BattleDerivedStats;
 }): BattleMovePlan {
-  const damagingMoves = options.attacker.moveRecords.filter(
-    (move) => move.allowedInGame && move.power > 0 && move.category !== "status",
+  const selectableChoices = buildBattleMoveChoices(options).filter(
+    (choice) => choice.isSelectable,
   );
+  let bestPlan = selectableChoices[0]?.plan ?? null;
 
-  if (damagingMoves.length === 0) {
-    return buildFallbackMovePlan(options.attacker, options.attackerStats);
-  }
-
-  let bestPlan: BattleMovePlan | null = null;
-
-  for (const move of damagingMoves) {
-    const plan = toBattleMovePlan({
-      attacker: options.attacker,
-      attackerStats: options.attackerStats,
-      defenderStats: options.defenderStats,
-      move,
-    });
-
-    if (!bestPlan || plan.score > bestPlan.score) {
-      bestPlan = plan;
+  for (const choice of selectableChoices) {
+    if (!bestPlan || choice.plan.score > bestPlan.score) {
+      bestPlan = choice.plan;
     }
   }
 
@@ -139,89 +220,143 @@ export function selectBattleMove(options: {
   return bestPlan;
 }
 
-export function resolveBattle(
-  context: BattleResolutionContext,
-): BattleResolutionResult {
-  const rng = createSeededRandom(context.seed);
-  const playerStats = deriveBattleStats(context.player.record, context.floorLevel);
-  const enemyStats = deriveBattleStats(context.enemy.record, context.floorLevel);
-  const playerPlan = selectBattleMove({
-    attacker: context.player,
-    attackerStats: playerStats,
-    defender: context.enemy,
-    defenderStats: enemyStats,
+export function resolveBattleTurn(options: {
+  context: BattleResolutionContext;
+  playerMoveId: string;
+  state: BattleSessionState;
+}): BattleSessionState {
+  if (options.state.outcome) {
+    throw new Error("Cannot resolve another turn after the battle ends");
+  }
+
+  const playerPlan = resolveSelectedPlayerPlan({
+    context: options.context,
+    state: options.state,
+    playerMoveId: options.playerMoveId,
   });
   const enemyPlan = selectBattleMove({
-    attacker: context.enemy,
-    attackerStats: enemyStats,
-    defender: context.player,
-    defenderStats: playerStats,
+    attacker: options.context.enemy,
+    attackerStats: options.state.enemyStats,
+    defender: options.context.player,
+    defenderStats: options.state.playerStats,
   });
+  const turnNumber = options.state.turnsResolved + 1;
   const simulationState: BattleSimulationState = {
     hpBySide: {
-      player: playerStats.hp,
-      enemy: enemyStats.hp,
+      player: options.state.playerCurrentHp,
+      enemy: options.state.enemyCurrentHp,
     },
     plans: {
       player: playerPlan,
       enemy: enemyPlan,
     },
     statsBySide: {
-      player: playerStats,
-      enemy: enemyStats,
+      player: options.state.playerStats,
+      enemy: options.state.enemyStats,
     },
   };
-  const turns: BattleTurnLog[] = [];
-
-  for (let turnNumber = 1; turnNumber <= MAX_BATTLE_TURNS; turnNumber += 1) {
-    const actions = simulateTurn(turnNumber, context, simulationState, rng.next());
-
-    turns.push({
-      actions,
-      turnNumber,
-    });
-
-    if (
-      simulationState.hpBySide.player === 0 ||
-      simulationState.hpBySide.enemy === 0
-    ) {
-      break;
-    }
-  }
-
-  const outcome = determineOutcome(context, simulationState);
-  const turnsResolved = turns.length;
+  const actions = simulateTurn(
+    turnNumber,
+    options.context,
+    simulationState,
+    createSeededRandom(`${options.context.seed}:turn-${turnNumber}:order`).next(),
+  );
+  const outcome =
+    simulationState.hpBySide.player === 0 ||
+    simulationState.hpBySide.enemy === 0 ||
+    turnNumber >= BATTLE_TURN_LIMIT
+      ? determineOutcome(options.context, simulationState)
+      : null;
 
   return {
-    enemyPlan,
-    enemyRemainingHp: simulationState.hpBySide.enemy,
-    enemyStats,
+    enemyCurrentHp: simulationState.hpBySide.enemy,
+    enemyLastPlan: enemyPlan,
+    enemyStats: options.state.enemyStats,
     outcome,
-    playerPlan,
-    playerRemainingHp: simulationState.hpBySide.player,
-    playerStats,
-    summary: buildBattleSummary({
+    playerCurrentHp: simulationState.hpBySide.player,
+    playerLastPlan: playerPlan,
+    playerStats: options.state.playerStats,
+    summary: outcome
+      ? buildBattleSummary({
+          context: options.context,
+          outcome,
+          simulationState,
+          turnsResolved: turnNumber,
+        })
+      : null,
+    turns: [
+      ...options.state.turns,
+      {
+        actions,
+        turnNumber,
+      },
+    ],
+    turnsResolved: turnNumber,
+  };
+}
+
+export function resolveBattle(
+  context: BattleResolutionContext,
+): BattleResolutionResult {
+  let state = createBattleSession(context);
+
+  while (!state.outcome) {
+    const playerPlan = selectBattleMove({
+      attacker: context.player,
+      attackerStats: state.playerStats,
+      defender: context.enemy,
+      defenderStats: state.enemyStats,
+    });
+
+    state = resolveBattleTurn({
       context,
-      outcome,
-      simulationState,
-      turnsResolved,
-    }),
-    turns,
-    turnsResolved,
+      playerMoveId: playerPlan.moveId,
+      state,
+    });
+  }
+
+  if (
+    !state.outcome ||
+    !state.summary ||
+    !state.playerLastPlan ||
+    !state.enemyLastPlan
+  ) {
+    throw new Error("Expected a completed battle result");
+  }
+
+  return {
+    enemyPlan: state.enemyLastPlan,
+    enemyRemainingHp: state.enemyCurrentHp,
+    enemyStats: state.enemyStats,
+    outcome: state.outcome,
+    playerPlan: state.playerLastPlan,
+    playerRemainingHp: state.playerCurrentHp,
+    playerStats: state.playerStats,
+    summary: state.summary,
+    turns: state.turns,
+    turnsResolved: state.turnsResolved,
   };
 }
 
 function buildBattleSummary(options: {
   context: BattleResolutionContext;
-  outcome: BattleResolutionResult["outcome"];
+  outcome: BattleOutcome;
   simulationState: BattleSimulationState;
   turnsResolved: number;
 }): string {
+  const didKnockOut =
+    options.simulationState.hpBySide.player === 0 ||
+    options.simulationState.hpBySide.enemy === 0;
+
   if (options.outcome === "player-win") {
-    return `${options.context.player.generated.name} defeats ${options.context.enemy.generated.name} in ${options.turnsResolved} turns.`;
+    return didKnockOut
+      ? `${options.context.player.generated.name} knocks out ${options.context.enemy.generated.name} in ${options.turnsResolved} turns.`
+      : `${options.context.player.generated.name} wins the simplified decision after ${options.turnsResolved} turns.`;
   }
 
-  return `${options.context.enemy.generated.name} defeats ${options.context.player.generated.name} in ${options.turnsResolved} turns.`;
+  return didKnockOut
+    ? `${options.context.enemy.generated.name} knocks out ${options.context.player.generated.name} in ${options.turnsResolved} turns.`
+    : `${options.context.enemy.generated.name} wins the simplified decision after ${options.turnsResolved} turns.`;
 }
 
 function buildFallbackMovePlan(
@@ -319,7 +454,7 @@ function calculateNonHpStat(baseStat: number, level: FloorLevel): number {
 function determineOutcome(
   context: BattleResolutionContext,
   simulationState: BattleSimulationState,
-): BattleResolutionResult["outcome"] {
+): BattleOutcome {
   if (
     simulationState.hpBySide.player > 0 &&
     simulationState.hpBySide.enemy === 0
@@ -341,6 +476,12 @@ function determineOutcome(
 
   if (playerHpRatio !== enemyHpRatio) {
     return playerHpRatio > enemyHpRatio ? "player-win" : "enemy-win";
+  }
+
+  if (simulationState.hpBySide.player !== simulationState.hpBySide.enemy) {
+    return simulationState.hpBySide.player > simulationState.hpBySide.enemy
+      ? "player-win"
+      : "enemy-win";
   }
 
   const playerScore = simulationState.plans.player.score;
@@ -405,6 +546,31 @@ function resolveMoveExecution(options: {
   };
 }
 
+function resolveSelectedPlayerPlan(options: {
+  context: BattleResolutionContext;
+  playerMoveId: string;
+  state: BattleSessionState;
+}): BattleMovePlan {
+  const moveChoice = buildBattleMoveChoices({
+    attacker: options.context.player,
+    attackerStats: options.state.playerStats,
+    defender: options.context.enemy,
+    defenderStats: options.state.enemyStats,
+  }).find((choice) => choice.plan.moveId === options.playerMoveId);
+
+  if (!moveChoice) {
+    throw new Error(`Unknown player move choice "${options.playerMoveId}"`);
+  }
+
+  if (!moveChoice.isSelectable) {
+    throw new Error(
+      `Move "${moveChoice.plan.moveName}" is currently disabled in the battle prototype`,
+    );
+  }
+
+  return moveChoice.plan;
+}
+
 function simulateTurn(
   turnNumber: number,
   context: BattleResolutionContext,
@@ -428,7 +594,10 @@ function simulateTurn(
   for (const side of orderedSides) {
     const targetSide = side === "player" ? "enemy" : "player";
 
-    if (simulationState.hpBySide[side] === 0 || simulationState.hpBySide[targetSide] === 0) {
+    if (
+      simulationState.hpBySide[side] === 0 ||
+      simulationState.hpBySide[targetSide] === 0
+    ) {
       continue;
     }
 
@@ -500,6 +669,21 @@ function toBattleMovePlan(options: {
     priority: options.move.priority,
     score,
     typeId: options.move.type,
+  };
+}
+
+function toDisabledBattleMovePlan(move: MoveRecord): BattleMovePlan {
+  return {
+    accuracy: move.accuracy,
+    category: move.category,
+    expectedDamage: 0,
+    isFallback: false,
+    moveId: move.moveId,
+    moveName: move.name,
+    power: move.power,
+    priority: move.priority,
+    score: 0,
+    typeId: move.type,
   };
 }
 
