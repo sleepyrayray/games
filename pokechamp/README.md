@@ -122,3 +122,5 @@ No gameplay code has been started yet. The current focus is pre-production:
 See [docs/GAME_VISION.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/GAME_VISION.md) for the detailed game vision and implementation plan.
 See [docs/DATA_SPEC.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/DATA_SPEC.md) for the proposed data model and runtime dataset structure.
 See [docs/IMPLEMENTATION_ROADMAP.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/IMPLEMENTATION_ROADMAP.md) for the recommended build order and milestones.
+See [schemas/runtime/common.schema.json](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/schemas/runtime/common.schema.json) and the runtime schema files in [schemas/runtime](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/schemas/runtime) for the first JSON validation pass.
+See [src/types/pokechamp-data.ts](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/src/types/pokechamp-data.ts) for the matching TypeScript data model.

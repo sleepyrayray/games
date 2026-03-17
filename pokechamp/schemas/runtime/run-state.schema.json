@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokechamp.local/schemas/runtime/run-state.schema.json",
+  "title": "PokeChamp Run State Dataset",
+  "$ref": "common.schema.json#/$defs/runStateRecord"
+}

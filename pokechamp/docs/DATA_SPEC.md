@@ -6,6 +6,11 @@ This document defines the proposed data model for PokeChamp. The goal is to take
 
 This is not meant to mirror PokeAPI field-for-field. It is meant to describe the game-owned data we actually need.
 
+Concrete first-pass artifacts now exist here:
+
+- [schemas/runtime/common.schema.json](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/schemas/runtime/common.schema.json)
+- [src/types/pokechamp-data.ts](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/src/types/pokechamp-data.ts)
+
 ## Data Design Goals
 
 - Keep runtime data small and predictable.
@@ -49,6 +54,15 @@ Suggested outputs:
 - `data/runtime/moves.json`: runtime move definitions
 - `data/runtime/floors.json`: level curve and type metadata
 - `data/runtime/starters.json`: allowed starter pool
+
+Current schema coverage:
+
+- runtime Pokemon dataset
+- runtime moves dataset
+- runtime type metadata dataset
+- starter pool dataset
+- floor level dataset
+- run state dataset
 
 ## Runtime Data Model
 

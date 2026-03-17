@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokechamp.local/schemas/runtime/floor-levels.schema.json",
+  "title": "PokeChamp Floor Levels Dataset",
+  "type": "array",
+  "minItems": 18,
+  "maxItems": 18,
+  "items": {
+    "$ref": "common.schema.json#/$defs/floorLevelRecord"
+  }
+}

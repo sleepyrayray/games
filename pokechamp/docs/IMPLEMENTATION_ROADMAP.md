@@ -33,6 +33,8 @@ Deliverables:
 
 - [GAME_VISION.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/GAME_VISION.md)
 - [DATA_SPEC.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/DATA_SPEC.md)
+- [schemas/runtime/common.schema.json](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/schemas/runtime/common.schema.json)
+- [src/types/pokechamp-data.ts](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/src/types/pokechamp-data.ts)
 - Final call on:
   - evolution fallback levels
   - starter pool policy
