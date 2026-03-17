@@ -1,7 +1,9 @@
 import Phaser from "phaser";
 import { GAME_VIEWPORT } from "./gameRules";
+import { BattleResolutionScene } from "../scenes/BattleResolutionScene";
 import { BootScene } from "../scenes/BootScene";
 import { DoorChoiceScene } from "../scenes/DoorChoiceScene";
+import { FloorScene } from "../scenes/FloorScene";
 import { RewardDraftScene } from "../scenes/RewardDraftScene";
 import { StarterDraftScene } from "../scenes/StarterDraftScene";
 import { TowerLobbyScene } from "../scenes/TowerLobbyScene";
@@ -26,6 +28,8 @@ export const buildPhaserConfig = (
     BootScene,
     TowerLobbyScene,
     StarterDraftScene,
+    FloorScene,
+    BattleResolutionScene,
     RewardDraftScene,
     DoorChoiceScene,
   ],

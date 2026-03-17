@@ -6,7 +6,7 @@ import {
   TYPE_LABELS,
 } from "../config/gameRules";
 import { RunRuntimeService } from "../run/runRuntimeService";
-import { DoorChoiceScene } from "./DoorChoiceScene";
+import { FloorScene } from "./FloorScene";
 import { StarterDraftScene } from "./StarterDraftScene";
 import {
   PHASE_THREE_COLORS,
@@ -29,7 +29,7 @@ export class TowerLobbyScene extends Phaser.Scene {
     const savedRun = runtime.getRunState();
     const currentFloor = savedRun ? runtime.getCurrentFloorContext() : null;
     const layout = drawSceneShell(this, {
-      eyebrow: "PHASE 3 SANDBOX",
+      eyebrow: "PHASE 4 VERTICAL SLICE",
       title: GAME_TITLE,
       subtitle: `${GAME_SUBTITLE} • Saved run state now lives in local storage and flows through starter, reward, and door scenes.`,
     });
@@ -157,18 +157,15 @@ export class TowerLobbyScene extends Phaser.Scene {
       height: 92,
       label: currentFloor ? "Resume Run" : "No Save Yet",
       description: currentFloor
-        ? "Load the current floor preview from the saved RunStateRecord."
-        : "A saved floor preview will appear here after you begin a run.",
+        ? "Load the active floor room from the saved RunStateRecord."
+        : "An active floor room will appear here after you begin a run.",
       accentColor: currentFloor ? 0x5ab9d4 : 0x4d8193,
       onPress: () => {
         if (!currentFloor) {
           return;
         }
 
-        this.scene.start(DoorChoiceScene.KEY, {
-          currentFloor,
-          mode: "current-floor",
-        });
+        this.scene.start(FloorScene.KEY, { currentFloor });
       },
     });
 
@@ -191,8 +188,8 @@ export class TowerLobbyScene extends Phaser.Scene {
         layout.bodyX,
         layout.bodyY + 430,
         currentFloor
-          ? `Resume will reopen floor ${currentFloor.state.currentFloor} with ${currentFloor.playerPokemon.name}. If you were mid-reward or mid-door flow, the scene will rebuild deterministically from the saved run state.`
-          : `Next milestone: replace these sandbox controls with actual battle, reward, and navigation presentation while keeping the same runtime service.`,
+          ? `Resume will reopen floor ${currentFloor.state.currentFloor} with ${currentFloor.playerPokemon.name} directly inside the active room. Reward and door choices are still derived from the same saved run state when you win.`
+          : `The current vertical slice now includes starter drafting, a type-themed floor room, a simplified battle resolver, reward selection, and next-door choice on top of the same runtime service.`,
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.accent,

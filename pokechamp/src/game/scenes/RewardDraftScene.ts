@@ -6,6 +6,7 @@ import {
 } from "../run/runRuntimeService";
 import type { GeneratedBattlePokemon } from "../run/rulesSandbox";
 import { DoorChoiceScene } from "./DoorChoiceScene";
+import { FloorScene } from "./FloorScene";
 import { TowerLobbyScene } from "./TowerLobbyScene";
 import {
   PHASE_THREE_COLORS,
@@ -104,12 +105,11 @@ export class RewardDraftScene extends Phaser.Scene {
       width: 280,
       height: 72,
       label: "Back To Floor",
-      description: "Return to the current floor preview without committing a reward.",
+      description: "Return to the active floor room without committing a reward.",
       accentColor: 0x5ab9d4,
       onPress: () => {
-        this.scene.start(DoorChoiceScene.KEY, {
+        this.scene.start(FloorScene.KEY, {
           currentFloor: rewardContext.currentFloor,
-          mode: "current-floor",
         });
       },
     });

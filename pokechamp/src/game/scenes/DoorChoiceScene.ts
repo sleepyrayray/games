@@ -14,6 +14,8 @@ import type {
   GeneratedBattlePokemon,
   GeneratedDoorChoice,
 } from "../run/rulesSandbox";
+import { BattleResolutionScene } from "./BattleResolutionScene";
+import { FloorScene } from "./FloorScene";
 import { RewardDraftScene } from "./RewardDraftScene";
 import { StarterDraftScene } from "./StarterDraftScene";
 import { TowerLobbyScene } from "./TowerLobbyScene";
@@ -192,49 +194,30 @@ export class DoorChoiceScene extends Phaser.Scene {
         .setOrigin(0, 0);
     });
 
-    if (currentFloor.state.currentFloor === FLOOR_COUNT) {
-      createActionButton(this, {
-        x: layout.bodyX,
-        y: layout.bodyY + 390,
-        width: 360,
-        height: 86,
-        label: "Claim Tower Win",
-        description: "Finish the final floor and archive the completed run summary.",
-        accentColor: 0x67c5b8,
-        onPress: () => {
-          const completed = runtime.completeCurrentRun();
+    createActionButton(this, {
+      x: layout.bodyX,
+      y: layout.bodyY + 390,
+      width: 360,
+      height: 86,
+      label:
+        currentFloor.state.currentFloor === FLOOR_COUNT
+          ? "Enter Final Battle"
+          : "Enter Battle",
+      description:
+        currentFloor.state.currentFloor === FLOOR_COUNT
+          ? "Resolve the final showdown before claiming the tower."
+          : "Open the battle-resolution scene for this floor encounter.",
+      accentColor: 0x67c5b8,
+      onPress: () => {
+        const battleContext = runtime.getBattleContext();
 
-          if (!completed) {
-            throw new Error("Expected a completed run record after the final floor");
-          }
+        if (!battleContext) {
+          throw new Error("Expected battle context for the current floor");
+        }
 
-          this.scene.restart({
-            completedFloor: completed.currentFloor,
-            completedRun: completed.completedRun,
-            mode: "completed",
-          });
-        },
-      });
-    } else {
-      createActionButton(this, {
-        x: layout.bodyX,
-        y: layout.bodyY + 390,
-        width: 360,
-        height: 86,
-        label: "Simulate Victory",
-        description: "Generate the next-floor reward draft from the current saved state.",
-        accentColor: 0x67c5b8,
-        onPress: () => {
-          const rewardContext = runtime.getRewardDraftContext();
-
-          if (!rewardContext) {
-            throw new Error("Expected reward choices for a non-final floor");
-          }
-
-          this.scene.start(RewardDraftScene.KEY, { rewardContext });
-        },
-      });
-    }
+        this.scene.start(BattleResolutionScene.KEY, { battleContext });
+      },
+    });
 
     createActionButton(this, {
       x: layout.bodyX + 382,
@@ -527,10 +510,7 @@ export class DoorChoiceScene extends Phaser.Scene {
           throw new Error("Expected a current floor after advancing the run");
         }
 
-        this.scene.start(DoorChoiceScene.KEY, {
-          currentFloor,
-          mode: "current-floor",
-        });
+        this.scene.start(FloorScene.KEY, { currentFloor });
       },
     });
   }

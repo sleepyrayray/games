@@ -5,7 +5,7 @@ import {
   type StarterDraftContext,
 } from "../run/runRuntimeService";
 import type { GeneratedStarterChoice } from "../run/rulesSandbox";
-import { DoorChoiceScene } from "./DoorChoiceScene";
+import { FloorScene } from "./FloorScene";
 import { TowerLobbyScene } from "./TowerLobbyScene";
 import {
   PHASE_THREE_COLORS,
@@ -44,7 +44,7 @@ export class StarterDraftScene extends Phaser.Scene {
         forceNew: true,
       });
     const layout = drawSceneShell(this, {
-      eyebrow: "PHASE 3 RUNTIME",
+      eyebrow: "PHASE 4 VERTICAL SLICE",
       title: "Choose Your Starter",
       subtitle: "A random Grass, Fire, and Water trio from the validated starter pool.",
     });
@@ -216,10 +216,7 @@ export class StarterDraftScene extends Phaser.Scene {
           throw new Error("Expected a current floor after choosing a starter");
         }
 
-        this.scene.start(DoorChoiceScene.KEY, {
-          currentFloor,
-          mode: "current-floor",
-        });
+        this.scene.start(FloorScene.KEY, { currentFloor });
       },
     });
   }

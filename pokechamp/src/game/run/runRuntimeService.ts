@@ -1,15 +1,22 @@
 import pokemonDataset from "../../../data/runtime/pokemon.json";
 import floorLevelDataset from "../../../data/runtime/floor-levels.json";
+import movesDataset from "../../../data/runtime/moves.json";
 import starterDataset from "../../../data/runtime/starters.json";
 import {
   FLOOR_LEVELS,
   POKEMON_TYPES,
   type BattleReadyPokemonRecord,
+  type FloorLevel,
   type FloorLevelRecord,
+  type MoveRecord,
   type PokemonTypeId,
   type RunStateRecord,
   type StarterPoolRecord,
 } from "../../types/pokechamp-data";
+import type {
+  BattleCombatantContext,
+  BattleResolutionContext,
+} from "./battleResolution";
 import {
   createRunState,
   advanceRunStateAfterVictory,
@@ -49,7 +56,7 @@ export type StarterDraftContext = PendingStarterDraft;
 
 export interface CurrentFloorContext {
   encounter: GeneratedEncounter;
-  floorLevel: number;
+  floorLevel: FloorLevel;
   playerPokemon: GeneratedBattlePokemon;
   state: RunStateRecord;
 }
@@ -74,6 +81,9 @@ export class RunRuntimeService {
 
   private pendingFloorAdvance: PendingFloorAdvance | null = null;
   private pendingStarterDraft: PendingStarterDraft | null = null;
+  private readonly moveById = new Map(
+    (movesDataset as MoveRecord[]).map((moveRecord) => [moveRecord.moveId, moveRecord]),
+  );
   private readonly sandbox = new RulesSandbox({
     pokemon: pokemonDataset as BattleReadyPokemonRecord[],
     floorLevels: floorLevelDataset as FloorLevelRecord[],
@@ -222,6 +232,30 @@ export class RunRuntimeService {
     };
   }
 
+  public getBattleContext(): BattleResolutionContext | null {
+    const currentFloor = this.getCurrentFloorContext();
+
+    if (!currentFloor) {
+      return null;
+    }
+
+    return {
+      floorLevel: currentFloor.floorLevel,
+      floorNumber: currentFloor.state.currentFloor,
+      floorType: currentFloor.state.currentFloorType,
+      playerName: currentFloor.state.playerName,
+      runId: currentFloor.state.runId,
+      seed: this.buildStageSeed(
+        currentFloor.state.seed,
+        `floor-${currentFloor.state.currentFloor}`,
+        "battle",
+      ),
+      usedSpeciesCount: currentFloor.state.usedSpecies.length,
+      enemy: this.buildBattleCombatant(currentFloor.encounter.enemy),
+      player: this.buildBattleCombatant(currentFloor.playerPokemon),
+    };
+  }
+
   public chooseReward(battlePokemonId: string): PendingDoorChoiceContext {
     const rewardDraft = this.getRewardDraftContext();
 
@@ -361,6 +395,36 @@ export class RunRuntimeService {
     }
 
     return choice;
+  }
+
+  private buildBattleCombatant(
+    generatedPokemon: GeneratedBattlePokemon,
+  ): BattleCombatantContext {
+    const record = (pokemonDataset as BattleReadyPokemonRecord[]).find(
+      (candidate) => candidate.battlePokemonId === generatedPokemon.battlePokemonId,
+    );
+
+    if (!record) {
+      throw new Error(
+        `Unable to resolve battle-ready record for ${generatedPokemon.battlePokemonId}`,
+      );
+    }
+
+    const moveRecords = generatedPokemon.moves.map((moveId) => {
+      const moveRecord = this.moveById.get(moveId);
+
+      if (!moveRecord) {
+        throw new Error(`Unable to resolve move record for ${moveId}`);
+      }
+
+      return moveRecord;
+    });
+
+    return {
+      generated: generatedPokemon,
+      moveRecords,
+      record,
+    };
   }
 
   private resolveCurrentPokemon(state: RunStateRecord): GeneratedBattlePokemon {
