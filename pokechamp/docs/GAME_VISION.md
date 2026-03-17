@@ -89,25 +89,25 @@ The level curve should ramp evenly from level 8 to level 70 across 18 floors.
 Recommended floor levels:
 
 | Floor | Level |
-| --- | --- |
-| 1 | 8 |
-| 2 | 12 |
-| 3 | 15 |
-| 4 | 19 |
-| 5 | 23 |
-| 6 | 26 |
-| 7 | 30 |
-| 8 | 34 |
-| 9 | 37 |
-| 10 | 41 |
-| 11 | 44 |
-| 12 | 48 |
-| 13 | 52 |
-| 14 | 55 |
-| 15 | 59 |
-| 16 | 63 |
-| 17 | 66 |
-| 18 | 70 |
+| ----- | ----- |
+| 1     | 8     |
+| 2     | 12    |
+| 3     | 15    |
+| 4     | 19    |
+| 5     | 23    |
+| 6     | 26    |
+| 7     | 30    |
+| 8     | 34    |
+| 9     | 37    |
+| 10    | 41    |
+| 11    | 44    |
+| 12    | 48    |
+| 13    | 52    |
+| 14    | 55    |
+| 15    | 59    |
+| 16    | 63    |
+| 17    | 66    |
+| 18    | 70    |
 
 This keeps the progression close to linear while still producing clean whole-number battle levels.
 

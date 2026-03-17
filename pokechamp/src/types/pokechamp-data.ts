@@ -20,24 +20,7 @@ export const POKEMON_TYPES = [
 ] as const;
 
 export const FLOOR_LEVELS = [
-  8,
-  12,
-  15,
-  19,
-  23,
-  26,
-  30,
-  34,
-  37,
-  41,
-  44,
-  48,
-  52,
-  55,
-  59,
-  63,
-  66,
-  70,
+  8, 12, 15, 19, 23, 26, 30, 34, 37, 41, 44, 48, 52, 55, 59, 63, 66, 70,
 ] as const;
 
 export const MOVE_CATEGORIES = ["physical", "special", "status"] as const;

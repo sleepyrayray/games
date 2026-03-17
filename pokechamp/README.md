@@ -112,12 +112,34 @@ Pokemon names, creatures, and many sprite resources are copyrighted. This projec
 
 ## Project Status
 
-No gameplay code has been started yet. The current focus is pre-production:
+The initial project scaffold is now in place. The current focus is moving from pre-production into implementation:
 
-- lock the rules
-- define the data pipeline
-- choose the exact battle simplifications
-- decide the first playable milestone
+- build the Pokemon data pipeline
+- validate runtime datasets against the new schemas
+- keep refining the simplified battle rules
+- prepare the first playable floor slice
+
+## Local Development
+
+To run the scaffold locally:
+
+1. `npm install`
+2. `npm run dev`
+
+Useful commands:
+
+- `npm run build`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run format:check`
+
+## GitHub Pages
+
+The project is intended to deploy at `/games/pokechamp/` on GitHub Pages.
+
+- Local dev server URL: `http://localhost:5173/`
+- Local preview URL after build: `http://localhost:4173/games/pokechamp/`
+- Production Pages URL: `https://sleepyrayray.github.io/games/pokechamp/`
 
 See [docs/GAME_VISION.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/GAME_VISION.md) for the detailed game vision and implementation plan.
 See [docs/DATA_SPEC.md](/Volumes/jon/Jon/projects/my-projects/codes/games/pokechamp/docs/DATA_SPEC.md) for the proposed data model and runtime dataset structure.

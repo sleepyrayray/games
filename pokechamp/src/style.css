@@ -1,0 +1,46 @@
+:root {
+  color: #102033;
+  background:
+    radial-gradient(circle at top, rgba(255, 227, 163, 0.92), transparent 32%),
+    linear-gradient(160deg, #f5e7c7 0%, #8fb4ae 52%, #15384b 100%);
+  font-family: "Trebuchet MS", "Gill Sans", sans-serif;
+  line-height: 1.4;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#app {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+#app canvas {
+  border: 3px solid rgba(12, 35, 49, 0.85);
+  border-radius: 22px;
+  box-shadow:
+    0 28px 80px rgba(9, 20, 33, 0.35),
+    0 8px 24px rgba(9, 20, 33, 0.22);
+  max-height: calc(100vh - 48px);
+  max-width: calc(100vw - 48px);
+}

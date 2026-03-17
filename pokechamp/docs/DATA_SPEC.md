@@ -277,12 +277,7 @@ This is a game-derived helper record, not raw source data.
     "protect",
     "aqua-tail"
   ],
-  "recommendedMoves": [
-    "water-pulse",
-    "bite",
-    "protect",
-    "aqua-tail"
-  ]
+  "recommendedMoves": ["water-pulse", "bite", "protect", "aqua-tail"]
 }
 ```
 
@@ -420,18 +415,8 @@ This is the minimum save shape needed for a run in progress.
   "runId": "run-20260317-001",
   "playerName": "Ray",
   "currentFloor": 5,
-  "usedSpecies": [
-    "bulbasaur",
-    "pidgeotto",
-    "magnemite",
-    "croconaw"
-  ],
-  "usedBattlePokemon": [
-    "bulbasaur",
-    "pidgeotto",
-    "magnemite",
-    "croconaw"
-  ],
+  "usedSpecies": ["bulbasaur", "pidgeotto", "magnemite", "croconaw"],
+  "usedBattlePokemon": ["bulbasaur", "pidgeotto", "magnemite", "croconaw"],
   "playerHistory": [
     {
       "floor": 1,
