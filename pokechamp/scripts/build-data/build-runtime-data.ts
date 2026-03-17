@@ -17,8 +17,9 @@ import {
   type StatBlock,
 } from "../../src/types/pokechamp-data.ts";
 import {
+  BLOCKED_RECOMMENDED_MOVE_IDS,
+  CURATED_STATUS_MOVE_IDS,
   FLOOR_LEVEL_DATASET,
-  HIGH_VALUE_STATUS_MOVES,
   NORMALIZED_DATA_DIR,
   PARADOX_SPECIES,
   PREFERRED_LEARNSET_VERSION_GROUPS,
@@ -115,6 +116,14 @@ interface EvolutionIndex {
   familyIdBySpecies: Map<string, string>;
   evolutionChainIdBySpecies: Map<string, string>;
 }
+
+type MoveCurationBucket =
+  | "core-stab"
+  | "core-coverage"
+  | "fallback-damaging"
+  | "tactical-status"
+  | "fallback-status"
+  | "blocked";
 
 async function main(): Promise<void> {
   console.log("Loading raw PokeAPI snapshot...");
@@ -338,12 +347,12 @@ async function main(): Promise<void> {
         moveRecordById,
         floorLevel,
       );
-      const candidateMoves = rankMoves(legalMoves, formRecord.types)
+      const candidateMoves = rankMoves(legalMoves, formRecord)
         .slice(0, 8)
         .map((move) => move.moveId);
       const recommendedMoves = selectRecommendedMoves(
         legalMoves,
-        formRecord.types,
+        formRecord,
       ).map((move) => move.moveId);
 
       if (recommendedMoves.length === 0) {
@@ -967,10 +976,11 @@ function getLegalMoveRecords(
 
 function rankMoves(
   moveRecords: MoveRecord[],
-  types: PokemonTypeId[],
+  formRecord: Pick<FormRecord, "types" | "baseStats">,
 ): MoveRecord[] {
   return [...moveRecords].sort((left, right) => {
-    const scoreDifference = scoreMove(right, types) - scoreMove(left, types);
+    const scoreDifference =
+      scoreMove(right, formRecord) - scoreMove(left, formRecord);
 
     if (scoreDifference !== 0) {
       return scoreDifference;
@@ -988,19 +998,44 @@ function rankMoves(
 
 function selectRecommendedMoves(
   moveRecords: MoveRecord[],
-  types: PokemonTypeId[],
+  formRecord: Pick<FormRecord, "types" | "baseStats">,
 ): MoveRecord[] {
-  const rankedMoves = rankMoves(moveRecords, types);
-  const damagingMoves = rankedMoves.filter(
-    (moveRecord) => moveRecord.category !== "status" && moveRecord.power > 0,
+  const rankedMoves = rankMoves(moveRecords, formRecord);
+  const coreStabMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) === "core-stab",
   );
-  const statusMoves = rankedMoves.filter(
-    (moveRecord) => moveRecord.category === "status",
+  const coreCoverageMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) ===
+      "core-coverage",
+  );
+  const fallbackDamagingMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) ===
+      "fallback-damaging",
+  );
+  const tacticalStatusMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) ===
+      "tactical-status",
+  );
+  const fallbackStatusMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) ===
+      "fallback-status",
+  );
+  const blockedMoves = rankedMoves.filter(
+    (moveRecord) =>
+      classifyMoveCurationBucket(moveRecord, formRecord.types) === "blocked",
   );
   const recommended: MoveRecord[] = [];
   const selectedMoveIds = new Set<string>();
 
-  const addMove = (moveRecord: MoveRecord | undefined): void => {
+  const addMove = (
+    moveRecord: MoveRecord | undefined,
+    options?: { allowExtraStatus?: boolean },
+  ): void => {
     if (
       !moveRecord ||
       selectedMoveIds.has(moveRecord.moveId) ||
@@ -1013,58 +1048,120 @@ function selectRecommendedMoves(
       return;
     }
 
+    if (
+      moveRecord.category === "status" &&
+      !options?.allowExtraStatus &&
+      countStatusMoves(recommended) >= 1
+    ) {
+      return;
+    }
+
     selectedMoveIds.add(moveRecord.moveId);
     recommended.push(moveRecord);
   };
 
-  addMove(damagingMoves.find((moveRecord) => types.includes(moveRecord.type)));
+  addMove(coreStabMoves[0]);
   addMove(
-    damagingMoves.find(
+    coreCoverageMoves.find(
       (moveRecord) =>
         !selectedMoveIds.has(moveRecord.moveId) &&
-        (!types.includes(moveRecord.type) ||
-          moveRecord.type !== recommended[0]?.type),
+        moveRecord.type !== recommended[0]?.type,
     ),
   );
   addMove(
-    damagingMoves.find((moveRecord) => !selectedMoveIds.has(moveRecord.moveId)),
+    coreStabMoves.find((moveRecord) => !selectedMoveIds.has(moveRecord.moveId)),
   );
-  addMove(
-    statusMoves.find(
-      (moveRecord) =>
-        HIGH_VALUE_STATUS_MOVES.has(moveRecord.moveId) ||
-        moveRecord.effectTag === "heal" ||
-        moveRecord.effectTag === "protect" ||
-        moveRecord.effectTag === "status-apply" ||
-        moveRecord.effectTag === "stat-boost",
-    ),
-  );
+  addMove(tacticalStatusMoves[0]);
 
-  for (const moveRecord of rankedMoves) {
+  for (const moveRecord of coreStabMoves) {
     addMove(moveRecord);
+  }
+
+  for (const moveRecord of coreCoverageMoves) {
+    addMove(moveRecord);
+  }
+
+  for (const moveRecord of fallbackDamagingMoves) {
+    addMove(moveRecord);
+  }
+
+  for (const moveRecord of tacticalStatusMoves) {
+    addMove(moveRecord);
+  }
+
+  if (recommended.length === 0) {
+    addMove(fallbackStatusMoves[0], { allowExtraStatus: true });
+  }
+
+  if (recommended.length === 0) {
+    addMove(blockedMoves[0], { allowExtraStatus: true });
   }
 
   return recommended.slice(0, 4);
 }
 
-function scoreMove(moveRecord: MoveRecord, types: PokemonTypeId[]): number {
-  const stabBonus = types.includes(moveRecord.type) ? 35 : 0;
+function classifyMoveCurationBucket(
+  moveRecord: MoveRecord,
+  types: PokemonTypeId[],
+): MoveCurationBucket {
+  if (BLOCKED_RECOMMENDED_MOVE_IDS.has(moveRecord.moveId)) {
+    return "blocked";
+  }
+
+  if (moveRecord.category === "status") {
+    return CURATED_STATUS_MOVE_IDS.has(moveRecord.moveId) ||
+      moveRecord.effectTag === "heal" ||
+      moveRecord.effectTag === "protect"
+      ? "tactical-status"
+      : "fallback-status";
+  }
+
+  if (
+    !types.includes(moveRecord.type) &&
+    moveRecord.type === "normal" &&
+    moveRecord.power < 70 &&
+    moveRecord.priority <= 0
+  ) {
+    return "fallback-damaging";
+  }
+
+  return types.includes(moveRecord.type) ? "core-stab" : "core-coverage";
+}
+
+function scoreMove(
+  moveRecord: MoveRecord,
+  formRecord: Pick<FormRecord, "types" | "baseStats">,
+): number {
+  const curationBucket = classifyMoveCurationBucket(
+    moveRecord,
+    formRecord.types,
+  );
+  const stabBonus = formRecord.types.includes(moveRecord.type) ? 35 : 0;
   const accuracyScore = moveRecord.accuracy;
   const priorityScore =
     moveRecord.priority > 0 ? 20 + moveRecord.priority * 5 : 0;
   const damageScore =
     moveRecord.category === "status"
       ? 0
-      : moveRecord.power * 2 + accuracyScore + stabBonus + priorityScore;
+      : moveRecord.power * 2 +
+        accuracyScore +
+        stabBonus +
+        priorityScore +
+        getOffenseBiasBonus(moveRecord, formRecord.baseStats) +
+        getDamageEffectBonus(moveRecord);
 
-  if (moveRecord.category !== "status") {
-    return damageScore;
+  if (curationBucket === "blocked") {
+    return -1_000;
   }
 
-  let utilityScore = 25;
+  if (moveRecord.category !== "status") {
+    return damageScore + (curationBucket === "fallback-damaging" ? -30 : 0);
+  }
 
-  if (HIGH_VALUE_STATUS_MOVES.has(moveRecord.moveId)) {
-    utilityScore += 65;
+  let utilityScore = curationBucket === "tactical-status" ? 140 : 20;
+
+  if (CURATED_STATUS_MOVE_IDS.has(moveRecord.moveId)) {
+    utilityScore += 40;
   }
 
   if (moveRecord.effectTag === "heal") {
@@ -1088,6 +1185,56 @@ function scoreMove(moveRecord: MoveRecord, types: PokemonTypeId[]): number {
   }
 
   return utilityScore + accuracyScore;
+}
+
+function getOffenseBiasBonus(
+  moveRecord: MoveRecord,
+  baseStats: StatBlock,
+): number {
+  const statGap = baseStats.attack - baseStats.specialAttack;
+
+  if (moveRecord.category === "physical") {
+    return statGap > 15 ? 18 : statGap < -15 ? -12 : 0;
+  }
+
+  if (moveRecord.category === "special") {
+    return statGap < -15 ? 18 : statGap > 15 ? -12 : 0;
+  }
+
+  return 0;
+}
+
+function getDamageEffectBonus(moveRecord: MoveRecord): number {
+  if (moveRecord.effectTag === "drain") {
+    return 12;
+  }
+
+  if (moveRecord.effectTag === "priority") {
+    return 10;
+  }
+
+  if (moveRecord.effectTag === "multi-hit") {
+    return 6;
+  }
+
+  if (moveRecord.effectTag === "status-apply") {
+    return 8;
+  }
+
+  if (moveRecord.effectTag === "stat-drop") {
+    return 6;
+  }
+
+  if (moveRecord.effectTag === "recoil") {
+    return -4;
+  }
+
+  return 0;
+}
+
+function countStatusMoves(moveRecords: MoveRecord[]): number {
+  return moveRecords.filter((moveRecord) => moveRecord.category === "status")
+    .length;
 }
 
 function isRedundantDamagingMove(

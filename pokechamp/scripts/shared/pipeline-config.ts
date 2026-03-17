@@ -150,6 +150,47 @@ export const HIGH_VALUE_STATUS_MOVES = new Set([
   "work-up",
 ]);
 
+export const CURATED_STATUS_MOVE_IDS = new Set([
+  ...HIGH_VALUE_STATUS_MOVES,
+  "charm",
+  "fake-tears",
+  "feather-dance",
+  "glare",
+  "hypnosis",
+  "meditate",
+  "metal-sound",
+  "moonlight",
+  "poison-powder",
+  "rest",
+  "screech",
+  "sing",
+  "synthesis",
+  "yawn",
+]);
+
+export const BLOCKED_RECOMMENDED_MOVE_IDS = new Set([
+  "assist",
+  "celebrate",
+  "copycat",
+  "doom-desire",
+  "double-team",
+  "follow-me",
+  "future-sight",
+  "hold-hands",
+  "mat-block",
+  "me-first",
+  "metronome",
+  "mimic",
+  "minimize",
+  "mirror-move",
+  "rage-powder",
+  "sleep-talk",
+  "splash",
+  "spotlight",
+  "teleport",
+  "wide-guard",
+]);
+
 export const TYPE_METADATA: TypeMetadataRecord[] = [
   {
     typeId: "normal",
