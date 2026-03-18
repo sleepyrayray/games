@@ -17,6 +17,7 @@ The app should support the real-life social gameplay, not compete with it.
 
 - No in-app timer for the hint round
 - Neutral, clean on-screen copy
+- Mobile-first UI with desktop support
 - One shared device for all setup, reveals, voting, and endgame input
 - Each player sees their name first, then taps to reveal their word
 - After seeing their word, the player taps the word card to hide it and advance to the next player
@@ -429,6 +430,7 @@ Replay behavior:
 
 - Use short, plain labels
 - Avoid dramatic or playful flavor text in v1
+- Design for phone-sized screens first, then scale the same layout up for desktop
 - Prefer one clear action per screen
 - Use large tap targets
 - Keep transitions quick
