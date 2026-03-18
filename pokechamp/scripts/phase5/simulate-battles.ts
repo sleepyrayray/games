@@ -86,6 +86,7 @@ interface BattleSimulationSample {
 }
 
 interface BattleSimulationSummary {
+  averageFloorsCleared: number;
   alerts: string[];
   averageTurnsPerBattle: number;
   battleFailureCounts: Partial<Record<BattleAlertKind, number>>;
@@ -96,6 +97,8 @@ interface BattleSimulationSummary {
   fullTowerClears: number;
   generatedRunFailureCount: number;
   generatedRunFailureKinds: Record<string, number>;
+  furthestFloorReached: number;
+  lossFloorCounts: Record<string, number>;
   maxFallbackActionsObserved: number;
   maxNoProgressStreakObserved: number;
   maxProtectUsesPerSideObserved: number;
@@ -148,6 +151,8 @@ async function main(): Promise<void> {
   let completedGeneratedRuns = 0;
   let fullTowerClears = 0;
   let battleExceptionCount = 0;
+  const floorsClearedByRun: number[] = [];
+  const lossFloorCounts = new Map<string, number>();
 
   for (let index = 0; index < options.runs; index += 1) {
     const seed = `${options.seedPrefix}-${String(index + 1).padStart(4, "0")}`;
@@ -172,6 +177,7 @@ async function main(): Promise<void> {
 
     completedGeneratedRuns += 1;
     let didClearTower = true;
+    let floorsClearedThisRun = 0;
 
     for (const floor of generatedRun.run.floors) {
       try {
@@ -188,18 +194,32 @@ async function main(): Promise<void> {
 
         if (battleRecord.outcome !== "player-win") {
           didClearTower = false;
+          lossFloorCounts.set(
+            String(floor.floorNumber),
+            (lossFloorCounts.get(String(floor.floorNumber)) ?? 0) + 1,
+          );
+          break;
         }
+
+        floorsClearedThisRun += 1;
       } catch (error) {
         didClearTower = false;
         battleExceptionCount += 1;
+        lossFloorCounts.set(
+          String(floor.floorNumber),
+          (lossFloorCounts.get(String(floor.floorNumber)) ?? 0) + 1,
+        );
         collectFailureSample(failureSamples, options.sampleCount, {
           floorNumber: floor.floorNumber,
           kind: "battle-exception",
           message: error instanceof Error ? error.message : "Unknown battle error",
           seed,
         });
+        break;
       }
     }
+
+    floorsClearedByRun.push(floorsClearedThisRun);
 
     if (didClearTower) {
       fullTowerClears += 1;
@@ -216,6 +236,8 @@ async function main(): Promise<void> {
     totalRuns: options.runs,
     fullTowerClears,
     battleExceptionCount,
+    floorsClearedByRun,
+    lossFloorCounts,
   });
 
   printSummary(summary);
@@ -238,8 +260,10 @@ function buildSummary(options: {
   battleExceptionCount: number;
   completedGeneratedRuns: number;
   failureSamples: SimulationFailureSample[];
+  floorsClearedByRun: number[];
   fullTowerClears: number;
   generatedRunFailureKinds: Map<string, number>;
+  lossFloorCounts: Map<string, number>;
   moveUsage: Map<string, number>;
   options: CliOptions;
   totalRuns: number;
@@ -257,6 +281,10 @@ function buildSummary(options: {
   let maxProtectUsesPerSideObserved = 0;
   let maxRestUsesPerSideObserved = 0;
   let maxStalledRepeatChainObserved = 0;
+  const furthestFloorReached = options.floorsClearedByRun.reduce(
+    (highestFloor, floorsCleared) => Math.max(highestFloor, floorsCleared),
+    0,
+  );
 
   for (const record of options.battleRecords) {
     totalTurns += record.turnsResolved;
@@ -353,6 +381,11 @@ function buildSummary(options: {
   }
 
   return {
+    averageFloorsCleared:
+      options.floorsClearedByRun.length === 0
+        ? 0
+        : options.floorsClearedByRun.reduce((sum, value) => sum + value, 0) /
+          options.floorsClearedByRun.length,
     alerts,
     averageTurnsPerBattle: totalBattles === 0 ? 0 : totalTurns / totalBattles,
     battleFailureCounts: sortRecordByKey(
@@ -369,6 +402,10 @@ function buildSummary(options: {
     generatedRunFailureCount: sumMapValues(options.generatedRunFailureKinds),
     generatedRunFailureKinds: sortRecordByKey(
       Object.fromEntries(options.generatedRunFailureKinds.entries()),
+    ),
+    furthestFloorReached,
+    lossFloorCounts: sortRecordByKey(
+      Object.fromEntries(options.lossFloorCounts.entries()),
     ),
     maxFallbackActionsObserved,
     maxNoProgressStreakObserved,
@@ -499,6 +536,7 @@ function simulateBattle(options: {
       defenderEffects: state.enemyEffects,
       defenderStats: state.enemyStats,
       defenderStatStages: state.enemyStatStages,
+      turnsResolved: state.turnsResolved,
     });
     const nextState = resolveBattleTurn({
       context,
@@ -815,6 +853,12 @@ function printSummary(summary: BattleSimulationSummary): void {
   console.log(
     `- outcomes: player ${summary.playerWins}, enemy ${summary.enemyWins}, full clears ${summary.fullTowerClears} (${formatPercent(summary.fullTowerClearRate)})`,
   );
+  console.log(
+    `- run progression: average floors cleared ${summary.averageFloorsCleared.toFixed(2)}, furthest floor reached ${summary.furthestFloorReached}`,
+  );
+  if (Object.keys(summary.lossFloorCounts).length > 0) {
+    console.log(`- loss floors: ${JSON.stringify(summary.lossFloorCounts)}`);
+  }
   console.log(
     `- turn-limit battles: ${summary.turnLimitBattles} (${formatPercent(summary.turnLimitRate)})`,
   );

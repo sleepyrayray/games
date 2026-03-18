@@ -110,6 +110,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       defenderEffects: battleState.enemyEffects,
       defenderStats: battleState.enemyStats,
       defenderStatStages: battleState.enemyStatStages,
+      turnsResolved: battleState.turnsResolved,
     });
     const infoBarY = layout.bodyY;
     const cardsY = layout.bodyY + 70;

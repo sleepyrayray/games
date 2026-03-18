@@ -528,6 +528,7 @@ export function buildBattleMoveChoices(options: {
   defenderEffects?: BattlePersistentEffects;
   defenderStats: BattleDerivedStats;
   defenderStatStages?: BattleStatStages;
+  turnsResolved?: number;
 }): BattleMoveChoice[] {
   const choices = options.attacker.moveRecords.map((move) => {
     if (!move.allowedInGame) {
@@ -556,6 +557,7 @@ export function buildBattleMoveChoices(options: {
         defenderStats: options.defenderStats,
         defenderStatStages: options.defenderStatStages,
         move,
+        turnsResolved: options.turnsResolved,
       }),
     };
   });
@@ -590,6 +592,7 @@ export function selectBattleMove(options: {
   defenderEffects?: BattlePersistentEffects;
   defenderStats: BattleDerivedStats;
   defenderStatStages?: BattleStatStages;
+  turnsResolved?: number;
 }): BattleMovePlan {
   const selectableChoices = buildBattleMoveChoices(options).filter(
     (choice) => choice.isSelectable,
@@ -639,6 +642,7 @@ export function resolveBattleTurn(options: {
     defenderEffects: options.state.playerEffects,
     defenderStats: options.state.playerStats,
     defenderStatStages: options.state.playerStatStages,
+    turnsResolved: options.state.turnsResolved,
   });
   const turnNumber = options.state.turnsResolved + 1;
   const simulationState: BattleSimulationState = {
@@ -737,6 +741,7 @@ export function resolveBattle(
       defenderEffects: state.enemyEffects,
       defenderStats: state.enemyStats,
       defenderStatStages: state.enemyStatStages,
+      turnsResolved: state.turnsResolved,
     });
 
     state = resolveBattleTurn({
@@ -1340,6 +1345,7 @@ function toBattleMovePlan(options: {
   defenderStats: BattleDerivedStats;
   defenderStatStages?: BattleStatStages;
   move: MoveRecord;
+  turnsResolved?: number;
 }): BattleMovePlan {
   const attackerEffects = normalizeBattleEffects(options.attackerEffects);
   const defenderEffects = normalizeBattleEffects(options.defenderEffects);
@@ -1408,6 +1414,7 @@ function toBattleMovePlan(options: {
       stab,
       targetsSelf,
       typeEffectiveness,
+      turnsResolved: options.turnsResolved,
     }),
     targetsSelf,
     typeEffectiveness,
@@ -1477,7 +1484,12 @@ function buildMoveScore(options: {
   stab: number;
   targetsSelf: boolean;
   typeEffectiveness: number;
+  turnsResolved?: number;
 }): number {
+  const turnsRemaining = Math.max(
+    1,
+    BATTLE_TURN_LIMIT - (options.turnsResolved ?? 0),
+  );
   let score =
     options.expectedDamage +
     options.move.priority * 6 +
@@ -1510,15 +1522,28 @@ function buildMoveScore(options: {
           ) -
           sleepPenalty -
           repeatedHealPenalty;
+
+    if (turnsRemaining <= 4 && options.attackerCurrentHp / options.attackerStats.hp > 0.45) {
+      score -= 12;
+    } else if (
+      turnsRemaining <= 6 &&
+      options.attackerCurrentHp / options.attackerStats.hp > 0.6
+    ) {
+      score -= 6;
+    }
   }
 
   if (options.move.effectTag === "protect") {
     const hpRatio = options.attackerCurrentHp / options.attackerStats.hp;
     const repeatedProtectPenalty =
       options.attackerLastPlan?.moveId === "protect" ? 48 : 0;
+    const lateBattlePenalty =
+      turnsRemaining <= 4 ? 12 : turnsRemaining <= 6 ? 6 : 0;
 
     score +=
-      (hpRatio < 0.35 ? 18 : hpRatio < 0.6 ? 9 : 3) - repeatedProtectPenalty;
+      (hpRatio < 0.22 ? 16 : hpRatio < 0.4 ? 8 : hpRatio < 0.6 ? 2 : -6) -
+      repeatedProtectPenalty -
+      lateBattlePenalty;
   }
 
   if (options.move.effectTag === "drain") {
@@ -1556,6 +1581,30 @@ function buildMoveScore(options: {
     defenderEffects: options.defenderEffects,
     move: options.move,
   });
+
+  if (options.move.power > 0 && !options.targetsSelf) {
+    if (options.expectedDamage >= options.defenderCurrentHp) {
+      score += 24;
+    } else if (options.expectedDamage >= options.defenderCurrentHp * 0.6) {
+      score += 12;
+    } else if (options.expectedDamage >= options.defenderCurrentHp * 0.35) {
+      score += 6;
+    }
+
+    if (turnsRemaining <= 4) {
+      score += Math.floor(
+        Math.min(options.defenderCurrentHp, options.expectedDamage) * 0.45,
+      );
+    } else if (turnsRemaining <= 6) {
+      score += Math.floor(
+        Math.min(options.defenderCurrentHp, options.expectedDamage) * 0.2,
+      );
+    }
+  } else if (turnsRemaining <= 4) {
+    score -= options.move.effectTag === "heal" ? 6 : 10;
+  } else if (turnsRemaining <= 6 && options.move.power <= 0) {
+    score -= 4;
+  }
 
   return Math.round(score);
 }
@@ -1622,11 +1671,26 @@ function getStatusApplicationScore(options: {
   }
 
   if (
+    (SEED_MOVE_IDS.has(options.move.moveId) || TRAP_MOVE_IDS.has(options.move.moveId)) &&
+    options.defenderEffects.seeded
+  ) {
+    return -8;
+  }
+
+  if (
     YAWN_MOVE_IDS.has(options.move.moveId) &&
     !options.defenderEffects.yawnPending &&
     options.defenderEffects.majorStatus !== "sleep"
   ) {
     return Math.round(8 * chanceFactor);
+  }
+
+  if (
+    YAWN_MOVE_IDS.has(options.move.moveId) &&
+    (options.defenderEffects.yawnPending ||
+      options.defenderEffects.majorStatus === "sleep")
+  ) {
+    return -8;
   }
 
   const supportedStatus = inferSupportedStatusFromMove(options.move);
@@ -1638,11 +1702,11 @@ function getStatusApplicationScore(options: {
   if (supportedStatus === "confusion") {
     return options.defenderEffects.confusedTurnsRemaining === 0
       ? Math.round(9 * chanceFactor)
-      : 0;
+      : -8;
   }
 
   if (options.defenderEffects.majorStatus) {
-    return 0;
+    return -10;
   }
 
   const baseScore =
