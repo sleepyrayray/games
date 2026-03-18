@@ -2,6 +2,7 @@ import movesDataset from "../../data/runtime/moves.json" with { type: "json" };
 import pokemonDataset from "../../data/runtime/pokemon.json" with {
   type: "json",
 };
+import { getTypeEffectivenessMultiplier } from "../../src/game/config/gameRules.ts";
 import {
   buildBattleMoveChoices,
   deriveBattleStats,
@@ -17,6 +18,7 @@ import type { GeneratedBattlePokemon } from "../../src/game/run/rulesSandbox.ts"
 import type {
   BattleReadyPokemonRecord,
   MoveRecord,
+  PokemonTypeId,
 } from "../../src/types/pokechamp-data.ts";
 
 interface FlowResult {
@@ -71,6 +73,7 @@ function main(): void {
   const options = parseArgs(process.argv.slice(2));
   const storage = new MemoryStorage();
   installWindow(storage);
+  assertTypeEffectivenessIsApplied();
   assertAllowedUtilityMovesRemainSelectable();
   const results: FlowResult[] = [];
 
@@ -315,6 +318,48 @@ function runSingleFlow(
   );
 }
 
+function assertTypeEffectivenessIsApplied(): void {
+  assert(
+    getTypeEffectivenessMultiplier("ghost", ["normal", "psychic"]) === 0,
+    "Expected Ghost moves to have no effect on Normal/Psychic targets",
+  );
+  assert(
+    getTypeEffectivenessMultiplier("ghost", ["normal"]) === 0,
+    "Expected Ghost moves to have no effect on Normal targets",
+  );
+  assert(
+    getTypeEffectivenessMultiplier("fire", ["grass", "steel"]) === 4,
+    "Expected Fire moves to be 4x effective against Grass/Steel targets",
+  );
+  assert(
+    getTypeEffectivenessMultiplier("ground", ["flying"]) === 0,
+    "Expected Ground moves to have no effect on Flying targets",
+  );
+
+  const ghostPlan = buildSyntheticMovePlan({
+    attackerTypes: ["ghost"],
+    defenderTypes: ["normal", "psychic"],
+    move: {
+      accuracy: 100,
+      allowedInGame: true,
+      category: "special",
+      effectTag: "none",
+      moveId: "__phase4-test-ghost__",
+      name: "Phase 4 Ghost Test",
+      power: 80,
+      pp: 10,
+      priority: 0,
+      target: "opponent",
+      type: "ghost",
+    },
+  });
+
+  assert(
+    ghostPlan.typeEffectiveness === 0 && ghostPlan.expectedDamage === 0,
+    "Expected the battle planner to reduce Ghost damage to zero against Normal/Psychic targets",
+  );
+}
+
 function assertAllowedUtilityMovesRemainSelectable(): void {
   const candidate = findUtilityMoveCandidate();
 
@@ -377,6 +422,32 @@ function chooseStrongestCandidate<
   return bestCandidate;
 }
 
+function buildSyntheticMovePlan(options: {
+  attackerTypes: readonly PokemonTypeId[];
+  defenderTypes: readonly PokemonTypeId[];
+  move: MoveRecord;
+}) {
+  const attacker = buildSyntheticCombatantContext(options.attackerTypes, options.move);
+  const defender = buildSyntheticCombatantContext(
+    options.defenderTypes,
+    createNeutralTestMove(options.defenderTypes[0] ?? "normal"),
+  );
+
+  const choices = buildBattleMoveChoices({
+    attacker,
+    attackerStats: deriveBattleStats(attacker.record, attacker.generated.level),
+    defender,
+    defenderStats: deriveBattleStats(defender.record, defender.generated.level),
+  });
+  const plan = choices[0]?.plan;
+
+  if (!plan) {
+    throw new Error("Expected a synthetic move plan to be generated");
+  }
+
+  return plan;
+}
+
 function buildCombatantContext(
   record: BattleReadyPokemonRecord,
   level: number,
@@ -410,6 +481,56 @@ function buildCombatantContext(
     generated,
     moveRecords,
     record,
+  };
+}
+
+function buildSyntheticCombatantContext(
+  types: readonly PokemonTypeId[],
+  moveRecord: MoveRecord,
+): BattleCombatantContext {
+  const templateRecord = getTemplateBattlePokemonRecord();
+  const resolvedTypes =
+    types.length === 1
+      ? ([types[0] ?? "normal"] as [PokemonTypeId])
+      : ([types[0] ?? "normal", types[1] ?? types[0] ?? "normal"] as [
+          PokemonTypeId,
+          PokemonTypeId,
+        ]);
+  const record: BattleReadyPokemonRecord = {
+    ...templateRecord,
+    floorTypes: resolvedTypes,
+    types: resolvedTypes,
+  };
+
+  return {
+    generated: {
+      battlePokemonId: `${templateRecord.battlePokemonId}:${moveRecord.moveId}:${resolvedTypes.join("-")}`,
+      speciesId: templateRecord.speciesId,
+      formId: templateRecord.formId,
+      name: `${moveRecord.name} Tester`,
+      level: 50,
+      types: resolvedTypes,
+      floorTypes: resolvedTypes,
+      moves: [moveRecord.moveId],
+    },
+    moveRecords: [moveRecord],
+    record,
+  };
+}
+
+function createNeutralTestMove(typeId: PokemonTypeId): MoveRecord {
+  return {
+    accuracy: 100,
+    allowedInGame: true,
+    category: "special",
+    effectTag: "none",
+    moveId: `__phase4-neutral-${typeId}__`,
+    name: "Neutral Test Move",
+    power: 60,
+    pp: 10,
+    priority: 0,
+    target: "opponent",
+    type: typeId,
   };
 }
 
@@ -452,6 +573,16 @@ function findUtilityMoveCandidate():
   }
 
   return null;
+}
+
+function getTemplateBattlePokemonRecord(): BattleReadyPokemonRecord {
+  const templateRecord = pokemonById.values().next().value;
+
+  if (!templateRecord) {
+    throw new Error("Expected at least one battle-ready Pokemon record");
+  }
+
+  return templateRecord;
 }
 
 function scoreCandidate(battlePokemonId: string): number {

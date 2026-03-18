@@ -1,10 +1,15 @@
 import Phaser from "phaser";
-import { FLOOR_COUNT, TYPE_BADGE_COLORS, TYPE_LABELS } from "../config/gameRules";
+import {
+  FLOOR_COUNT,
+  TYPE_BADGE_COLORS,
+  TYPE_LABELS,
+} from "../config/gameRules";
 import {
   BATTLE_TURN_LIMIT,
   buildBattleMoveChoices,
   createBattleSession,
   resolveBattleTurn,
+  summarizeTypeEffectiveness,
   type BattleCombatantContext,
   type BattleMoveChoice,
   type BattleResolutionContext,
@@ -91,7 +96,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       eyebrow: `BATTLE FLOOR ${context.floorNumber} OF ${FLOOR_COUNT}`,
       title: `${TYPE_LABELS[context.floorType]} Battle`,
       subtitle:
-        "Phase 4 combat prototype: pick any legal move each turn. Priority, accuracy, and STAB are live; utility moves resolve as light prototype actions while type effectiveness and full status systems wait for a later phase.",
+        "Phase 4 combat prototype: pick any legal move each turn. Priority, accuracy, STAB, and type effectiveness are live; utility moves still resolve as light prototype actions while full status systems wait for a later phase.",
     });
     const moveChoices = buildBattleMoveChoices({
       attacker: context.player,
@@ -667,8 +672,8 @@ export class BattleResolutionScene extends Phaser.Scene {
       ? options.choice.plan.isFallback
         ? "Fallback strike covers unsupported movesets."
         : options.choice.plan.category === "status" || options.choice.plan.power <= 0
-          ? `Prototype utility action • Est. impact ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
-        : `Estimated damage ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
+          ? `Prototype utility action • ${summarizeTypeEffectiveness(options.choice.plan.typeEffectiveness)} • Est. impact ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
+        : `${summarizeTypeEffectiveness(options.choice.plan.typeEffectiveness)} • Est. damage ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
       : options.choice.disabledReason ?? "Unavailable";
 
     this.add
@@ -711,8 +716,16 @@ export class BattleResolutionScene extends Phaser.Scene {
       turn.actions.forEach((action) => {
         const actorName = action.actorSide === "player" ? playerName : enemyName;
         const targetName = action.actorSide === "player" ? enemyName : playerName;
+        const effectivenessNote =
+          action.typeEffectiveness > 1
+            ? " It's super effective."
+            : action.typeEffectiveness > 0 && action.typeEffectiveness < 1
+              ? " It's not very effective."
+              : "";
         const actionSummary = action.hit
-          ? `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""} for ${action.damage} damage. ${targetName} fell to ${action.remainingHp} HP.`
+          ? action.typeEffectiveness === 0
+            ? `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""}, but it had no effect on ${targetName}. ${targetName} stayed at ${action.remainingHp} HP.`
+            : `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""} for ${action.damage} damage.${effectivenessNote} ${targetName} fell to ${action.remainingHp} HP.`
           : `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""} and missed.`;
 
         lines.push(`Turn ${turn.turnNumber}: ${actionSummary}`);

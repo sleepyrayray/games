@@ -7,6 +7,10 @@ import type {
   PokemonTypeId,
 } from "../../types/pokechamp-data.ts";
 import {
+  describeTypeEffectiveness,
+  getTypeEffectivenessMultiplier,
+} from "../config/gameRules.ts";
+import {
   createSeededRandom,
   type GeneratedBattlePokemon,
 } from "./rulesSandbox.ts";
@@ -56,6 +60,7 @@ export interface BattleMovePlan {
   power: number;
   priority: number;
   score: number;
+  typeEffectiveness: number;
   typeId: PokemonTypeId;
 }
 
@@ -72,6 +77,7 @@ export interface BattleActionLog {
   moveId: string;
   moveName: string;
   remainingHp: number;
+  typeEffectiveness: number;
   usedFallback: boolean;
 }
 
@@ -173,6 +179,7 @@ export function buildBattleMoveChoices(options: {
       plan: toBattleMovePlan({
         attacker: options.attacker,
         attackerStats: options.attackerStats,
+        defender: options.defender,
         defenderStats: options.defenderStats,
         move,
       }),
@@ -188,7 +195,11 @@ export function buildBattleMoveChoices(options: {
     {
       disabledReason: null,
       isSelectable: true,
-      plan: buildFallbackMovePlan(options.attacker, options.attackerStats),
+      plan: buildFallbackMovePlan(
+        options.attacker,
+        options.attackerStats,
+        options.defender,
+      ),
     },
   ];
 }
@@ -211,7 +222,11 @@ export function selectBattleMove(options: {
   }
 
   if (!bestPlan) {
-    return buildFallbackMovePlan(options.attacker, options.attackerStats);
+    return buildFallbackMovePlan(
+      options.attacker,
+      options.attackerStats,
+      options.defender,
+    );
   }
 
   return bestPlan;
@@ -359,30 +374,41 @@ function buildBattleSummary(options: {
 function buildFallbackMovePlan(
   attacker: BattleCombatantContext,
   attackerStats: BattleDerivedStats,
+  defender: BattleCombatantContext,
 ): BattleMovePlan {
   const category: MoveCategory =
     attackerStats.attack >= attackerStats.specialAttack ? "physical" : "special";
   const typeId = attacker.generated.types[0];
   const power = 40;
   const accuracy = 100;
+  const typeEffectiveness = getTypeEffectivenessMultiplier(
+    typeId,
+    defender.generated.types,
+  );
 
   return {
     accuracy,
     category,
-    expectedDamage: Math.max(
-      8,
-      Math.floor(
-        (category === "physical"
-          ? attackerStats.attack
-          : attackerStats.specialAttack) / 4,
-      ),
-    ),
+    expectedDamage:
+      typeEffectiveness === 0
+        ? 0
+        : Math.max(
+            1,
+            Math.floor(
+              ((category === "physical"
+                ? attackerStats.attack
+                : attackerStats.specialAttack) /
+                4) *
+                typeEffectiveness,
+            ),
+          ),
     isFallback: true,
     moveId: FALLBACK_MOVE_ID,
     moveName: "Fallback Strike",
     power,
     priority: 0,
-    score: power,
+    score: typeEffectiveness === 0 ? -20 : power * typeEffectiveness,
+    typeEffectiveness,
     typeId,
   };
 }
@@ -395,7 +421,12 @@ function calculateExpectedDamage(options: {
   level: number;
   power: number;
   stab: number;
+  typeEffectiveness: number;
 }): number {
+  if (options.typeEffectiveness === 0) {
+    return 0;
+  }
+
   const attackStat =
     options.category === "physical"
       ? options.attackerStats.attack
@@ -411,6 +442,7 @@ function calculateExpectedDamage(options: {
     level: options.level,
     power: options.power,
     stab: options.stab,
+    typeEffectiveness: options.typeEffectiveness,
   });
 
   return Math.max(1, Math.floor((scaledDamage * options.accuracy) / 100));
@@ -423,7 +455,12 @@ function calculateDamage(options: {
   level: number;
   power: number;
   stab: number;
+  typeEffectiveness: number;
 }): number {
+  if (options.typeEffectiveness === 0) {
+    return 0;
+  }
+
   const levelFactor = Math.floor((2 * options.level) / 5) + 2;
   const baseDamage =
     Math.floor(
@@ -432,9 +469,10 @@ function calculateDamage(options: {
         50,
     ) + 2;
   const stabDamage = Math.floor(baseDamage * options.stab);
+  const effectivenessAdjustedDamage = stabDamage * options.typeEffectiveness;
   const accuracyAdjustedDamage = Math.max(
     1,
-    Math.floor((stabDamage * options.accuracy) / 100),
+    Math.floor((effectivenessAdjustedDamage * options.accuracy) / 100),
   );
 
   return accuracyAdjustedDamage;
@@ -525,6 +563,7 @@ function resolveMoveExecution(options: {
       stab: options.attacker.generated.types.includes(options.movePlan.typeId)
         ? 1.2
         : 1,
+      typeEffectiveness: options.movePlan.typeEffectiveness,
     });
     options.simulationState.hpBySide[options.defenderSide] = Math.max(
       0,
@@ -539,6 +578,7 @@ function resolveMoveExecution(options: {
     moveId: options.movePlan.moveId,
     moveName: options.movePlan.moveName,
     remainingHp: options.simulationState.hpBySide[options.defenderSide],
+    typeEffectiveness: options.movePlan.typeEffectiveness,
     usedFallback: options.movePlan.isFallback,
   };
 }
@@ -636,11 +676,16 @@ function pickFirstActorSide(
 function toBattleMovePlan(options: {
   attacker: BattleCombatantContext;
   attackerStats: BattleDerivedStats;
+  defender: BattleCombatantContext;
   defenderStats: BattleDerivedStats;
   move: MoveRecord;
 }): BattleMovePlan {
   const accuracy = normalizeMoveAccuracy(options.move.accuracy);
   const stab = options.attacker.generated.types.includes(options.move.type) ? 1.2 : 1;
+  const typeEffectiveness = getTypeEffectivenessMultiplier(
+    options.move.type,
+    options.defender.generated.types,
+  );
   const expectedDamage = calculateExpectedDamage({
     accuracy,
     attackerStats: options.attackerStats,
@@ -649,12 +694,14 @@ function toBattleMovePlan(options: {
     level: options.attacker.generated.level,
     power: options.move.power,
     stab,
+    typeEffectiveness,
   });
   const score =
     expectedDamage +
     options.move.priority * 6 +
     buildEffectBonus(options.move) +
-    (stab > 1 ? 4 : 0);
+    (stab > 1 ? 4 : 0) +
+    getTypeEffectivenessScoreBonus(typeEffectiveness);
 
   return {
     accuracy,
@@ -666,6 +713,7 @@ function toBattleMovePlan(options: {
     power: options.move.power,
     priority: options.move.priority,
     score,
+    typeEffectiveness,
     typeId: options.move.type,
   };
 }
@@ -681,6 +729,7 @@ function toDisabledBattleMovePlan(move: MoveRecord): BattleMovePlan {
     power: move.power,
     priority: move.priority,
     score: 0,
+    typeEffectiveness: 1,
     typeId: move.type,
   };
 }
@@ -710,4 +759,32 @@ function buildEffectBonus(move: MoveRecord): number {
     default:
       return 0;
   }
+}
+
+function getTypeEffectivenessScoreBonus(typeEffectiveness: number): number {
+  if (typeEffectiveness === 0) {
+    return -24;
+  }
+
+  if (typeEffectiveness >= 4) {
+    return 12;
+  }
+
+  if (typeEffectiveness > 1) {
+    return 6;
+  }
+
+  if (typeEffectiveness <= 0.25) {
+    return -8;
+  }
+
+  if (typeEffectiveness < 1) {
+    return -4;
+  }
+
+  return 0;
+}
+
+export function summarizeTypeEffectiveness(multiplier: number): string {
+  return describeTypeEffectiveness(multiplier);
 }
