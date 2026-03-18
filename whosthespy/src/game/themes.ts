@@ -39,7 +39,7 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'countries',
-    name: 'Places (Countries)',
+    name: 'Countries',
     words: [
       'canada',
       'japan',

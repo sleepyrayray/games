@@ -43,6 +43,7 @@ export interface Assignment {
 export interface RoundSession {
   theme: Theme;
   players: Player[];
+  revealOrder: string[];
   assignments: Record<string, Assignment>;
   spyPlayerId: string;
   commonWord: string;
@@ -53,6 +54,7 @@ export interface RoundSession {
 export interface SetupDraft {
   selectedThemeId: ThemeId | null;
   playerNames: string[];
+  themeOrder: ThemeId[];
 }
 
 export interface VotingSession {

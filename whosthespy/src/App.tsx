@@ -9,6 +9,7 @@ import {
   normalizeInput,
   normalizeForCompare,
   resolveVotes,
+  shuffleItems,
   validatePlayerNames,
   shouldSpyWinBySurvival,
 } from './game/logic';
@@ -20,6 +21,7 @@ import {
   type GameResult,
   type Player,
   type ScreenId,
+  type Theme,
   type ThemeId,
   type VotePhase,
   type VotingSession,
@@ -50,24 +52,6 @@ type Action =
   | { type: 'submitSpyGuess' }
   | { type: 'playAgain' };
 
-const initialState: AppState = {
-  screen: 'title',
-  setup: {
-    selectedThemeId: null,
-    playerNames: ['', '', ''],
-  },
-  round: null,
-  revealIndex: 0,
-  voting: null,
-  selectedVoteTargetId: null,
-  tiedPlayerIds: [],
-  tieStage: null,
-  lastEliminatedPlayerId: null,
-  spyGuess: '',
-  result: null,
-  notice: null,
-};
-
 const INSTRUCTION_STEPS = [
   {
     step: '1',
@@ -77,7 +61,7 @@ const INSTRUCTION_STEPS = [
   {
     step: '2',
     title: 'Pass and reveal',
-    body: 'Each player taps in, sees only their word, then hides it before passing the device.',
+    body: 'Players check their words in a random order, see only the word, then hide it before passing the device.',
   },
   {
     step: '3',
@@ -91,20 +75,26 @@ const INSTRUCTION_STEPS = [
   },
 ];
 
-const THEME_DETAILS: Record<ThemeId, { blurb: string }> = {
-  foods: {
-    blurb: 'Fast clues and familiar words.',
-  },
-  animals: {
-    blurb: 'Easy to read and good for mixed groups.',
-  },
-  countries: {
-    blurb: 'Broader knowledge and wider clue variety.',
-  },
-  jobs: {
-    blurb: 'Great for descriptive, social hints.',
-  },
-};
+function createInitialState(): AppState {
+  return {
+    screen: 'title',
+    setup: {
+      selectedThemeId: null,
+      playerNames: ['', '', ''],
+      themeOrder: shuffleItems(THEMES.map((theme) => theme.id)),
+    },
+    round: null,
+    revealIndex: 0,
+    voting: null,
+    selectedVoteTargetId: null,
+    tiedPlayerIds: [],
+    tieStage: null,
+    lastEliminatedPlayerId: null,
+    spyGuess: '',
+    result: null,
+    notice: null,
+  };
+}
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -271,7 +261,7 @@ function reducer(state: AppState, action: Action): AppState {
         return state;
       }
 
-      if (state.revealIndex < state.round.players.length - 1) {
+      if (state.revealIndex < state.round.revealOrder.length - 1) {
         return {
           ...state,
           revealIndex: state.revealIndex + 1,
@@ -544,7 +534,12 @@ function buildVotingSession(
 }
 
 function getCurrentRevealPlayer(state: AppState) {
-  return state.round?.players[state.revealIndex] ?? null;
+  if (!state.round) {
+    return null;
+  }
+
+  const currentRevealPlayerId = state.round.revealOrder[state.revealIndex];
+  return state.round.players.find((player) => player.id === currentRevealPlayerId) ?? null;
 }
 
 function getCurrentVotingPlayer(state: AppState) {
@@ -654,11 +649,14 @@ function getScreenLabel(screen: ScreenId) {
 }
 
 export default function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
 
   const selectedTheme = state.setup.selectedThemeId
     ? getThemeById(state.setup.selectedThemeId)
     : null;
+  const orderedThemes = state.setup.themeOrder
+    .map((themeId) => getThemeById(themeId))
+    .filter((theme): theme is Theme => theme !== null);
   const normalizedPlayerNames = state.setup.playerNames.map(normalizeInput);
   const duplicateNameKeys = getDuplicateNameKeys(state.setup.playerNames);
   const filledPlayerCount = normalizedPlayerNames.filter(Boolean).length;
@@ -710,9 +708,7 @@ export default function App() {
     ? [state.round.theme.name, `Round ${state.round.roundNumber}`]
     : state.screen === 'playerEntry' && selectedTheme
       ? [selectedTheme.name, `${state.setup.playerNames.length} seats`]
-      : state.screen === 'themeSelection'
-        ? [`${THEMES.length} themes`]
-        : [];
+      : [];
 
   return (
     <div className="app-shell">
@@ -739,36 +735,10 @@ export default function App() {
           {state.screen === 'title' ? (
             <>
               <section className="hero hero-title">
-                <h2>One device. Hidden words. Fast rounds.</h2>
-                <p className="hero-copy">
-                  Built for quick pass-the-device play on mobile, with a wider version of the same
-                  flow on desktop.
+                <p className="hero-copy hero-copy-compact">
+                  Pass one phone around, give one clue each, and find the odd word.
                 </p>
-                <div className="pill-row">
-                  <span className="hero-pill">3 to 10 players</span>
-                  <span className="hero-pill">One shared device</span>
-                  <span className="hero-pill">No timer</span>
-                </div>
               </section>
-              <section className="feature-panel">
-                <article className="feature-card">
-                  <span>Setup</span>
-                  <strong>Pick a theme and add names in under two minutes.</strong>
-                </article>
-                <article className="feature-card">
-                  <span>Reveal</span>
-                  <strong>Players only see their word, then figure out the mismatch during hints.</strong>
-                </article>
-              </section>
-              {hasSetupProgress ? (
-                <section className="resume-panel">
-                  <span>Current setup</span>
-                  <strong>
-                    {selectedTheme ? selectedTheme.name : 'No theme selected'} · {filledPlayerCount}{' '}
-                    players named
-                  </strong>
-                </section>
-              ) : null}
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
                   {hasSetupProgress ? 'Continue Setup' : 'Start Setup'}
@@ -810,10 +780,10 @@ export default function App() {
           {state.screen === 'themeSelection' ? (
             <>
               <section className="section-copy">
-                <p>Pick one theme for this round. Keep it broad enough that players can hint naturally.</p>
+                <p>Pick one theme.</p>
               </section>
               <div className="theme-grid">
-                {THEMES.map((theme) => (
+                {orderedThemes.map((theme) => (
                   <button
                     key={theme.id}
                     type="button"
@@ -826,20 +796,9 @@ export default function App() {
                     onClick={() => dispatch({ type: 'selectTheme', themeId: theme.id })}
                   >
                     <span>{theme.name}</span>
-                    <strong className="choice-detail">{THEME_DETAILS[theme.id].blurb}</strong>
-                    <small>{theme.words.slice(0, 3).join(' · ')}</small>
                   </button>
                 ))}
               </div>
-              <section className="selection-note">
-                <span>{selectedTheme ? 'Selected theme' : 'Theme preview'}</span>
-                <strong>{selectedTheme ? selectedTheme.name : 'Choose one to continue'}</strong>
-                <p>
-                  {selectedTheme
-                    ? `${selectedTheme.words.length} prototype words loaded for this theme.`
-                    : 'Each theme already has a starter word pool for prototype rounds.'}
-                </p>
-              </section>
               <div className="button-row">
                 <button className="button button-secondary" onClick={() => dispatch({ type: 'goHome' })}>
                   Back
@@ -858,7 +817,7 @@ export default function App() {
           {state.screen === 'playerEntry' ? (
             <>
               <section className="section-copy">
-                <p>{MIN_PLAYERS} to {MAX_PLAYERS} players. Keep names short and easy to scan on a phone.</p>
+                <p>Add player names.</p>
               </section>
               <section className="setup-summary">
                 <article className="summary-card">

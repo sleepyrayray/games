@@ -53,6 +53,7 @@ export function createRound(theme: Theme, playerNames: string[], random = Math.r
   }
 
   const players = createPlayers(playerNames);
+  const revealOrder = shuffleItems(players.map((player) => player.id), random);
   const spyPlayer = players[randomIndex(players, random)];
   const [commonWord, spyWord] = pickTwoDistinctWords(theme.words, random);
 
@@ -71,6 +72,7 @@ export function createRound(theme: Theme, playerNames: string[], random = Math.r
   return {
     theme,
     players,
+    revealOrder,
     assignments,
     spyPlayerId: spyPlayer.id,
     commonWord,
@@ -150,6 +152,17 @@ export function incrementRound(round: RoundSession) {
     ...round,
     roundNumber: round.roundNumber + 1,
   };
+}
+
+export function shuffleItems<T>(items: T[], random = Math.random) {
+  const copy = [...items];
+
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+  }
+
+  return copy;
 }
 
 function pickTwoDistinctWords(words: string[], random: () => number) {

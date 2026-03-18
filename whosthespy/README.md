@@ -12,6 +12,7 @@ Planned game link: [https://sleepyrayray.github.io/games/whosthespy/](https://sl
 - The spy gets a different word from everyone else, but both words come from the same theme.
 - Players reveal their words privately one by one on the shared device.
 - The app shows only each player's word during reveal and does not explicitly say whether they are the spy.
+- The app randomizes the order in which players check their words.
 - Players then give spoken hints to each other in real life.
 - After the hint round, everyone votes for who they think the spy is.
 - If the spy is found, the spy gets one final chance to guess the common word and steal the win.
@@ -27,7 +28,7 @@ Planned game link: [https://sleepyrayray.github.io/games/whosthespy/](https://sl
 1. Choose a theme.
 2. Enter player names.
 3. Start the game.
-4. Show a clickable player card for the current player.
+4. Show a clickable player card for the next player in a randomized reveal order.
 5. The player taps their card to privately reveal their word.
 6. The player taps their word to hide it and move to the next player's reveal card.
 7. Once all players have seen their word, the app tells players to begin the real-life hint round.
@@ -56,7 +57,7 @@ The first version should ship with four starting themes:
 
 - Foods & Drinks
 - Animals
-- Places (Countries)
+- Countries
 - Jobs
 
 Each theme should contain 50 words.

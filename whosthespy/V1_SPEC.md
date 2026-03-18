@@ -20,6 +20,7 @@ The app should support the real-life social gameplay, not compete with it.
 - Mobile-first UI with desktop support
 - One shared device for all setup, reveals, voting, and endgame input
 - Each player sees their name first, then taps to reveal their word
+- Reveal order is randomized each round
 - The word reveal screen shows only the assigned word, not an explicit spy or non-spy label
 - After seeing their word, the player taps the word card to hide it and advance to the next player
 - Final spy guess must match the common word exactly after case-insensitive comparison
@@ -46,8 +47,7 @@ The app should support the real-life social gameplay, not compete with it.
 
 ## Turn Order
 
-- Player entry order becomes the default round order
-- Secret word reveals happen in player entry order
+- Secret word reveals happen in a randomized order each round
 - Voting happens in player entry order, skipping eliminated players
 - Revotes also use player entry order, skipping eliminated players
 
@@ -141,7 +141,7 @@ Validation copy:
 Notes:
 
 - Only one theme can be active at a time
-- Launch themes are Foods & Drinks, Animals, Places (Countries), and Jobs
+- Launch themes are Foods & Drinks, Animals, Countries, and Jobs
 
 ### 4. Player Entry Screen
 

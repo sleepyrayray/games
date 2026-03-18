@@ -189,7 +189,7 @@ Goal: make the game replayable enough for the first release.
 
 Tasks:
 
-- Add the four launch themes: Foods & Drinks, Animals, Places (Countries), and Jobs
+- Add the four launch themes: Foods & Drinks, Animals, Countries, and Jobs
 - Add 50 words to each theme
 - Validate that random same-theme pairings are not obviously broken too often
 - Remove weak or confusing words found during test rounds
