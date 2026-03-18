@@ -7,6 +7,7 @@ import type {
   PokemonTypeId,
 } from "../../types/pokechamp-data.ts";
 import {
+  EARLY_FLOOR_PLAYER_BALANCE_BY_FLOOR,
   describeTypeEffectiveness,
   getTypeEffectivenessMultiplier,
 } from "../config/gameRules.ts";
@@ -489,14 +490,8 @@ export function normalizeBattleSessionState(
 export function createBattleSession(
   context: BattleResolutionContext,
 ): BattleSessionState {
-  const playerStats = deriveBattleStats(
-    context.player.record,
-    context.player.generated.level,
-  );
-  const enemyStats = deriveBattleStats(
-    context.enemy.record,
-    context.enemy.generated.level,
-  );
+  const playerStats = buildBattleSideStats(context, "player");
+  const enemyStats = buildBattleSideStats(context, "enemy");
 
   return {
     enemyEffects: createEmptyBattleEffects(),
@@ -513,6 +508,39 @@ export function createBattleSession(
     summary: null,
     turns: [],
     turnsResolved: 0,
+  };
+}
+
+function buildBattleSideStats(
+  context: BattleResolutionContext,
+  side: BattleSide,
+): BattleDerivedStats {
+  const combatant = side === "player" ? context.player : context.enemy;
+  const baseStats = deriveBattleStats(combatant.record, combatant.generated.level);
+  const profile =
+    side === "player"
+      ? EARLY_FLOOR_PLAYER_BALANCE_BY_FLOOR[
+          context.floorNumber as keyof typeof EARLY_FLOOR_PLAYER_BALANCE_BY_FLOOR
+        ]
+      : null;
+
+  if (!profile) {
+    return baseStats;
+  }
+
+  return {
+    attack: applyStatMultiplier(baseStats.attack, profile.attack),
+    defense: applyStatMultiplier(baseStats.defense, profile.defense),
+    hp: applyStatMultiplier(baseStats.hp, profile.hp),
+    specialAttack: applyStatMultiplier(
+      baseStats.specialAttack,
+      profile.specialAttack,
+    ),
+    specialDefense: applyStatMultiplier(
+      baseStats.specialDefense,
+      profile.specialDefense,
+    ),
+    speed: applyStatMultiplier(baseStats.speed, profile.speed),
   };
 }
 

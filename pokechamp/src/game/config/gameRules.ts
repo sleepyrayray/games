@@ -15,6 +15,33 @@ export const GAME_VIEWPORT = {
 
 export const FLOOR_COUNT = 18;
 
+export const EARLY_FLOOR_PLAYER_BALANCE_BY_FLOOR = {
+  1: {
+    attack: 1.12,
+    defense: 1.1,
+    hp: 1.18,
+    specialAttack: 1.12,
+    specialDefense: 1.1,
+    speed: 1.08,
+  },
+  2: {
+    attack: 1.08,
+    defense: 1.06,
+    hp: 1.12,
+    specialAttack: 1.08,
+    specialDefense: 1.06,
+    speed: 1.04,
+  },
+  3: {
+    attack: 1.05,
+    defense: 1.03,
+    hp: 1.08,
+    specialAttack: 1.05,
+    specialDefense: 1.03,
+    speed: 1.02,
+  },
+} as const;
+
 export const FLOOR_LEVEL_BY_NUMBER = FLOOR_LEVELS.map((level, index) => ({
   floorNumber: index + 1,
   level,
