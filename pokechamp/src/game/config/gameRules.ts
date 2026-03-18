@@ -3,7 +3,7 @@ import {
   POKEMON_TYPES,
   type FloorLevel,
   type PokemonTypeId,
-} from "../../types/pokechamp-data";
+} from "../../types/pokechamp-data.ts";
 
 export const GAME_TITLE = "PokeChamp";
 export const GAME_SUBTITLE = "Tower Challenge Prototype";

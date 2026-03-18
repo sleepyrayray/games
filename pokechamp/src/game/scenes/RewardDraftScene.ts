@@ -5,6 +5,7 @@ import {
   type RewardDraftContext,
 } from "../run/runRuntimeService";
 import type { GeneratedBattlePokemon } from "../run/rulesSandbox";
+import { BattleResolutionScene } from "./BattleResolutionScene";
 import { DoorChoiceScene } from "./DoorChoiceScene";
 import { FloorScene } from "./FloorScene";
 import { TowerLobbyScene } from "./TowerLobbyScene";
@@ -104,13 +105,21 @@ export class RewardDraftScene extends Phaser.Scene {
       y: layout.bodyY + 404,
       width: 280,
       height: 72,
-      label: "Back To Floor",
-      description: "Return to the active floor room without committing a reward.",
+      label: "Back To Victory",
+      description: "Return to the saved victory summary without committing a reward.",
       accentColor: 0x5ab9d4,
       onPress: () => {
-        this.scene.start(FloorScene.KEY, {
-          currentFloor: rewardContext.currentFloor,
-        });
+        const savedBattle = runtime.getBattleSession();
+
+        if (!savedBattle) {
+          this.scene.start(FloorScene.KEY, {
+            currentFloor: rewardContext.currentFloor,
+          });
+
+          return;
+        }
+
+        this.scene.start(BattleResolutionScene.KEY, savedBattle);
       },
     });
 

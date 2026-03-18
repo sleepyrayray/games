@@ -1,7 +1,11 @@
-import pokemonDataset from "../../../data/runtime/pokemon.json";
-import floorLevelDataset from "../../../data/runtime/floor-levels.json";
-import movesDataset from "../../../data/runtime/moves.json";
-import starterDataset from "../../../data/runtime/starters.json";
+import pokemonDataset from "../../../data/runtime/pokemon.json" with { type: "json" };
+import floorLevelDataset from "../../../data/runtime/floor-levels.json" with {
+  type: "json",
+};
+import movesDataset from "../../../data/runtime/moves.json" with { type: "json" };
+import starterDataset from "../../../data/runtime/starters.json" with {
+  type: "json",
+};
 import {
   FLOOR_LEVELS,
   POKEMON_TYPES,
@@ -12,13 +16,13 @@ import {
   type PokemonTypeId,
   type RunStateRecord,
   type StarterPoolRecord,
-} from "../../types/pokechamp-data";
+} from "../../types/pokechamp-data.ts";
 import {
   createBattleSession,
   type BattleCombatantContext,
   type BattleResolutionContext,
   type BattleSessionState,
-} from "./battleResolution";
+} from "./battleResolution.ts";
 import {
   createRunState,
   advanceRunStateAfterVictory,
@@ -26,7 +30,7 @@ import {
   getBlockedSpeciesFromRunState,
   getRemainingFloorTypesFromRunState,
   type CompletedRunRecord,
-} from "./runState";
+} from "./runState.ts";
 import {
   RulesSandbox,
   createSeededRandom,
@@ -36,7 +40,7 @@ import {
   type GeneratedRewardOffer,
   type GeneratedStarterChoice,
   type GeneratedStarterOffer,
-} from "./rulesSandbox";
+} from "./rulesSandbox.ts";
 
 const DEFAULT_PLAYER_NAME = "Player";
 const BATTLE_STATE_STORAGE_KEY = "pokechamp.battle-state.v1";
@@ -96,6 +100,24 @@ export interface BattleSessionContext {
   battleState: BattleSessionState;
 }
 
+export type RunCheckpointStage =
+  | "none"
+  | "starter-draft"
+  | "floor"
+  | "battle"
+  | "reward"
+  | "door"
+  | "final-victory";
+
+export interface RunCheckpointSummary {
+  battleSession: BattleSessionContext | null;
+  currentFloor: CurrentFloorContext | null;
+  pendingDoorChoice: PendingDoorChoiceContext | null;
+  rewardContext: RewardDraftContext | null;
+  stage: RunCheckpointStage;
+  starterDraft: StarterDraftContext | null;
+}
+
 export class RunRuntimeService {
   private static instance: RunRuntimeService | null = null;
 
@@ -150,6 +172,74 @@ export class RunRuntimeService {
 
   public getStarterDraft(): StarterDraftContext | null {
     return this.pendingStarterDraft;
+  }
+
+  public getCheckpointSummary(): RunCheckpointSummary {
+    const starterDraft = this.getStarterDraft();
+    const currentFloor = this.getCurrentFloorContext();
+
+    if (!currentFloor) {
+      return {
+        battleSession: null,
+        currentFloor: null,
+        pendingDoorChoice: null,
+        rewardContext: null,
+        stage: starterDraft ? "starter-draft" : "none",
+        starterDraft,
+      };
+    }
+
+    const pendingDoorChoice = this.getPendingDoorChoiceContext();
+
+    if (pendingDoorChoice) {
+      return {
+        battleSession: null,
+        currentFloor,
+        pendingDoorChoice,
+        rewardContext: null,
+        stage: "door",
+        starterDraft,
+      };
+    }
+
+    const battleSession = this.getBattleSession();
+
+    if (battleSession?.battleState.outcome === "player-win") {
+      return {
+        battleSession,
+        currentFloor,
+        pendingDoorChoice: null,
+        rewardContext:
+          currentFloor.state.currentFloor === FLOOR_LEVELS.length
+            ? null
+            : this.getRewardDraftContext(),
+        stage:
+          currentFloor.state.currentFloor === FLOOR_LEVELS.length
+            ? "final-victory"
+            : "reward",
+        starterDraft,
+      };
+    }
+
+    if (battleSession) {
+      return {
+        battleSession,
+        currentFloor,
+        pendingDoorChoice: null,
+        rewardContext: null,
+        stage: "battle",
+        starterDraft,
+      };
+    }
+
+    return {
+      battleSession: null,
+      currentFloor,
+      pendingDoorChoice: null,
+      rewardContext: null,
+      stage: "floor",
+      starterDraft,
+    };
   }
 
   public getPreferredPlayerName(): string {

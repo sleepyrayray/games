@@ -5,11 +5,11 @@ import type {
   MoveId,
   MoveRecord,
   PokemonTypeId,
-} from "../../types/pokechamp-data";
+} from "../../types/pokechamp-data.ts";
 import {
   createSeededRandom,
   type GeneratedBattlePokemon,
-} from "./rulesSandbox";
+} from "./rulesSandbox.ts";
 
 type BattleSide = "enemy" | "player";
 

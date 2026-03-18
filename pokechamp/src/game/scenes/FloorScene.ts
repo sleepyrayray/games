@@ -11,6 +11,8 @@ import {
   type CurrentFloorContext,
 } from "../run/runRuntimeService";
 import { BattleResolutionScene } from "./BattleResolutionScene";
+import { DoorChoiceScene } from "./DoorChoiceScene";
+import { RewardDraftScene } from "./RewardDraftScene";
 import { TowerLobbyScene } from "./TowerLobbyScene";
 import {
   PHASE_THREE_COLORS,
@@ -66,11 +68,37 @@ export class FloorScene extends Phaser.Scene {
 
   public create(): void {
     const runtime = RunRuntimeService.getInstance();
-    const currentFloor =
-      this.currentFloorFromData ?? runtime.getCurrentFloorContext();
+    const checkpoint = runtime.getCheckpointSummary();
+    const currentFloor = this.currentFloorFromData ?? checkpoint.currentFloor;
 
     if (!currentFloor) {
       this.scene.start(TowerLobbyScene.KEY);
+
+      return;
+    }
+
+    if (checkpoint.stage === "door" && checkpoint.pendingDoorChoice) {
+      this.scene.start(DoorChoiceScene.KEY, {
+        mode: "choose-next-floor",
+        pendingChoice: checkpoint.pendingDoorChoice,
+      });
+
+      return;
+    }
+
+    if (checkpoint.stage === "reward" && checkpoint.rewardContext) {
+      this.scene.start(RewardDraftScene.KEY, {
+        rewardContext: checkpoint.rewardContext,
+      });
+
+      return;
+    }
+
+    if (
+      checkpoint.stage === "final-victory" &&
+      checkpoint.battleSession
+    ) {
+      this.scene.start(BattleResolutionScene.KEY, checkpoint.battleSession);
 
       return;
     }

@@ -7,13 +7,14 @@ import {
 } from "../config/gameRules";
 import {
   RunRuntimeService,
-  type BattleSessionContext,
+  type RunCheckpointSummary,
 } from "../run/runRuntimeService";
 import { BattleResolutionScene } from "./BattleResolutionScene";
 import { DoorChoiceScene } from "./DoorChoiceScene";
 import { FloorScene } from "./FloorScene";
 import { IntroScene } from "./IntroScene";
 import { RewardDraftScene } from "./RewardDraftScene";
+import { StarterDraftScene } from "./StarterDraftScene";
 import {
   PHASE_THREE_COLORS,
   PHASE_THREE_FONTS,
@@ -32,23 +33,16 @@ export class TowerLobbyScene extends Phaser.Scene {
 
   public create(): void {
     const runtime = RunRuntimeService.getInstance();
+    const checkpoint = runtime.getCheckpointSummary();
     const savedRun = runtime.getRunState();
-    const currentFloor = savedRun ? runtime.getCurrentFloorContext() : null;
+    const currentFloor = checkpoint.currentFloor;
     const preferredPlayerName = runtime.getPreferredPlayerName();
-    const savedBattle = currentFloor ? runtime.getBattleSession() : null;
-    const pendingDoorChoice = currentFloor
-      ? runtime.getPendingDoorChoiceContext()
-      : null;
-    const resumeState = getResumeState({
-      currentFloorExists: currentFloor !== null,
-      currentFloorNumber: currentFloor?.state.currentFloor ?? null,
-      pendingDoorChoiceExists: pendingDoorChoice !== null,
-      savedBattle,
-    });
+    const activeTrainerName = currentFloor?.state.playerName ?? preferredPlayerName;
+    const resumeState = getResumeState(checkpoint);
     const layout = drawSceneShell(this, {
       eyebrow: "PHASE 4 VERTICAL SLICE",
       title: GAME_TITLE,
-      subtitle: `${GAME_SUBTITLE} • Trainer ${preferredPlayerName} can launch, save, and resume the full Phase 4 slice across intro, floor, battle, reward, and door scenes.`,
+      subtitle: `${GAME_SUBTITLE} • Trainer ${activeTrainerName} can launch, save, and resume the full Phase 4 slice across intro, floor, battle, reward, and door scenes.`,
     });
 
     drawPanel(this, {
@@ -116,12 +110,21 @@ export class TowerLobbyScene extends Phaser.Scene {
           `Run id: ${currentFloor.state.runId}`,
           `Current floor: ${currentFloor.state.currentFloor} / ${FLOOR_COUNT}`,
           `Floor type: ${TYPE_LABELS[currentFloor.state.currentFloorType]}`,
-          `Preferred trainer: ${preferredPlayerName}`,
+          `Active trainer: ${currentFloor.state.playerName}`,
+          `Preferred default: ${preferredPlayerName}`,
           `Partner: ${currentFloor.playerPokemon.name} (Lv. ${currentFloor.playerPokemon.level})`,
           `Enemy preview: ${currentFloor.encounter.enemy.name}`,
           `Resume checkpoint: ${resumeState.summary}`,
           `Species already locked: ${currentFloor.state.usedSpecies.length}`,
         ].join("\n")
+      : checkpoint.starterDraft
+        ? [
+            `Pending starter draft for: ${checkpoint.starterDraft.playerName}`,
+            `Draft seed: ${checkpoint.starterDraft.seed}`,
+            `Starter trio level: ${checkpoint.starterDraft.starterOffer.level}`,
+            `Resume checkpoint: ${resumeState.summary}`,
+            `Preferred default: ${preferredPlayerName}`,
+          ].join("\n")
       : `Preferred trainer: ${preferredPlayerName}\nNo saved run yet.\nStart a new run to generate a starter trio and persist the first RunStateRecord.`;
 
     this.add
@@ -173,41 +176,49 @@ export class TowerLobbyScene extends Phaser.Scene {
       height: 92,
       label: resumeState.label,
       description: resumeState.description,
-      accentColor: currentFloor ? 0x5ab9d4 : 0x4d8193,
+      accentColor:
+        checkpoint.stage === "none" ? 0x4d8193 : 0x5ab9d4,
       onPress: () => {
-        if (!currentFloor) {
+        if (checkpoint.stage === "starter-draft" && checkpoint.starterDraft) {
+          this.scene.start(StarterDraftScene.KEY, {
+            draft: checkpoint.starterDraft,
+          });
+
           return;
         }
 
-        if (pendingDoorChoice) {
+        if (checkpoint.stage === "door" && checkpoint.pendingDoorChoice) {
           this.scene.start(DoorChoiceScene.KEY, {
             mode: "choose-next-floor",
-            pendingChoice: pendingDoorChoice,
+            pendingChoice: checkpoint.pendingDoorChoice,
+          });
+
+          return;
+        }
+
+        if (checkpoint.stage === "reward" && checkpoint.rewardContext) {
+          this.scene.start(RewardDraftScene.KEY, {
+            rewardContext: checkpoint.rewardContext,
           });
 
           return;
         }
 
         if (
-          savedBattle?.battleState.outcome === "player-win" &&
-          currentFloor.state.currentFloor < FLOOR_COUNT
+          (checkpoint.stage === "battle" ||
+            checkpoint.stage === "final-victory") &&
+          checkpoint.battleSession
         ) {
-          const rewardContext = runtime.getRewardDraftContext();
-
-          if (rewardContext) {
-            this.scene.start(RewardDraftScene.KEY, { rewardContext });
-
-            return;
-          }
-        }
-
-        if (savedBattle) {
-          this.scene.start(BattleResolutionScene.KEY, savedBattle);
+          this.scene.start(BattleResolutionScene.KEY, checkpoint.battleSession);
 
           return;
         }
 
-        this.scene.start(FloorScene.KEY, { currentFloor });
+        if (checkpoint.stage === "floor" && checkpoint.currentFloor) {
+          this.scene.start(FloorScene.KEY, {
+            currentFloor: checkpoint.currentFloor,
+          });
+        }
       },
     });
 
@@ -217,7 +228,7 @@ export class TowerLobbyScene extends Phaser.Scene {
       width: 184,
       height: 92,
       label: "Reset Save",
-      description: "Clear the pending draft and the saved RunStateRecord from local storage.",
+      description: "Clear the pending draft plus saved run, battle, and door checkpoints from local storage.",
       accentColor: 0xf3c969,
       onPress: () => {
         runtime.clearRunState();
@@ -231,6 +242,8 @@ export class TowerLobbyScene extends Phaser.Scene {
         layout.bodyY + 430,
         currentFloor
           ? `Resume will reopen floor ${currentFloor.state.currentFloor} with ${currentFloor.playerPokemon.name} directly inside the active room. Reward and door choices are still derived from the same saved run state when you win.`
+          : checkpoint.starterDraft
+            ? `A starter trio is already waiting in memory for ${checkpoint.starterDraft.playerName}. Resume Draft picks up exactly where the intro handed off.`
           : `The current vertical slice now includes starter drafting, a type-themed floor room, an interactive battle prototype, reward selection, and next-door choice on top of the same runtime service.`,
         {
           color: PHASE_THREE_COLORS.muted,
@@ -260,17 +273,20 @@ export class TowerLobbyScene extends Phaser.Scene {
   }
 }
 
-function getResumeState(options: {
-  currentFloorExists: boolean;
-  currentFloorNumber: number | null;
-  pendingDoorChoiceExists: boolean;
-  savedBattle: BattleSessionContext | null;
-}): {
+function getResumeState(checkpoint: RunCheckpointSummary): {
   description: string;
   label: string;
   summary: string;
 } {
-  if (!options.currentFloorExists) {
+  if (checkpoint.stage === "starter-draft") {
+    return {
+      description: "Return to the in-progress starter trio before a run has been locked in.",
+      label: "Resume Draft",
+      summary: "Starter draft pending",
+    };
+  }
+
+  if (checkpoint.stage === "none") {
     return {
       description: "An active floor room will appear here after you begin a run.",
       label: "No Save Yet",
@@ -278,7 +294,7 @@ function getResumeState(options: {
     };
   }
 
-  if (options.pendingDoorChoiceExists) {
+  if (checkpoint.stage === "door") {
     return {
       description: "Resume the saved door-choice checkpoint after locking in a reward.",
       label: "Resume Door",
@@ -286,7 +302,7 @@ function getResumeState(options: {
     };
   }
 
-  if (!options.savedBattle) {
+  if (checkpoint.stage === "floor") {
     return {
       description: "Load the active floor room from the saved RunStateRecord.",
       label: "Resume Run",
@@ -294,20 +310,20 @@ function getResumeState(options: {
     };
   }
 
-  if (options.savedBattle.battleState.outcome === "player-win") {
-    if (options.currentFloorNumber === FLOOR_COUNT) {
-      return {
-        description:
-          "Resume the saved final victory checkpoint and claim the tower clear.",
-        label: "Claim Win",
-        summary: "Final victory checkpoint",
-      };
-    }
-
+  if (checkpoint.stage === "reward") {
     return {
       description: "Resume from the saved victory checkpoint and continue into rewards.",
       label: "Resume Reward",
       summary: "Victory checkpoint",
+    };
+  }
+
+  if (checkpoint.stage === "final-victory") {
+    return {
+      description:
+        "Resume the saved final victory checkpoint and claim the tower clear.",
+      label: "Claim Win",
+      summary: "Final victory checkpoint",
     };
   }
 
