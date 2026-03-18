@@ -19,6 +19,7 @@ import {
 } from "../../types/pokechamp-data.ts";
 import {
   createBattleSession,
+  normalizeBattleSessionState,
   type BattleCombatantContext,
   type BattleResolutionContext,
   type BattleSessionState,
@@ -844,7 +845,10 @@ export class RunRuntimeService {
       return null;
     }
 
-    return savedSession;
+    return {
+      ...savedSession,
+      battleState: normalizeBattleSessionState(savedSession.battleState),
+    };
   }
 
   private loadValidatedPendingDoorChoiceRecord(

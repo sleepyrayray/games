@@ -20,7 +20,8 @@
     "data:sync": "npm run data:import && npm run data:build && npm run data:validate",
     "phase3:simulate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts",
     "phase3:validate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts --runs 500",
-    "phase4:validate": "node --experimental-strip-types ./scripts/phase4/validate-flow.ts"
+    "phase4:validate": "node --experimental-strip-types ./scripts/phase4/validate-flow.ts",
+    "phase5:validate": "node --experimental-strip-types ./scripts/phase5/validate-battle.ts"
   },
   "dependencies": {
     "phaser": "^3.88.2"

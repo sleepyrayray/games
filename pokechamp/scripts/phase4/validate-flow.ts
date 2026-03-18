@@ -407,9 +407,15 @@ function resolveBestTurn(
 ) {
   const selectableMove = buildBattleMoveChoices({
     attacker: battleSession.battleContext.player,
+    attackerCurrentHp: battleSession.battleState.playerCurrentHp,
+    attackerEffects: battleSession.battleState.playerEffects,
     attackerStats: battleSession.battleState.playerStats,
+    attackerStatStages: battleSession.battleState.playerStatStages,
     defender: battleSession.battleContext.enemy,
+    defenderCurrentHp: battleSession.battleState.enemyCurrentHp,
+    defenderEffects: battleSession.battleState.enemyEffects,
     defenderStats: battleSession.battleState.enemyStats,
+    defenderStatStages: battleSession.battleState.enemyStatStages,
   })
     .filter((choice) => choice.isSelectable)
     .sort((left, right) => right.plan.score - left.plan.score)[0];

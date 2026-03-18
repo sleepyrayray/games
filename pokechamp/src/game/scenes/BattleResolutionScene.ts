@@ -96,13 +96,19 @@ export class BattleResolutionScene extends Phaser.Scene {
       eyebrow: `BATTLE FLOOR ${context.floorNumber} OF ${FLOOR_COUNT}`,
       title: `${TYPE_LABELS[context.floorType]} Battle`,
       subtitle:
-        "Phase 4 combat prototype: pick any legal move each turn. Priority, accuracy, STAB, and type effectiveness are live; utility moves still resolve as light prototype actions while full status systems wait for a later phase.",
+        "Phase 5 simplified battle: pick any legal move each turn. Priority, accuracy, STAB, type matchups, healing, Protect, residual damage, and stat-stage shifts are all live in this rules pass.",
     });
     const moveChoices = buildBattleMoveChoices({
       attacker: context.player,
+      attackerCurrentHp: battleState.playerCurrentHp,
+      attackerEffects: battleState.playerEffects,
       attackerStats: battleState.playerStats,
+      attackerStatStages: battleState.playerStatStages,
       defender: context.enemy,
+      defenderCurrentHp: battleState.enemyCurrentHp,
+      defenderEffects: battleState.enemyEffects,
       defenderStats: battleState.enemyStats,
+      defenderStatStages: battleState.enemyStatStages,
     });
     const infoBarY = layout.bodyY;
     const cardsY = layout.bodyY + 70;
@@ -171,8 +177,10 @@ export class BattleResolutionScene extends Phaser.Scene {
     this.drawCombatantStatusCard({
       combatant: context.enemy,
       currentHp: battleState.enemyCurrentHp,
+      effects: battleState.enemyEffects,
       label: `${TYPE_LABELS[context.floorType]} floor trainer`,
       stats: battleState.enemyStats,
+      statStages: battleState.enemyStatStages,
       width: 548,
       x: layout.bodyX,
       y: cardsY,
@@ -181,8 +189,10 @@ export class BattleResolutionScene extends Phaser.Scene {
     this.drawCombatantStatusCard({
       combatant: context.player,
       currentHp: battleState.playerCurrentHp,
+      effects: battleState.playerEffects,
       label: `${context.playerName}'s partner`,
       stats: battleState.playerStats,
+      statStages: battleState.playerStatStages,
       width: 548,
       x: layout.bodyX + 568,
       y: cardsY,
@@ -513,8 +523,10 @@ export class BattleResolutionScene extends Phaser.Scene {
   private drawCombatantStatusCard(options: {
     combatant: BattleCombatantContext;
     currentHp: number;
+    effects: BattleSessionState["playerEffects"];
     label: string;
     stats: BattleSessionState["playerStats"];
+    statStages: BattleSessionState["playerStatStages"];
     width: number;
     x: number;
     y: number;
@@ -556,11 +568,12 @@ export class BattleResolutionScene extends Phaser.Scene {
       .text(
         options.x + 18,
         options.y + 122,
-        `Lv. ${options.combatant.generated.level} • HP ${options.currentHp} / ${options.stats.hp}`,
+        `Lv. ${options.combatant.generated.level} • HP ${options.currentHp} / ${options.stats.hp} • ${this.describeBattleEffects(options.effects)}`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,
-          fontSize: "18px",
+          fontSize: "15px",
+          wordWrap: { width: options.width - 36 },
         },
       )
       .setOrigin(0, 0);
@@ -577,7 +590,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       .text(
         options.x + 18,
         options.y + 166,
-        `Atk ${options.stats.attack} • Def ${options.stats.defense} • SpA ${options.stats.specialAttack} • SpD ${options.stats.specialDefense} • Spe ${options.stats.speed}`,
+        `Atk ${options.stats.attack} • Def ${options.stats.defense} • SpA ${options.stats.specialAttack} • SpD ${options.stats.specialDefense} • Spe ${options.stats.speed} • ${this.describeStatStages(options.statStages)}`,
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.title,
@@ -671,9 +684,17 @@ export class BattleResolutionScene extends Phaser.Scene {
     const detailLine = options.choice.isSelectable
       ? options.choice.plan.isFallback
         ? "Fallback strike covers unsupported movesets."
-        : options.choice.plan.category === "status" || options.choice.plan.power <= 0
-          ? `Prototype utility action • ${summarizeTypeEffectiveness(options.choice.plan.typeEffectiveness)} • Est. impact ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
-        : `${summarizeTypeEffectiveness(options.choice.plan.typeEffectiveness)} • Est. damage ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
+        : [
+            options.choice.plan.power > 0
+              ? `${summarizeTypeEffectiveness(options.choice.plan.typeEffectiveness)} • Est. damage ${options.choice.plan.expectedDamage}`
+              : options.choice.plan.effectSummary ?? "Utility move",
+            options.choice.plan.power > 0 ? options.choice.plan.effectSummary : null,
+            options.choice.plan.priority !== 0
+              ? `Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}`
+              : null,
+          ]
+            .filter((value): value is string => !!value)
+            .join(" • ")
       : options.choice.disabledReason ?? "Unavailable";
 
     this.add
@@ -715,30 +736,97 @@ export class BattleResolutionScene extends Phaser.Scene {
     turns.forEach((turn) => {
       turn.actions.forEach((action) => {
         const actorName = action.actorSide === "player" ? playerName : enemyName;
-        const targetName = action.actorSide === "player" ? enemyName : playerName;
-        const effectivenessNote =
-          action.typeEffectiveness > 1
-            ? " It's super effective."
-            : action.typeEffectiveness > 0 && action.typeEffectiveness < 1
-              ? " It's not very effective."
-              : "";
-        const actionSummary = action.hit
-          ? action.typeEffectiveness === 0
-            ? `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""}, but it had no effect on ${targetName}. ${targetName} stayed at ${action.remainingHp} HP.`
-            : `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""} for ${action.damage} damage.${effectivenessNote} ${targetName} fell to ${action.remainingHp} HP.`
-          : `${actorName} used ${action.moveName}${action.usedFallback ? " (fallback)" : ""} and missed.`;
+        const targetName = action.targetsSelf
+          ? actorName
+          : action.actorSide === "player"
+            ? enemyName
+            : playerName;
+        const moveLabel = `${action.moveName}${action.usedFallback ? " (fallback)" : ""}`;
+        let actionSummary: string;
 
-        lines.push(`Turn ${turn.turnNumber}: ${actionSummary}`);
+        if (action.skipped) {
+          actionSummary = action.notes[0] ?? `${actorName} could not act.`;
+        } else if (!action.hit) {
+          actionSummary = `${actorName} used ${moveLabel} and missed.`;
+        } else if (action.typeEffectiveness === 0 && !action.targetsSelf) {
+          actionSummary = `${actorName} used ${moveLabel}, but it had no effect on ${targetName}.`;
+        } else if (action.damage > 0) {
+          const effectivenessNote =
+            action.typeEffectiveness > 1
+              ? " It was super effective."
+              : action.typeEffectiveness > 0 && action.typeEffectiveness < 1
+                ? " It was not very effective."
+                : "";
+
+          actionSummary = `${actorName} used ${moveLabel} for ${action.damage} damage.${effectivenessNote} ${targetName} is at ${action.remainingHp} HP.`;
+        } else {
+          actionSummary = `${actorName} used ${moveLabel}.`;
+        }
+
+        const appendedNotes =
+          action.skipped || !action.hit
+            ? []
+            : action.notes.filter((note) => note.length > 0);
+
+        lines.push(
+          `Turn ${turn.turnNumber}: ${[actionSummary, ...appendedNotes].join(" ")}`,
+        );
+      });
+
+      turn.events.forEach((event) => {
+        lines.push(`Turn ${turn.turnNumber}: ${event}`);
       });
     });
 
     if (lines.length === 0) {
       return [
         "No turns resolved yet. Choose one of the legal move buttons to start the battle.",
-        "Allowed utility moves are clickable too, but they still resolve with simplified prototype effects in this Phase 4 slice.",
+        "Utility moves are fully selectable here too, and this Phase 5 pass now applies simplified healing, Protect, stat stages, and residual effects.",
       ];
     }
 
     return lines.slice(-maxLines);
+  }
+
+  private describeBattleEffects(
+    effects: BattleSessionState["playerEffects"],
+  ): string {
+    const parts: string[] = [];
+
+    if (effects.majorStatus) {
+      parts.push(`Status ${toDisplayLabel(effects.majorStatus)}`);
+    }
+
+    if (effects.seeded) {
+      parts.push("Seeded");
+    }
+
+    if (effects.yawnPending) {
+      parts.push("Drowsy");
+    }
+
+    return parts.length > 0 ? parts.join(" • ") : "Status Clear";
+  }
+
+  private describeStatStages(
+    statStages: BattleSessionState["playerStatStages"],
+  ): string {
+    const parts = [
+      this.toStageFragment("Atk", statStages.attack),
+      this.toStageFragment("Def", statStages.defense),
+      this.toStageFragment("SpA", statStages.specialAttack),
+      this.toStageFragment("SpD", statStages.specialDefense),
+      this.toStageFragment("Spe", statStages.speed),
+    ].filter((value): value is string => !!value);
+
+    return parts.length > 0 ? `Stages ${parts.join(" • ")}` : "Stages Even";
+  }
+
+  private toStageFragment(label: string, value: number): string | null {
+    if (value === 0) {
+      return null;
+    }
+
+    return `${label} ${value > 0 ? "+" : ""}${value}`;
   }
 }
