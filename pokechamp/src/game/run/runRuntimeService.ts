@@ -138,6 +138,7 @@ export class RunRuntimeService {
   private readonly sandbox = new RulesSandbox({
     pokemon: pokemonDataset as BattleReadyPokemonRecord[],
     floorLevels: floorLevelDataset as FloorLevelRecord[],
+    moves: movesDataset as MoveRecord[],
     starters: starterDataset as StarterPoolRecord,
   });
 

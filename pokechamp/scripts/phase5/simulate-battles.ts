@@ -138,6 +138,7 @@ async function main(): Promise<void> {
   const sandbox = new RulesSandbox({
     pokemon,
     floorLevels,
+    moves,
     starters,
   });
   const moveById = new Map(moves.map((move) => [move.moveId, move] as const));

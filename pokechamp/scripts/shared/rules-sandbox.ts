@@ -4,6 +4,7 @@ import {
   type BattleReadyPokemonRecord,
   type FloorLevel,
   type FloorLevelRecord,
+  type MoveRecord,
   type MoveSet,
   type PokemonDataset,
   type PokemonTypeId,
@@ -40,6 +41,7 @@ export interface RandomSource {
 export interface RulesSandboxData {
   pokemon: PokemonDataset;
   floorLevels: FloorLevelRecord[];
+  moves: MoveRecord[];
   starters: StarterPoolRecord;
 }
 
@@ -187,11 +189,13 @@ export class RulesSandbox {
   >();
   private readonly data: RulesSandboxData;
   private readonly floorLevelByNumber = new Map<number, FloorLevel>();
+  private readonly moveById: ReadonlyMap<string, MoveRecord>;
   private readonly rewardPoolsByLevel = new Map<FloorLevel, SpeciesBucket[]>();
   private readonly starterPoolsByType: Record<StarterType, SpeciesBucket[]>;
 
   constructor(data: RulesSandboxData) {
     this.data = data;
+    this.moveById = new Map(data.moves.map((move) => [move.moveId, move] as const));
     this.validateFloorLevels();
 
     for (const level of FLOOR_LEVELS) {
@@ -237,8 +241,12 @@ export class RulesSandbox {
         this.starterPoolsByType[starterType],
         blockedSpecies,
       );
+      const preferredCandidates = this.getPreferredStarterBuckets(
+        candidates,
+        starterLevel,
+      );
 
-      if (candidates.length === 0) {
+      if (preferredCandidates.length === 0) {
         throw new RulesSandboxError(
           "invalid-starter",
           `No legal ${starterType} starter candidates remain`,
@@ -251,7 +259,7 @@ export class RulesSandbox {
         );
       }
 
-      const chosenBucket = pickOne(candidates, rng);
+      const chosenBucket = pickOne(preferredCandidates, rng);
       const chosenRecord = pickOne(chosenBucket.records, rng);
 
       return {
@@ -387,11 +395,24 @@ export class RulesSandbox {
       );
     }
 
-    const choices = this.selectRewardChoicesWithUniqueTypes(
+    const preferredCandidateBuckets = this.getPreferredRewardCandidateBuckets(
       candidateBuckets,
       nextFloorLevel,
-      rng,
+      nextFloorNumber,
     );
+    const choices =
+      this.selectRewardChoicesWithUniqueTypes(
+        preferredCandidateBuckets,
+        nextFloorLevel,
+        rng,
+      ) ??
+      (preferredCandidateBuckets === candidateBuckets
+        ? null
+        : this.selectRewardChoicesWithUniqueTypes(
+            candidateBuckets,
+            nextFloorLevel,
+            rng,
+          ));
 
     if (!choices) {
       throw new RulesSandboxError(
@@ -572,6 +593,50 @@ export class RulesSandbox {
         return bucket;
       })
       .sort(compareSpeciesBuckets);
+  }
+
+  private getPreferredStarterBuckets(
+    candidateBuckets: SpeciesBucket[],
+    starterLevel: FloorLevel,
+  ): SpeciesBucket[] {
+    const preferredBuckets = candidateBuckets
+      .map((bucket) => ({
+        speciesId: bucket.speciesId,
+        records: bucket.records.filter((record) =>
+          isPreferredStarterRecord(record, starterLevel, this.moveById),
+        ),
+      }))
+      .filter((bucket) => bucket.records.length > 0);
+
+    return preferredBuckets.length > 0 ? preferredBuckets : candidateBuckets;
+  }
+
+  private getPreferredRewardCandidateBuckets(
+    candidateBuckets: SpeciesBucket[],
+    nextFloorLevel: FloorLevel,
+    nextFloorNumber: number,
+  ): SpeciesBucket[] {
+    if (nextFloorNumber > 3) {
+      return candidateBuckets;
+    }
+
+    const preferredBuckets = candidateBuckets
+      .map((bucket) => ({
+        speciesId: bucket.speciesId,
+        records: bucket.records.filter((record) =>
+          isPreferredEarlyRewardRecord(record, nextFloorLevel, this.moveById),
+        ),
+      }))
+      .filter((bucket) => bucket.records.length > 0);
+
+    if (
+      preferredBuckets.length < 3 ||
+      countDistinctRewardTypingKeys(preferredBuckets) < 3
+    ) {
+      return candidateBuckets;
+    }
+
+    return preferredBuckets;
   }
 
   private getEncounterCandidateBuckets(
@@ -1016,6 +1081,69 @@ function filterBucketsByBlockedSpecies(
   blockedSpecies: ReadonlySet<SpeciesId>,
 ): SpeciesBucket[] {
   return buckets.filter((bucket) => !blockedSpecies.has(bucket.speciesId));
+}
+
+interface BattlePressureProfile {
+  bestPower: number;
+  bestStabPower: number;
+  damagingMoveCount: number;
+}
+
+function buildBattlePressureProfile(
+  record: BattleReadyPokemonRecord,
+  level: number,
+  moveById: ReadonlyMap<string, MoveRecord>,
+): BattlePressureProfile {
+  const moves = resolveMoveSetForLevel(record, level);
+  let bestPower = 0;
+  let bestStabPower = 0;
+  let damagingMoveCount = 0;
+
+  for (const moveId of moves ?? []) {
+    const move = moveById.get(moveId);
+
+    if (!move || move.power <= 0) {
+      continue;
+    }
+
+    damagingMoveCount += 1;
+    bestPower = Math.max(bestPower, move.power);
+
+    if (record.types.includes(move.type)) {
+      bestStabPower = Math.max(bestStabPower, move.power);
+    }
+  }
+
+  return {
+    bestPower,
+    bestStabPower,
+    damagingMoveCount,
+  };
+}
+
+function isPreferredStarterRecord(
+  record: BattleReadyPokemonRecord,
+  level: number,
+  moveById: ReadonlyMap<string, MoveRecord>,
+): boolean {
+  return buildBattlePressureProfile(record, level, moveById).bestStabPower >= 40;
+}
+
+function isPreferredEarlyRewardRecord(
+  record: BattleReadyPokemonRecord,
+  level: number,
+  moveById: ReadonlyMap<string, MoveRecord>,
+): boolean {
+  const pressure = buildBattlePressureProfile(record, level, moveById);
+
+  return (
+    pressure.damagingMoveCount > 0 &&
+    (
+      pressure.bestStabPower >= 40 ||
+      pressure.bestPower >= 60 ||
+      pressure.damagingMoveCount >= 2
+    )
+  );
 }
 
 function isRecordLegalAtLevel(

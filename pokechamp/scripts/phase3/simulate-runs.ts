@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type {
   BattleReadyPokemonRecord,
   FloorLevelRecord,
+  MoveRecord,
   StarterPoolRecord,
 } from "../../src/types/pokechamp-data.ts";
 import {
@@ -72,10 +73,14 @@ async function main(): Promise<void> {
   const starters = await readJsonFile<StarterPoolRecord>(
     join(RUNTIME_DATA_DIR, "starters.json"),
   );
+  const moves = await readJsonFile<MoveRecord[]>(
+    join(RUNTIME_DATA_DIR, "moves.json"),
+  );
 
   const sandbox = new RulesSandbox({
     pokemon,
     floorLevels,
+    moves,
     starters,
   });
   const results = Array.from({ length: options.runs }, (_, index) =>
