@@ -526,7 +526,7 @@ function buildVotingSession(
 ): VotingSession {
   return {
     phase,
-    voterOrder: getActivePlayers(round.players).map((player) => player.id),
+    voterOrder: shuffleItems(getActivePlayers(round.players).map((player) => player.id)),
     currentVoterIndex: 0,
     votes: {},
     tiedPlayerIds,
@@ -693,6 +693,15 @@ export default function App() {
   const votingStepLabel = state.voting
     ? `${state.voting.currentVoterIndex + 1} of ${state.voting.voterOrder.length}`
     : null;
+  const revotePlayerNames =
+    state.round && state.voting?.phase === 'revote'
+      ? formatNames(state.round.players, state.voting.tiedPlayerIds)
+      : null;
+  const roundPlayers = state.round?.players ?? [];
+  const tiedPlayerCards = state.tiedPlayerIds.map((playerId) => ({
+    id: playerId,
+    name: getPlayerName(roundPlayers, playerId) ?? 'Unknown player',
+  }));
   const eliminatedPlayerName = state.round
     ? getPlayerName(state.round.players, state.lastEliminatedPlayerId)
     : null;
@@ -986,9 +995,15 @@ export default function App() {
                 <h2>Pass the phone to {currentVotingPlayer.name}</h2>
                 <p>Only {currentVotingPlayer.name} should look while choosing a vote.</p>
               </section>
+              {state.voting?.phase === 'revote' && revotePlayerNames ? (
+                <section className="detail-note">
+                  <span>Revote between</span>
+                  <strong>{revotePlayerNames}</strong>
+                </section>
+              ) : null}
               <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
                 <span className="handoff-label">
-                  {state.voting?.phase === 'revote' ? 'Revote' : 'Vote'}
+                  {state.voting?.phase === 'revote' ? 'Open revote' : 'Open ballot'}
                 </span>
                 <strong>{currentVotingPlayer.name}</strong>
                 <small>Tap to open the ballot</small>
@@ -1005,13 +1020,22 @@ export default function App() {
                   </span>
                   {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
                 </div>
-                <h2>{currentVotingPlayer.name}, choose one player.</h2>
+                <h2>
+                  {currentVotingPlayer.name}, choose{' '}
+                  {state.voting?.phase === 'revote' ? 'one tied player.' : 'one player.'}
+                </h2>
                 <p>
                   {state.voting?.phase === 'revote'
-                    ? 'Only tied players appear in this revote.'
+                    ? 'Only tied players appear in this revote. The result stays hidden until every ballot is in.'
                     : 'Your choice stays private until every vote is in.'}
                 </p>
               </section>
+              {state.voting?.phase === 'revote' && revotePlayerNames ? (
+                <section className="detail-note">
+                  <span>Revote between</span>
+                  <strong>{revotePlayerNames}</strong>
+                </section>
+              ) : null}
               <div className="vote-grid">
                 {voteOptions.map((player) => (
                   <button
@@ -1028,19 +1052,13 @@ export default function App() {
                   </button>
                 ))}
               </div>
-              <section className="selection-inline-note">
-                <span>Selected</span>
-                <strong>
-                  {getPlayerName(state.round?.players ?? [], state.selectedVoteTargetId) ?? 'No player selected yet'}
-                </strong>
-              </section>
               <div className="button-stack">
                 <button
                   className="button button-primary"
                   disabled={!state.selectedVoteTargetId}
                   onClick={() => dispatch({ type: 'submitVote' })}
                 >
-                  Submit Vote
+                  {state.voting?.phase === 'revote' ? 'Submit Revote' : 'Submit Vote'}
                 </button>
               </div>
             </>
@@ -1048,16 +1066,47 @@ export default function App() {
 
           {state.screen === 'tie' && state.round ? (
             <>
-              <section className="section-copy">
-                <h2>{state.tieStage === 1 ? 'Tie Vote' : 'No Elimination'}</h2>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">{state.tieStage === 1 ? 'Tie vote' : 'No elimination'}</span>
+                  <span className="phase-chip">
+                    {state.tieStage === 1 ? `${state.tiedPlayerIds.length} tied` : `Round ${state.round.roundNumber + 1}`}
+                  </span>
+                </div>
+                <h2>{state.tieStage === 1 ? 'No one is out yet.' : 'Still tied after the revote.'}</h2>
                 {state.tieStage === 1 ? (
-                  <p>Revote between {formatNames(state.round.players, state.tiedPlayerIds)}.</p>
+                  <p>Run one more private vote between the tied players.</p>
                 ) : (
-                  <>
-                    <p>The revote tied again.</p>
-                    <p>Start another hint round.</p>
-                  </>
+                  <p>No one is eliminated. Keep the same hidden words and start another hint round.</p>
                 )}
+              </section>
+              {state.tieStage === 1 ? (
+                <div className="summary-grid">
+                  {tiedPlayerCards.map((player) => (
+                    <article key={player.id} className="summary-card">
+                      <span>Tied player</span>
+                      <strong>{player.name}</strong>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+              <section className="checklist-card">
+                <span>What happens next</span>
+                <div className="checklist-list">
+                  {state.tieStage === 1 ? (
+                    <>
+                      <p>Everyone votes again in private.</p>
+                      <p>Only tied players appear on the ballot.</p>
+                      <p>No vote totals are shown.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>No one leaves the game this round.</p>
+                      <p>All active players stay in.</p>
+                      <p>Go back to spoken hints, then vote again.</p>
+                    </>
+                  )}
+                </div>
               </section>
               <div className="button-stack">
                 {state.tieStage === 1 ? (

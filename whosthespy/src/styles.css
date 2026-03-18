@@ -415,7 +415,7 @@ button {
 }
 
 .checklist-card,
-.selection-inline-note {
+.detail-note {
   padding: 0.95rem 1rem;
   border-radius: 1.2rem;
   background: #f4efe3;
@@ -429,7 +429,7 @@ button {
 }
 
 .checklist-card span,
-.selection-inline-note span {
+.detail-note span {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.74rem;
@@ -442,12 +442,12 @@ button {
 }
 
 .checklist-list p,
-.selection-inline-note strong {
+.detail-note strong {
   margin: 0;
   color: #20271b;
 }
 
-.selection-inline-note {
+.detail-note {
   display: grid;
   gap: 0.2rem;
   margin: 1rem 0;
