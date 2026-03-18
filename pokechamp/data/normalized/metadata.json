@@ -2,7 +2,7 @@
   "source": "pokeapi",
   "apiBaseUrl": "https://pokeapi.co/api/v2",
   "fetchedAt": "2026-03-17T05:21:24.336Z",
-  "builtAt": "2026-03-17T14:11:34.406Z",
+  "builtAt": "2026-03-18T03:34:23.609Z",
   "preferredLearnsetVersionGroups": [
     "scarlet-violet",
     "legends-arceus",
@@ -1549,6 +1549,6 @@
     "evolutionWindows": 954,
     "movesetPools": 8458,
     "runtimePokemon": 946,
-    "runtimeMoves": 417
+    "runtimeMoves": 412
   }
 }

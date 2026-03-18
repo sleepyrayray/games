@@ -191,6 +191,18 @@ export const BLOCKED_RECOMMENDED_MOVE_IDS = new Set([
   "wide-guard",
 ]);
 
+export const BLOCKED_RUNTIME_MOVE_IDS = new Set([
+  "beat-up",
+  "curse",
+  "heal-pulse",
+  "purify",
+  "sketch",
+  "splash",
+  "teleport",
+  "throat-chop",
+  "transform",
+]);
+
 export const TYPE_METADATA: TypeMetadataRecord[] = [
   {
     typeId: "normal",

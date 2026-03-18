@@ -3410,18 +3410,15 @@
     "movesetsByFloorLevel": {
       "19": [
         "draining-kiss",
-        "heal-pulse",
         "echoed-voice"
       ],
       "23": [
         "draining-kiss",
-        "heal-pulse",
         "echoed-voice",
         "flail"
       ],
       "26": [
         "draining-kiss",
-        "heal-pulse",
         "echoed-voice",
         "flail"
       ],
@@ -3712,49 +3709,49 @@
         "hyper-voice",
         "zen-headbutt",
         "take-down",
-        "heal-pulse"
+        "pound"
       ],
       "48": [
         "double-edge",
         "zen-headbutt",
         "hyper-voice",
-        "heal-pulse"
+        "disarming-voice"
       ],
       "52": [
         "double-edge",
         "zen-headbutt",
         "hyper-voice",
-        "heal-pulse"
+        "disarming-voice"
       ],
       "55": [
         "double-edge",
         "zen-headbutt",
         "hyper-voice",
-        "heal-pulse"
+        "disarming-voice"
       ],
       "59": [
         "double-edge",
         "zen-headbutt",
         "hyper-voice",
-        "heal-pulse"
+        "disarming-voice"
       ],
       "63": [
         "last-resort",
         "zen-headbutt",
-        "heal-pulse",
-        "hyper-voice"
+        "hyper-voice",
+        "disarming-voice"
       ],
       "66": [
         "last-resort",
         "zen-headbutt",
-        "heal-pulse",
-        "hyper-voice"
+        "hyper-voice",
+        "disarming-voice"
       ],
       "70": [
         "last-resort",
         "zen-headbutt",
-        "heal-pulse",
-        "hyper-voice"
+        "hyper-voice",
+        "disarming-voice"
       ]
     },
     "sprite": {
@@ -4648,20 +4645,20 @@
       ],
       "19": [
         "water-pulse",
-        "amnesia",
+        "rest",
         "mud-slap",
         "snore"
       ],
       "23": [
         "water-pulse",
-        "amnesia",
+        "rest",
         "mud-slap",
         "snore"
       ],
       "26": [
         "aqua-tail",
         "water-pulse",
-        "amnesia",
+        "rest",
         "mud-slap"
       ]
     },
@@ -4697,55 +4694,55 @@
     "movesetsByFloorLevel": {
       "26": [
         "dive",
-        "throat-chop",
+        "bite",
         "agility",
         "peck"
       ],
       "30": [
         "dive",
-        "throat-chop",
+        "bite",
         "agility",
         "peck"
       ],
       "34": [
         "dive",
-        "throat-chop",
+        "bite",
         "agility",
         "peck"
       ],
       "37": [
         "dive",
-        "throat-chop",
+        "bite",
         "agility",
         "peck"
       ],
       "41": [
         "dive",
-        "throat-chop",
+        "crunch",
         "agility",
         "peck"
       ],
       "44": [
         "dive",
-        "throat-chop",
+        "crunch",
         "agility",
         "peck"
       ],
       "48": [
         "liquidation",
-        "throat-chop",
+        "crunch",
         "agility",
         "peck"
       ],
       "52": [
         "liquidation",
-        "throat-chop",
+        "crunch",
         "agility",
         "peck"
       ],
       "55": [
         "liquidation",
-        "throat-chop",
+        "crunch",
         "agility",
         "peck"
       ],
@@ -4753,25 +4750,25 @@
         "liquidation",
         "double-edge",
         "agility",
-        "throat-chop"
+        "crunch"
       ],
       "63": [
         "liquidation",
         "double-edge",
         "agility",
-        "throat-chop"
+        "crunch"
       ],
       "66": [
         "liquidation",
         "double-edge",
         "agility",
-        "throat-chop"
+        "crunch"
       ],
       "70": [
         "liquidation",
         "double-edge",
         "agility",
-        "throat-chop"
+        "crunch"
       ]
     },
     "sprite": {
@@ -5200,61 +5197,61 @@
         "icicle-crash",
         "thrash",
         "icy-wind",
-        "charm"
+        "rest"
       ],
       "41": [
         "blizzard",
         "thrash",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "44": [
         "blizzard",
         "thrash",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "48": [
         "blizzard",
         "thrash",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "52": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "55": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "59": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "63": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "66": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ],
       "70": [
         "blizzard",
         "superpower",
         "icicle-crash",
-        "charm"
+        "rest"
       ]
     },
     "sprite": {
@@ -5944,7 +5941,6 @@
       "12": [
         "icy-wind",
         "powder-snow",
-        "curse",
         "rapid-spin"
       ],
       "15": [
@@ -6155,67 +6151,67 @@
         "aqua-tail",
         "crunch",
         "water-pulse",
-        "swords-dance"
+        "rest"
       ],
       "37": [
         "aqua-tail",
         "crunch",
         "water-pulse",
-        "swords-dance"
+        "rest"
       ],
       "41": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "44": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "48": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "52": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "55": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "59": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "63": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "66": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ],
       "70": [
         "double-edge",
         "crunch",
         "aqua-tail",
-        "swords-dance"
+        "rest"
       ]
     },
     "sprite": {
@@ -7159,33 +7155,30 @@
       ],
       "37": [
         "horn-attack",
-        "throat-chop",
         "revenge",
         "reversal"
       ],
       "41": [
         "head-charge",
-        "throat-chop",
         "revenge",
         "reversal"
       ],
       "44": [
         "head-charge",
-        "throat-chop",
         "revenge",
         "reversal"
       ],
       "48": [
         "head-charge",
-        "throat-chop",
+        "revenge",
         "swords-dance",
-        "revenge"
+        "reversal"
       ],
       "52": [
         "head-charge",
         "megahorn",
         "swords-dance",
-        "throat-chop"
+        "revenge"
       ],
       "55": [
         "giga-impact",
@@ -7405,43 +7398,43 @@
         "phantom-force",
         "rollout",
         "giga-drain",
-        "curse"
+        "hex"
       ],
       "52": [
         "phantom-force",
         "rollout",
         "giga-drain",
-        "curse"
+        "hex"
       ],
       "55": [
         "power-whip",
         "rollout",
         "phantom-force",
-        "curse"
+        "giga-drain"
       ],
       "59": [
         "power-whip",
         "rollout",
         "phantom-force",
-        "curse"
+        "giga-drain"
       ],
       "63": [
         "power-whip",
         "rollout",
         "phantom-force",
-        "curse"
+        "giga-drain"
       ],
       "66": [
         "power-whip",
         "rollout",
         "phantom-force",
-        "curse"
+        "giga-drain"
       ],
       "70": [
         "power-whip",
         "rollout",
         "phantom-force",
-        "curse"
+        "giga-drain"
       ]
     },
     "sprite": {
@@ -9778,56 +9771,56 @@
       "41": [
         "avalanche",
         "body-slam",
-        "amnesia",
+        "rest",
         "powder-snow"
       ],
       "44": [
         "ice-spinner",
         "body-slam",
-        "amnesia",
+        "rest",
         "powder-snow"
       ],
       "48": [
         "ice-spinner",
         "body-slam",
-        "amnesia",
+        "rest",
         "powder-snow"
       ],
       "52": [
         "ice-spinner",
         "double-edge",
-        "amnesia",
+        "rest",
         "powder-snow"
       ],
       "55": [
         "blizzard",
         "double-edge",
         "ice-spinner",
-        "amnesia"
+        "rest"
       ],
       "59": [
         "blizzard",
         "double-edge",
         "ice-spinner",
-        "amnesia"
+        "rest"
       ],
       "63": [
         "blizzard",
         "double-edge",
         "ice-spinner",
-        "amnesia"
+        "rest"
       ],
       "66": [
         "blizzard",
         "double-edge",
         "ice-spinner",
-        "amnesia"
+        "rest"
       ],
       "70": [
         "blizzard",
         "double-edge",
         "ice-spinner",
-        "amnesia"
+        "rest"
       ]
     },
     "sprite": {
@@ -12930,19 +12923,19 @@
         "hex",
         "ancient-power",
         "astonish",
-        "curse"
+        "tackle"
       ],
       "34": [
         "hex",
         "ancient-power",
         "astonish",
-        "curse"
+        "tackle"
       ],
       "37": [
         "hex",
         "ancient-power",
         "astonish",
-        "curse"
+        "tackle"
       ]
     },
     "sprite": {
@@ -14454,55 +14447,55 @@
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "tackle"
       ],
       "44": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "tackle"
       ],
       "48": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "52": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "55": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "59": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "63": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "66": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ],
       "70": [
         "hex",
         "power-gem",
         "astonish",
-        "curse"
+        "night-shade"
       ]
     },
     "sprite": {
@@ -15508,61 +15501,61 @@
       "37": [
         "parabolic-charge",
         "volt-switch",
-        "charm",
+        "rest",
         "nuzzle"
       ],
       "41": [
         "discharge",
-        "charm",
+        "rest",
         "nuzzle",
         "snore"
       ],
       "44": [
         "discharge",
-        "charm",
+        "rest",
         "nuzzle",
         "snore"
       ],
       "48": [
         "discharge",
         "play-rough",
-        "charm",
+        "rest",
         "nuzzle"
       ],
       "52": [
         "discharge",
         "play-rough",
-        "charm",
+        "rest",
         "nuzzle"
       ],
       "55": [
         "discharge",
         "play-rough",
-        "charm",
+        "rest",
         "nuzzle"
       ],
       "59": [
         "discharge",
         "play-rough",
-        "charm",
+        "rest",
         "nuzzle"
       ],
       "63": [
         "thunder",
         "discharge",
-        "charm",
+        "rest",
         "play-rough"
       ],
       "66": [
         "thunder",
         "discharge",
-        "charm",
+        "rest",
         "play-rough"
       ],
       "70": [
         "thunder",
         "discharge",
-        "charm",
+        "rest",
         "play-rough"
       ]
     },
@@ -19527,19 +19520,16 @@
       ],
       "12": [
         "metal-claw",
-        "beat-up",
         "fury-cutter",
         "vice-grip"
       ],
       "15": [
         "metal-claw",
-        "beat-up",
         "fury-cutter",
         "vice-grip"
       ],
       "19": [
         "bug-bite",
-        "beat-up",
         "metal-claw",
         "vice-grip"
       ],
@@ -19547,7 +19537,7 @@
         "bug-bite",
         "bite",
         "metal-claw",
-        "beat-up"
+        "vice-grip"
       ],
       "26": [
         "bug-bite",
@@ -22143,30 +22133,30 @@
         "uproar",
         "crunch",
         "stomp",
-        "screech"
+        "rest"
       ],
       "59": [
         "uproar",
         "crunch",
         "stomp",
-        "screech"
+        "rest"
       ],
       "63": [
         "hyper-voice",
         "crunch",
-        "screech",
+        "rest",
         "stomp"
       ],
       "66": [
         "hyper-voice",
         "crunch",
-        "screech",
+        "rest",
         "stomp"
       ],
       "70": [
         "hyper-voice",
         "crunch",
-        "screech",
+        "rest",
         "stomp"
       ]
     },
@@ -25266,65 +25256,65 @@
       "34": [
         "slam",
         "quick-attack",
-        "agility"
+        "rest"
       ],
       "37": [
         "slam",
         "sucker-punch",
         "quick-attack",
-        "agility"
+        "rest"
       ],
       "41": [
         "slam",
         "sucker-punch",
         "quick-attack",
-        "agility"
+        "rest"
       ],
       "44": [
         "slam",
         "sucker-punch",
         "quick-attack",
-        "agility"
+        "rest"
       ],
       "48": [
         "slam",
         "sucker-punch",
         "quick-attack",
-        "agility"
+        "rest"
       ],
       "52": [
         "double-edge",
         "sucker-punch",
-        "agility"
+        "rest"
       ],
       "55": [
         "double-edge",
         "sucker-punch",
-        "agility"
+        "rest"
       ],
       "59": [
         "double-edge",
         "sucker-punch",
         "hyper-voice",
-        "agility"
+        "rest"
       ],
       "63": [
         "double-edge",
         "sucker-punch",
         "hyper-voice",
-        "agility"
+        "rest"
       ],
       "66": [
         "double-edge",
         "sucker-punch",
         "hyper-voice",
-        "agility"
+        "rest"
       ],
       "70": [
         "double-edge",
         "sucker-punch",
         "hyper-voice",
-        "agility"
+        "rest"
       ]
     },
     "sprite": {
@@ -25990,7 +25980,7 @@
       "23": [
         "lick",
         "payback",
-        "curse"
+        "hypnosis"
       ]
     },
     "sprite": {
@@ -26134,60 +26124,60 @@
         "hex",
         "sucker-punch",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ],
       "41": [
         "hex",
         "sucker-punch",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ],
       "44": [
         "hex",
         "dark-pulse",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ],
       "48": [
         "shadow-ball",
         "dark-pulse",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "52": [
         "shadow-ball",
         "dark-pulse",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "55": [
         "shadow-ball",
         "dark-pulse",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "59": [
         "shadow-ball",
         "dark-pulse",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "63": [
         "shadow-ball",
         "dream-eater",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "66": [
         "shadow-ball",
         "dream-eater",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ],
       "70": [
         "shadow-ball",
         "dream-eater",
-        "curse",
+        "hypnosis",
         "shadow-punch"
       ]
     },
@@ -27875,21 +27865,20 @@
       ],
       "19": [
         "shadow-punch",
-        "curse",
         "mud-slap",
         "pound"
       ],
       "23": [
         "shadow-punch",
-        "curse",
         "mud-slap",
-        "night-shade"
+        "night-shade",
+        "pound"
       ],
       "26": [
         "stomping-tantrum",
         "shadow-punch",
-        "curse",
-        "mud-slap"
+        "mud-slap",
+        "night-shade"
       ],
       "30": [
         "stomping-tantrum",
@@ -29820,26 +29809,25 @@
       "19": [
         "razor-leaf",
         "absorb",
-        "curse",
         "tackle"
       ],
       "23": [
         "razor-leaf",
         "bite",
         "absorb",
-        "curse"
+        "tackle"
       ],
       "26": [
         "razor-leaf",
         "bite",
         "absorb",
-        "curse"
+        "tackle"
       ],
       "30": [
         "razor-leaf",
         "bite",
         "mega-drain",
-        "curse"
+        "tackle"
       ]
     },
     "sprite": {
@@ -30279,37 +30267,37 @@
       "52": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ],
       "55": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ],
       "59": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ],
       "63": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ],
       "66": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ],
       "70": [
         "thrash",
         "crunch",
-        "yawn",
+        "rest",
         "super-fang"
       ]
     },
@@ -30729,13 +30717,11 @@
       ],
       "26": [
         "psybeam",
-        "disarming-voice",
-        "heal-pulse"
+        "disarming-voice"
       ],
       "30": [
         "psybeam",
-        "dazzling-gleam",
-        "heal-pulse"
+        "dazzling-gleam"
       ]
     },
     "sprite": {
@@ -30852,7 +30838,6 @@
       "34": [
         "psybeam",
         "dazzling-gleam",
-        "heal-pulse",
         "brutal-swing"
       ],
       "37": [
@@ -30904,19 +30889,19 @@
         "hex",
         "payback",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ],
       "30": [
         "hex",
         "payback",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ],
       "34": [
         "hex",
         "payback",
         "shadow-punch",
-        "curse"
+        "hypnosis"
       ]
     },
     "sprite": {
@@ -31516,13 +31501,13 @@
       ],
       "41": [
         "brick-break",
-        "throat-chop",
+        "aerial-ace",
         "pin-missile",
         "counter"
       ],
       "44": [
         "brick-break",
-        "throat-chop",
+        "aerial-ace",
         "pin-missile",
         "counter"
       ],
@@ -31739,55 +31724,55 @@
       "41": [
         "dig",
         "crunch",
-        "yawn",
+        "rest",
         "take-down"
       ],
       "44": [
         "earthquake",
         "crunch",
-        "yawn",
+        "rest",
         "take-down"
       ],
       "48": [
         "earthquake",
         "crunch",
-        "yawn",
+        "rest",
         "take-down"
       ],
       "52": [
         "earthquake",
         "double-edge",
-        "yawn",
+        "rest",
         "crunch"
       ],
       "55": [
         "earthquake",
         "double-edge",
-        "yawn",
+        "rest",
         "crunch"
       ],
       "59": [
         "earthquake",
         "double-edge",
-        "yawn",
+        "rest",
         "fissure"
       ],
       "63": [
         "earthquake",
         "double-edge",
-        "slack-off",
+        "rest",
         "fissure"
       ],
       "66": [
         "earthquake",
         "double-edge",
-        "slack-off",
+        "rest",
         "fissure"
       ],
       "70": [
         "earthquake",
         "double-edge",
-        "slack-off",
+        "rest",
         "fissure"
       ]
     },
@@ -32734,37 +32719,37 @@
       "52": [
         "phantom-force",
         "play-rough",
-        "charm",
+        "rest",
         "crunch"
       ],
       "55": [
         "phantom-force",
         "play-rough",
-        "charm",
+        "rest",
         "crunch"
       ],
       "59": [
         "phantom-force",
         "double-edge",
-        "charm",
+        "rest",
         "play-rough"
       ],
       "63": [
         "phantom-force",
         "double-edge",
-        "charm",
+        "rest",
         "play-rough"
       ],
       "66": [
         "phantom-force",
         "double-edge",
-        "charm",
+        "rest",
         "play-rough"
       ],
       "70": [
         "phantom-force",
         "double-edge",
-        "charm",
+        "rest",
         "play-rough"
       ]
     },
@@ -34099,25 +34084,25 @@
       "23": [
         "covet",
         "round",
-        "charm",
+        "rest",
         "disarming-voice"
       ],
       "26": [
         "body-slam",
-        "charm",
+        "rest",
         "round",
         "disarming-voice"
       ],
       "30": [
         "body-slam",
-        "charm",
+        "rest",
         "round",
         "disarming-voice"
       ],
       "34": [
         "body-slam",
         "gyro-ball",
-        "charm",
+        "rest",
         "round"
       ]
     },
@@ -38365,24 +38350,24 @@
       "23": [
         "headbutt",
         "pin-missile",
-        "hone-claws"
+        "rest"
       ],
       "26": [
         "headbutt",
         "pin-missile",
-        "hone-claws"
+        "rest"
       ],
       "30": [
         "take-down",
         "pin-missile",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "34": [
         "take-down",
         "pin-missile",
         "headbutt",
-        "hone-claws"
+        "rest"
       ]
     },
     "sprite": {
@@ -38421,25 +38406,25 @@
         "headbutt",
         "lick",
         "night-slash",
-        "hone-claws"
+        "rest"
       ],
       "26": [
         "headbutt",
         "lick",
         "night-slash",
-        "hone-claws"
+        "rest"
       ],
       "30": [
         "take-down",
         "lick",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "34": [
         "take-down",
         "lick",
         "headbutt",
-        "hone-claws"
+        "rest"
       ]
     },
     "sprite": {
@@ -38701,15 +38686,15 @@
         "agility"
       ],
       "37": [
-        "throat-chop",
-        "feint",
         "lunge",
+        "feint",
+        "assurance",
         "agility"
       ],
       "41": [
         "sucker-punch",
         "feint",
-        "throat-chop",
+        "lunge",
         "agility"
       ],
       "44": [
@@ -45941,20 +45926,17 @@
     ],
     "movesetsByFloorLevel": {
       "8": [
-        "beat-up",
         "quick-attack",
         "hone-claws"
       ],
       "12": [
         "snarl",
         "quick-attack",
-        "beat-up",
         "hone-claws"
       ],
       "15": [
         "snarl",
         "quick-attack",
-        "beat-up",
         "hone-claws"
       ]
     },
@@ -47267,60 +47249,60 @@
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "41": [
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "44": [
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "48": [
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "52": [
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "55": [
         "take-down",
         "cross-chop",
         "headbutt",
-        "hone-claws"
+        "rest"
       ],
       "59": [
         "double-edge",
         "cross-chop",
-        "hone-claws",
+        "rest",
         "night-slash"
       ],
       "63": [
         "double-edge",
         "cross-chop",
-        "hone-claws",
+        "rest",
         "night-slash"
       ],
       "66": [
         "double-edge",
         "cross-chop",
-        "hone-claws",
+        "rest",
         "night-slash"
       ],
       "70": [
         "double-edge",
         "cross-chop",
-        "hone-claws",
+        "rest",
         "night-slash"
       ]
     },
@@ -49334,66 +49316,62 @@
       ],
       "15": [
         "rock-smash",
-        "beat-up",
         "tackle"
       ],
       "19": [
         "rock-smash",
-        "beat-up",
         "tackle"
       ],
       "23": [
         "rock-smash",
-        "beat-up",
         "tackle"
       ],
       "26": [
         "rock-smash",
         "take-down",
-        "beat-up",
         "tackle"
       ],
       "30": [
         "rock-smash",
         "take-down",
-        "beat-up",
-        "fling"
+        "fling",
+        "tackle"
       ],
       "34": [
         "rock-smash",
         "take-down",
-        "beat-up",
-        "fling"
+        "fling",
+        "tackle"
       ],
       "37": [
         "rock-smash",
         "take-down",
         "bulk-up",
-        "beat-up"
+        "fling"
       ],
       "41": [
         "rock-smash",
         "thrash",
         "bulk-up",
-        "beat-up"
+        "fling"
       ],
       "44": [
         "rock-smash",
         "thrash",
         "bulk-up",
-        "beat-up"
+        "fling"
       ],
       "48": [
         "rock-smash",
         "thrash",
         "bulk-up",
-        "beat-up"
+        "fling"
       ],
       "52": [
         "close-combat",
         "thrash",
         "bulk-up",
-        "beat-up"
+        "fling"
       ],
       "55": [
         "close-combat",
@@ -52483,93 +52461,93 @@
     "movesetsByFloorLevel": {
       "19": [
         "tri-attack",
-        "iron-defense",
+        "rest",
         "spark",
         "tackle"
       ],
       "23": [
         "rock-slide",
         "tri-attack",
-        "iron-defense",
+        "rest",
         "spark"
       ],
       "26": [
         "power-gem",
         "tri-attack",
         "rock-slide",
-        "iron-defense"
+        "rest"
       ],
       "30": [
         "power-gem",
         "tri-attack",
         "rock-slide",
-        "iron-defense"
+        "rest"
       ],
       "34": [
         "power-gem",
         "discharge",
         "rock-slide",
-        "iron-defense"
+        "rest"
       ],
       "37": [
         "power-gem",
         "earth-power",
         "rock-slide",
-        "iron-defense"
+        "rest"
       ],
       "41": [
         "power-gem",
         "earth-power",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "44": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "48": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "52": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "55": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "59": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "63": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "66": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ],
       "70": [
         "power-gem",
         "zap-cannon",
         "stone-edge",
-        "iron-defense"
+        "rest"
       ]
     },
     "sprite": {
@@ -53028,28 +53006,22 @@
         "counter"
       ],
       "26": [
-        "counter",
-        "purify"
+        "counter"
       ],
       "30": [
-        "counter",
-        "curse"
+        "counter"
       ],
       "34": [
-        "counter",
-        "curse"
+        "counter"
       ],
       "37": [
-        "counter",
-        "curse"
+        "counter"
       ],
       "41": [
-        "counter",
-        "curse"
+        "counter"
       ],
       "44": [
-        "counter",
-        "curse"
+        "counter"
       ],
       "48": [
         "counter",
@@ -54722,61 +54694,61 @@
         "aqua-tail",
         "take-down",
         "dive",
-        "yawn"
+        "rest"
       ],
       "41": [
         "aqua-tail",
         "take-down",
         "dive",
-        "yawn"
+        "rest"
       ],
       "44": [
         "aqua-tail",
         "take-down",
         "dive",
-        "yawn"
+        "rest"
       ],
       "48": [
         "hydro-pump",
         "take-down",
         "aqua-tail",
-        "yawn"
+        "rest"
       ],
       "52": [
         "hydro-pump",
         "double-edge",
         "aqua-tail",
-        "yawn"
+        "rest"
       ],
       "55": [
         "head-smash",
         "double-edge",
         "hydro-pump",
-        "yawn"
+        "rest"
       ],
       "59": [
         "head-smash",
         "double-edge",
         "hydro-pump",
-        "yawn"
+        "rest"
       ],
       "63": [
         "head-smash",
         "double-edge",
         "hydro-pump",
-        "yawn"
+        "rest"
       ],
       "66": [
         "head-smash",
         "double-edge",
         "hydro-pump",
-        "yawn"
+        "rest"
       ],
       "70": [
         "head-smash",
         "double-edge",
         "hydro-pump",
-        "yawn"
+        "rest"
       ]
     },
     "sprite": {
@@ -58128,13 +58100,13 @@
         "brick-break",
         "facade",
         "payback",
-        "beat-up"
+        "low-kick"
       ],
       "44": [
         "crunch",
         "facade",
         "brick-break",
-        "beat-up"
+        "low-kick"
       ],
       "48": [
         "high-jump-kick",
@@ -58152,31 +58124,31 @@
         "focus-punch",
         "facade",
         "crunch",
-        "beat-up"
+        "low-kick"
       ],
       "59": [
         "focus-punch",
         "facade",
         "crunch",
-        "beat-up"
+        "low-kick"
       ],
       "63": [
         "focus-punch",
         "head-smash",
         "crunch",
-        "beat-up"
+        "low-kick"
       ],
       "66": [
         "focus-punch",
         "head-smash",
         "crunch",
-        "beat-up"
+        "low-kick"
       ],
       "70": [
         "focus-punch",
         "head-smash",
         "crunch",
-        "beat-up"
+        "low-kick"
       ]
     },
     "sprite": {
@@ -58239,26 +58211,24 @@
       "26": [
         "payback",
         "facade",
-        "beat-up",
         "low-kick"
       ],
       "30": [
         "payback",
         "facade",
-        "beat-up",
         "low-kick"
       ],
       "34": [
         "brick-break",
         "facade",
         "payback",
-        "beat-up"
+        "low-kick"
       ],
       "37": [
         "brick-break",
         "facade",
         "payback",
-        "beat-up"
+        "low-kick"
       ]
     },
     "sprite": {
@@ -58586,19 +58556,19 @@
       ],
       "23": [
         "headbutt",
-        "charm",
+        "rest",
         "ice-shard",
         "icy-wind"
       ],
       "26": [
         "headbutt",
-        "charm",
+        "rest",
         "ice-shard",
         "icy-wind"
       ],
       "30": [
         "headbutt",
-        "charm",
+        "rest",
         "aurora-beam",
         "ice-shard"
       ]
@@ -60065,13 +60035,13 @@
       "66": [
         "stone-edge",
         "rock-slide",
-        "shell-smash",
+        "rest",
         "bug-bite"
       ],
       "70": [
         "stone-edge",
         "rock-slide",
-        "shell-smash",
+        "rest",
         "bug-bite"
       ]
     },
@@ -61822,7 +61792,7 @@
         "covet",
         "sucker-punch",
         "slack-off",
-        "throat-chop"
+        "counter"
       ],
       "41": [
         "covet",
@@ -62488,7 +62458,6 @@
     "movesetsByFloorLevel": {
       "8": [
         "water-gun",
-        "curse",
         "tackle"
       ],
       "12": [
@@ -62536,7 +62505,6 @@
     "movesetsByFloorLevel": {
       "8": [
         "acid",
-        "curse",
         "tackle"
       ],
       "12": [
@@ -63306,86 +63274,86 @@
       "23": [
         "last-resort",
         "bite",
-        "yawn",
+        "rest",
         "snore"
       ],
       "26": [
         "last-resort",
         "crunch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "30": [
         "last-resort",
         "crunch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "34": [
         "last-resort",
         "crunch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "37": [
         "last-resort",
         "crunch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "41": [
         "last-resort",
         "high-horsepower",
-        "yawn",
+        "rest",
         "snore"
       ],
       "44": [
         "last-resort",
         "hammer-arm",
-        "yawn",
+        "rest",
         "snore"
       ],
       "48": [
         "last-resort",
         "hammer-arm",
-        "yawn",
+        "rest",
         "snore"
       ],
       "52": [
         "last-resort",
         "belch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "55": [
         "last-resort",
         "belch",
-        "yawn",
+        "rest",
         "snore"
       ],
       "59": [
         "giga-impact",
         "belch",
         "last-resort",
-        "yawn"
+        "rest"
       ],
       "63": [
         "giga-impact",
         "belch",
         "last-resort",
-        "yawn"
+        "rest"
       ],
       "66": [
         "giga-impact",
         "belch",
         "last-resort",
-        "yawn"
+        "rest"
       ],
       "70": [
         "giga-impact",
         "belch",
         "last-resort",
-        "yawn"
+        "rest"
       ]
     },
     "sprite": {
@@ -64024,43 +63992,43 @@
       ],
       "48": [
         "bug-bite",
-        "throat-chop",
+        "headbutt",
         "struggle-bug",
-        "headbutt"
+        "assurance"
       ],
       "52": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ],
       "55": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ],
       "59": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ],
       "63": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ],
       "66": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ],
       "70": [
         "skitter-smack",
-        "throat-chop",
+        "headbutt",
         "bug-bite",
         "struggle-bug"
       ]
@@ -67790,56 +67758,56 @@
       "41": [
         "raging-bull",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "44": [
         "raging-bull",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "48": [
         "raging-bull",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "52": [
         "thrash",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "55": [
         "thrash",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "59": [
         "thrash",
         "zen-headbutt",
-        "work-up",
+        "rest",
         "assurance"
       ],
       "63": [
         "giga-impact",
         "zen-headbutt",
         "thrash",
-        "work-up"
+        "rest"
       ],
       "66": [
         "giga-impact",
         "zen-headbutt",
         "thrash",
-        "work-up"
+        "rest"
       ],
       "70": [
         "giga-impact",
         "zen-headbutt",
         "thrash",
-        "work-up"
+        "rest"
       ]
     },
     "sprite": {
@@ -67929,55 +67897,55 @@
         "aqua-jet",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "44": [
         "aqua-jet",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "48": [
         "aqua-jet",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "52": [
         "aqua-jet",
         "thrash",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "55": [
         "wave-crash",
         "thrash",
-        "work-up",
+        "rest",
         "double-kick"
       ],
       "59": [
         "wave-crash",
         "thrash",
-        "work-up",
+        "rest",
         "double-kick"
       ],
       "63": [
         "close-combat",
         "thrash",
         "wave-crash",
-        "work-up"
+        "rest"
       ],
       "66": [
         "close-combat",
         "thrash",
         "wave-crash",
-        "work-up"
+        "rest"
       ],
       "70": [
         "close-combat",
         "thrash",
         "wave-crash",
-        "work-up"
+        "rest"
       ]
     },
     "sprite": {
@@ -68066,55 +68034,55 @@
         "flame-charge",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "44": [
         "flame-charge",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "48": [
         "flame-charge",
         "raging-bull",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "52": [
         "flame-charge",
         "thrash",
         "double-kick",
-        "work-up"
+        "rest"
       ],
       "55": [
         "flare-blitz",
         "thrash",
-        "work-up",
+        "rest",
         "double-kick"
       ],
       "59": [
         "flare-blitz",
         "thrash",
-        "work-up",
+        "rest",
         "double-kick"
       ],
       "63": [
         "close-combat",
         "thrash",
         "flare-blitz",
-        "work-up"
+        "rest"
       ],
       "66": [
         "close-combat",
         "thrash",
         "flare-blitz",
-        "work-up"
+        "rest"
       ],
       "70": [
         "close-combat",
         "thrash",
         "flare-blitz",
-        "work-up"
+        "rest"
       ]
     },
     "sprite": {
@@ -68200,55 +68168,55 @@
       "41": [
         "double-kick",
         "raging-bull",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "44": [
         "double-kick",
         "raging-bull",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "48": [
         "double-kick",
         "raging-bull",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "52": [
         "double-kick",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "55": [
         "double-kick",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "59": [
         "double-kick",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "63": [
         "close-combat",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "66": [
         "close-combat",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ],
       "70": [
         "close-combat",
         "thrash",
-        "work-up",
+        "rest",
         "zen-headbutt"
       ]
     },
@@ -72309,55 +72277,55 @@
         "headlong-rush",
         "play-rough",
         "slash",
-        "fake-tears"
+        "rest"
       ],
       "44": [
         "headlong-rush",
         "play-rough",
         "slash",
-        "fake-tears"
+        "rest"
       ],
       "48": [
         "headlong-rush",
         "play-rough",
-        "fake-tears",
+        "rest",
         "slash"
       ],
       "52": [
         "headlong-rush",
         "play-rough",
-        "fake-tears",
+        "rest",
         "slash"
       ],
       "55": [
         "headlong-rush",
         "play-rough",
-        "fake-tears",
+        "rest",
         "slash"
       ],
       "59": [
         "headlong-rush",
         "play-rough",
         "thrash",
-        "fake-tears"
+        "rest"
       ],
       "63": [
         "headlong-rush",
         "play-rough",
         "thrash",
-        "fake-tears"
+        "rest"
       ],
       "66": [
         "headlong-rush",
         "hammer-arm",
         "thrash",
-        "fake-tears"
+        "rest"
       ],
       "70": [
         "headlong-rush",
         "hammer-arm",
         "thrash",
-        "fake-tears"
+        "rest"
       ]
     },
     "sprite": {
@@ -73551,14 +73519,12 @@
       ],
       "30": [
         "uproar",
-        "throat-chop",
         "slash"
       ],
       "34": [
         "uproar",
-        "throat-chop",
-        "slash",
-        "counter"
+        "counter",
+        "slash"
       ]
     },
     "sprite": {
@@ -74497,48 +74463,48 @@
         "dive",
         "body-slam",
         "brine",
-        "amnesia"
+        "rest"
       ],
       "48": [
         "dive",
         "body-slam",
         "brine",
-        "amnesia"
+        "rest"
       ],
       "52": [
         "hydro-pump",
         "body-slam",
         "dive",
-        "amnesia"
+        "rest"
       ],
       "55": [
         "water-spout",
         "body-slam",
-        "amnesia",
+        "rest",
         "dive"
       ],
       "59": [
         "water-spout",
         "body-slam",
-        "amnesia",
+        "rest",
         "dive"
       ],
       "63": [
         "water-spout",
         "body-slam",
-        "amnesia",
+        "rest",
         "dive"
       ],
       "66": [
         "water-spout",
         "body-slam",
-        "amnesia",
+        "rest",
         "dive"
       ],
       "70": [
         "water-spout",
         "body-slam",
-        "amnesia",
+        "rest",
         "dive"
       ]
     },
@@ -75425,73 +75391,73 @@
         "aqua-tail",
         "thrash",
         "water-pulse",
-        "amnesia"
+        "rest"
       ],
       "34": [
         "muddy-water",
         "thrash",
         "aqua-tail",
-        "amnesia"
+        "rest"
       ],
       "37": [
         "muddy-water",
         "thrash",
         "aqua-tail",
-        "amnesia"
+        "rest"
       ],
       "41": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "44": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "48": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "52": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "55": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "59": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "63": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "66": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ],
       "70": [
         "earthquake",
         "thrash",
         "muddy-water",
-        "amnesia"
+        "rest"
       ]
     },
     "sprite": {
@@ -75583,61 +75549,61 @@
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "41": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "44": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "48": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "52": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "55": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "59": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "63": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "66": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ],
       "70": [
         "double-edge",
         "gyro-ball",
         "hyper-voice",
-        "charm"
+        "rest"
       ]
     },
     "sprite": {
@@ -75837,36 +75803,29 @@
     ],
     "movesetsByFloorLevel": {
       "8": [
-        "water-gun",
-        "beat-up"
+        "water-gun"
       ],
       "12": [
-        "brine",
-        "beat-up"
+        "brine"
       ],
       "15": [
-        "brine",
-        "beat-up"
+        "brine"
       ],
       "19": [
-        "brine",
-        "beat-up"
+        "brine"
       ],
       "23": [
         "dive",
-        "beat-up",
         "brine"
       ],
       "26": [
         "dive",
-        "beat-up",
         "brine"
       ],
       "30": [
         "dive",
         "uproar",
-        "brine",
-        "beat-up"
+        "brine"
       ],
       "34": [
         "aqua-tail",
@@ -76431,43 +76390,43 @@
         "aqua-jet",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "52": [
         "aqua-jet",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "55": [
         "liquidation",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "59": [
         "liquidation",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "63": [
         "liquidation",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "66": [
         "liquidation",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ],
       "70": [
         "liquidation",
         "sucker-punch",
         "water-pulse",
-        "throat-chop"
+        "dig"
       ]
     },
     "sprite": {

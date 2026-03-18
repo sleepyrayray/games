@@ -18,6 +18,7 @@ import {
 } from "../../src/types/pokechamp-data.ts";
 import {
   BLOCKED_RECOMMENDED_MOVE_IDS,
+  BLOCKED_RUNTIME_MOVE_IDS,
   CURATED_STATUS_MOVE_IDS,
   FLOOR_LEVEL_DATASET,
   NORMALIZED_DATA_DIR,
@@ -834,6 +835,10 @@ function buildLearnsetEntries(
 function normalizeMoveRecord(move: PokeApiMove): MoveRecord {
   const effectData: Record<string, string | number | boolean> = {};
 
+  if (move.name === "rest") {
+    effectData.healing = 100;
+  }
+
   if (move.meta?.ailment_chance) {
     effectData.ailmentChance = move.meta.ailment_chance;
   }
@@ -895,6 +900,10 @@ function normalizeMoveTarget(targetName: string): string {
 }
 
 function deriveEffectTag(move: PokeApiMove): MoveEffectTag {
+  if (move.name === "rest") {
+    return "heal";
+  }
+
   if (move.name === "protect") {
     return "protect";
   }
@@ -952,6 +961,7 @@ function isAllowedMove(move: PokeApiMove): boolean {
   const blockedMetaCategories = new Set(["whole-field-effect"]);
 
   return (
+    !BLOCKED_RUNTIME_MOVE_IDS.has(move.name) &&
     !blockedTargets.has(move.target.name) &&
     !blockedMetaCategories.has(move.meta?.category.name ?? "")
   );

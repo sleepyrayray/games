@@ -16,11 +16,33 @@ import {
 } from "./rulesSandbox.ts";
 
 type BattleSide = "enemy" | "player";
-type BattlePersistentStatus = "burn" | "paralysis" | "poison" | "sleep";
+type BattlePersistentStatus =
+  | "burn"
+  | "freeze"
+  | "paralysis"
+  | "poison"
+  | "sleep";
 type BattleStatId = Exclude<keyof BattleDerivedStats, "hp">;
 
 const FALLBACK_MOVE_ID: MoveId = "__fallback-strike__";
 const BURN_MOVE_IDS = new Set<MoveId>(["will-o-wisp"]);
+const CONFUSION_MOVE_IDS = new Set<MoveId>([
+  "confusion",
+  "dizzy-punch",
+  "dynamic-punch",
+  "hurricane",
+  "psybeam",
+  "strange-steam",
+  "water-pulse",
+]);
+const FREEZE_MOVE_IDS = new Set<MoveId>([
+  "blizzard",
+  "freeze-dry",
+  "ice-beam",
+  "ice-fang",
+  "ice-punch",
+  "powder-snow",
+]);
 const PARALYSIS_MOVE_IDS = new Set<MoveId>([
   "glare",
   "stun-spore",
@@ -70,8 +92,11 @@ const SELF_TARGETING_MOVE_IDS = new Set<MoveId>([
   "synthesis",
   "work-up",
 ]);
+const DREAM_EATER_MOVE_IDS = new Set<MoveId>(["dream-eater"]);
 const DEFAULT_STATUS_DAMAGE_FRACTION = 0.125;
 const DEFAULT_SEED_DAMAGE_FRACTION = 0.1;
+const DEFAULT_CONFUSION_TURNS = 2;
+const DEFAULT_FREEZE_TURNS = 1;
 const DEFAULT_SLEEP_TURNS = 2;
 
 interface BattleStatChangeRule {
@@ -253,6 +278,8 @@ export interface BattleStatStages {
 }
 
 export interface BattlePersistentEffects {
+  confusedTurnsRemaining: number;
+  frozenTurnsRemaining: number;
   majorStatus: BattlePersistentStatus | null;
   seeded: boolean;
   sleepTurnsRemaining: number;
@@ -359,6 +386,8 @@ export function deriveBattleStats(
 
 export function createEmptyBattleEffects(): BattlePersistentEffects {
   return {
+    confusedTurnsRemaining: 0,
+    frozenTurnsRemaining: 0,
     majorStatus: null,
     seeded: false,
     sleepTurnsRemaining: 0,
@@ -380,6 +409,12 @@ function normalizeBattleEffects(
   effects: BattlePersistentEffects | null | undefined,
 ): BattlePersistentEffects {
   return {
+    confusedTurnsRemaining: normalizePositiveInteger(
+      effects?.confusedTurnsRemaining,
+    ),
+    frozenTurnsRemaining: normalizePositiveInteger(
+      effects?.frozenTurnsRemaining,
+    ),
     majorStatus: isBattlePersistentStatus(effects?.majorStatus)
       ? effects.majorStatus
       : null,
@@ -943,19 +978,30 @@ function resolveMoveExecution(options: {
   const actorName = options.attacker.generated.name;
   const defenderName = options.defender.generated.name;
   const isDamagingMove = !options.movePlan.targetsSelf && options.movePlan.power > 0;
-  const skipNote = resolveStartOfTurnSkip({
+  const startOfTurnResult = resolveStartOfTurnSkip({
     actionRandom,
     actorName,
     effects: attackerEffects,
+    maxHp: options.attackerStats.hp,
   });
 
-  if (skipNote) {
-    notes.push(skipNote);
+  if (startOfTurnResult.selfDamage > 0) {
+    const selfDamage = Math.min(
+      options.simulationState.hpBySide[options.attackerSide],
+      startOfTurnResult.selfDamage,
+    );
+
+    options.simulationState.hpBySide[options.attackerSide] -= selfDamage;
+    notes.push(`${actorName} took ${selfDamage} self-hit damage.`);
+  }
+
+  if (startOfTurnResult.skipReason) {
+    notes.push(startOfTurnResult.skipReason);
 
     return {
       actorSide: options.attackerSide,
       damage: 0,
-      hit: false,
+      hit: startOfTurnResult.selfDamage > 0,
       moveId: options.movePlan.moveId,
       moveName: options.movePlan.moveName,
       notes,
@@ -982,10 +1028,31 @@ function resolveMoveExecution(options: {
     notes.push(`${actorName} braced behind Protect.`);
   } else if (
     !options.movePlan.targetsSelf &&
-    options.simulationState.protectedBySide[options.defenderSide]
+      options.simulationState.protectedBySide[options.defenderSide]
   ) {
     notes.push(`${defenderName} blocked the move with Protect.`);
   } else {
+    const requiresSleepingTarget = DREAM_EATER_MOVE_IDS.has(actualMoveRecord.moveId);
+
+    if (requiresSleepingTarget && defenderEffects.majorStatus !== "sleep") {
+      notes.push(`${actualMoveRecord.name} only works on a sleeping target.`);
+
+      return {
+        actorSide: options.attackerSide,
+        damage: 0,
+        hit: true,
+        moveId: options.movePlan.moveId,
+        moveName: options.movePlan.moveName,
+        notes,
+        remainingHp: options.simulationState.hpBySide[options.defenderSide],
+        selfRemainingHp: options.simulationState.hpBySide[options.attackerSide],
+        skipped: false,
+        targetsSelf: options.movePlan.targetsSelf,
+        typeEffectiveness: options.movePlan.typeEffectiveness,
+        usedFallback: options.movePlan.isFallback,
+      };
+    }
+
     const attackerModifiedStats = getModifiedBattleStats(
       options.attackerStats,
       attackerEffects,
@@ -1059,12 +1126,16 @@ function resolveMoveExecution(options: {
     }
 
     if (actualMoveRecord.effectTag === "heal") {
+      const healingRatio =
+        actualMoveRecord.moveId === "rest"
+          ? 1
+          : getMoveHealingRatio(actualMoveRecord);
       const healed = healBattleSide(
         options.simulationState,
         options.attackerSide,
         calculateScaledAmount(
           options.attackerStats.hp,
-          getMoveHealingRatio(actualMoveRecord),
+          healingRatio,
         ),
       );
 
@@ -1073,6 +1144,13 @@ function resolveMoveExecution(options: {
           ? `${actorName} restored ${healed} HP.`
           : `${actorName} was already at full HP.`,
       );
+
+      if (actualMoveRecord.moveId === "rest") {
+        attackerEffects.majorStatus = "sleep";
+        attackerEffects.sleepTurnsRemaining = DEFAULT_SLEEP_TURNS;
+        attackerEffects.frozenTurnsRemaining = 0;
+        notes.push(`${actorName} fell asleep after resting.`);
+      }
     }
 
     const canApplyFollowUpEffects =
@@ -1391,20 +1469,23 @@ function buildMoveScore(options: {
 
   if (options.move.effectTag === "heal") {
     const missingHp = Math.max(0, options.attackerStats.hp - options.attackerCurrentHp);
+    const healingRatio =
+      options.move.moveId === "rest" ? 1 : getMoveHealingRatio(options.move);
+    const sleepPenalty = options.move.moveId === "rest" ? 18 : 0;
 
     score +=
       missingHp === 0
-        ? -10
+        ? -10 - sleepPenalty
         : Math.floor(
             Math.min(
               missingHp,
               calculateScaledAmount(
                 options.attackerStats.hp,
-                getMoveHealingRatio(options.move),
+                healingRatio,
               ),
             ) *
               (options.attackerCurrentHp / options.attackerStats.hp < 0.4 ? 0.9 : 0.55),
-          );
+          ) - sleepPenalty;
   }
 
   if (options.move.effectTag === "protect") {
@@ -1417,6 +1498,13 @@ function buildMoveScore(options: {
     score += Math.floor(
       options.expectedDamage * Math.max(0, getMoveDrainRatio(options.move)) * 0.5,
     );
+
+    if (
+      DREAM_EATER_MOVE_IDS.has(options.move.moveId) &&
+      options.defenderEffects.majorStatus !== "sleep"
+    ) {
+      score -= 80;
+    }
   }
 
   if (options.move.effectTag === "recoil") {
@@ -1516,13 +1604,25 @@ function getStatusApplicationScore(options: {
 
   const supportedStatus = inferSupportedStatusFromMove(options.move);
 
-  if (!supportedStatus || options.defenderEffects.majorStatus) {
+  if (!supportedStatus) {
+    return 0;
+  }
+
+  if (supportedStatus === "confusion") {
+    return options.defenderEffects.confusedTurnsRemaining === 0
+      ? Math.round(9 * chanceFactor)
+      : 0;
+  }
+
+  if (options.defenderEffects.majorStatus) {
     return 0;
   }
 
   const baseScore =
     supportedStatus === "sleep"
       ? 14
+      : supportedStatus === "freeze"
+        ? 12
       : supportedStatus === "burn"
         ? 10
         : supportedStatus === "poison"
@@ -1540,11 +1640,15 @@ function buildMoveEffectSummary(
 ): string | null {
   switch (move.effectTag) {
     case "heal":
-      return `Heals ${Math.round(getMoveHealingRatio(move) * 100)}% HP`;
+      return move.moveId === "rest"
+        ? "Fully heals, then puts the user to sleep"
+        : `Heals ${Math.round(getMoveHealingRatio(move) * 100)}% HP`;
     case "protect":
       return "Blocks direct damage for one turn";
     case "drain":
-      return `Recovers ${Math.round(getMoveDrainRatio(move) * 100)}% of dealt damage`;
+      return DREAM_EATER_MOVE_IDS.has(move.moveId)
+        ? `Only works on sleeping targets • Recovers ${Math.round(getMoveDrainRatio(move) * 100)}% of dealt damage`
+        : `Recovers ${Math.round(getMoveDrainRatio(move) * 100)}% of dealt damage`;
     case "recoil":
       return `Takes ${Math.round(Math.abs(getMoveDrainRatio(move)) * 100)}% recoil`;
     case "multi-hit":
@@ -1569,10 +1673,13 @@ function buildMoveEffectSummary(
       if (YAWN_MOVE_IDS.has(move.moveId)) {
         return "Makes the foe drowsy for next turn";
       }
+      {
+        const supportedStatus = inferSupportedStatusFromMove(move);
 
-      return inferSupportedStatusFromMove(move)
-        ? `${toDisplayBattleStatus(inferSupportedStatusFromMove(move) as BattlePersistentStatus)} chance ${getMoveAilmentChance(move)}%`
-        : "Triggers a simplified secondary status when supported";
+        return supportedStatus
+          ? `${toDisplayExtendedStatusLabel(supportedStatus)} chance ${getMoveAilmentChance(move)}%`
+          : "Triggers a simplified secondary status when supported";
+      }
     default:
       return null;
   }
@@ -1603,6 +1710,7 @@ function resolveEndOfTurnEffects(
       if (!effects.majorStatus) {
         effects.majorStatus = "sleep";
         effects.sleepTurnsRemaining = DEFAULT_SLEEP_TURNS;
+        effects.frozenTurnsRemaining = 0;
         simulationState.turnEvents.push(
           `${combatant.generated.name} grew drowsy and fell asleep.`,
         );
@@ -1672,6 +1780,7 @@ function applyBattleMoveStatusEffects(options: {
   }
 
   const defenderEffects = options.simulationState.effectsBySide[options.defenderSide];
+  const supportedStatus = inferSupportedStatusFromMove(options.move);
 
   if (SEED_MOVE_IDS.has(options.move.moveId) || TRAP_MOVE_IDS.has(options.move.moveId)) {
     if (!defenderEffects.seeded) {
@@ -1691,7 +1800,17 @@ function applyBattleMoveStatusEffects(options: {
     return;
   }
 
-  const supportedStatus = inferSupportedStatusFromMove(options.move);
+  if (supportedStatus === "confusion") {
+    if (defenderEffects.confusedTurnsRemaining > 0) {
+      options.notes.push(`${options.defenderName} is already confused.`);
+      return;
+    }
+
+    defenderEffects.confusedTurnsRemaining = DEFAULT_CONFUSION_TURNS;
+    options.notes.push(`${options.defenderName} became confused.`);
+
+    return;
+  }
 
   if (!supportedStatus) {
     options.notes.push("Its extra ailment is outside the simplified ruleset.");
@@ -1704,9 +1823,16 @@ function applyBattleMoveStatusEffects(options: {
   }
 
   defenderEffects.majorStatus = supportedStatus;
+  defenderEffects.sleepTurnsRemaining = 0;
+  defenderEffects.frozenTurnsRemaining = 0;
 
   if (supportedStatus === "sleep") {
     defenderEffects.sleepTurnsRemaining = DEFAULT_SLEEP_TURNS;
+  }
+
+  if (supportedStatus === "freeze") {
+    defenderEffects.frozenTurnsRemaining = DEFAULT_FREEZE_TURNS;
+    defenderEffects.sleepTurnsRemaining = 0;
   }
 
   options.notes.push(
@@ -1756,7 +1882,29 @@ function resolveStartOfTurnSkip(options: {
   actionRandom: ReturnType<typeof createSeededRandom>;
   actorName: string;
   effects: BattlePersistentEffects;
-}): string | null {
+  maxHp: number;
+  notes?: string[];
+}): { selfDamage: number; skipReason: string | null } {
+  if (options.effects.majorStatus === "freeze" && options.effects.frozenTurnsRemaining > 0) {
+    options.effects.frozenTurnsRemaining = Math.max(
+      0,
+      options.effects.frozenTurnsRemaining - 1,
+    );
+
+    if (options.effects.frozenTurnsRemaining === 0) {
+      options.effects.majorStatus = null;
+      return {
+        selfDamage: 0,
+        skipReason: `${options.actorName} thawed out after losing the turn.`,
+      };
+    }
+
+    return {
+      selfDamage: 0,
+      skipReason: `${options.actorName} is frozen solid and cannot move.`,
+    };
+  }
+
   if (options.effects.majorStatus === "sleep" && options.effects.sleepTurnsRemaining > 0) {
     options.effects.sleepTurnsRemaining = Math.max(
       0,
@@ -1765,20 +1913,46 @@ function resolveStartOfTurnSkip(options: {
 
     if (options.effects.sleepTurnsRemaining === 0) {
       options.effects.majorStatus = null;
-      return `${options.actorName} slept through the turn, but will wake up next round.`;
+      return {
+        selfDamage: 0,
+        skipReason: `${options.actorName} slept through the turn, but will wake up next round.`,
+      };
     }
 
-    return `${options.actorName} is asleep and cannot move.`;
+    return {
+      selfDamage: 0,
+      skipReason: `${options.actorName} is asleep and cannot move.`,
+    };
   }
 
   if (
     options.effects.majorStatus === "paralysis" &&
     options.actionRandom.next() < 0.25
   ) {
-    return `${options.actorName} is paralyzed and cannot move.`;
+    return {
+      selfDamage: 0,
+      skipReason: `${options.actorName} is paralyzed and cannot move.`,
+    };
   }
 
-  return null;
+  if (options.effects.confusedTurnsRemaining > 0) {
+    options.effects.confusedTurnsRemaining = Math.max(
+      0,
+      options.effects.confusedTurnsRemaining - 1,
+    );
+
+    if (options.actionRandom.next() < 0.33) {
+      return {
+        selfDamage: calculateScaledAmount(options.maxHp, 0.1),
+        skipReason: `${options.actorName} hurt itself in confusion.`,
+      };
+    }
+  }
+
+  return {
+    selfDamage: 0,
+    skipReason: null,
+  };
 }
 
 function resolveMoveRecord(
@@ -1892,9 +2066,13 @@ function shouldMoveTargetSelf(move: MoveRecord): boolean {
 
 function inferSupportedStatusFromMove(
   move: MoveRecord,
-): BattlePersistentStatus | null {
+): BattlePersistentStatus | "confusion" | null {
   if (BURN_MOVE_IDS.has(move.moveId) || move.type === "fire") {
     return "burn";
+  }
+
+  if (FREEZE_MOVE_IDS.has(move.moveId)) {
+    return "freeze";
   }
 
   if (PARALYSIS_MOVE_IDS.has(move.moveId) || move.type === "electric") {
@@ -1907,6 +2085,10 @@ function inferSupportedStatusFromMove(
 
   if (SLEEP_MOVE_IDS.has(move.moveId)) {
     return "sleep";
+  }
+
+  if (CONFUSION_MOVE_IDS.has(move.moveId)) {
+    return "confusion";
   }
 
   return null;
@@ -1990,7 +2172,18 @@ function summarizeStatChangeRules(rules: BattleStatChangeRule[]): string {
 }
 
 function toDisplayBattleStatus(status: BattlePersistentStatus): string {
-  return status;
+  switch (status) {
+    case "freeze":
+      return "freeze";
+    default:
+      return status;
+  }
+}
+
+function toDisplayExtendedStatusLabel(
+  status: BattlePersistentStatus | "confusion",
+): string {
+  return status === "confusion" ? "confusion" : toDisplayBattleStatus(status);
 }
 
 function toDisplayStatId(statId: BattleStatId): string {
@@ -2053,6 +2246,7 @@ function isBattlePersistentStatus(
 ): value is BattlePersistentStatus {
   return (
     value === "burn" ||
+    value === "freeze" ||
     value === "paralysis" ||
     value === "poison" ||
     value === "sleep"

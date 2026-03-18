@@ -596,7 +596,7 @@
     "effectData": {
       "maxHits": 6
     },
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "belch",
@@ -1543,7 +1543,7 @@
     "priority": 0,
     "target": "specific-move",
     "effectTag": "other",
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "cut",
@@ -3535,7 +3535,7 @@
     "effectData": {
       "healing": 50
     },
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "healing-wish",
@@ -5810,7 +5810,7 @@
     "effectData": {
       "healing": 50
     },
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "pyro-ball",
@@ -6081,7 +6081,10 @@
     "pp": 5,
     "priority": 0,
     "target": "self",
-    "effectTag": "other",
+    "effectTag": "heal",
+    "effectData": {
+      "healing": 100
+    },
     "allowedInGame": true
   },
   {
@@ -6768,7 +6771,7 @@
     "priority": 0,
     "target": "opponent",
     "effectTag": "other",
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "skill-swap",
@@ -7275,7 +7278,7 @@
     "priority": 0,
     "target": "self",
     "effectTag": "other",
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "spore",
@@ -7942,7 +7945,7 @@
     "priority": -6,
     "target": "self",
     "effectTag": "other",
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "terrain-pulse",
@@ -7997,7 +8000,7 @@
     "effectData": {
       "ailmentChance": 100
     },
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "thunder",
@@ -8211,7 +8214,7 @@
     "priority": 0,
     "target": "opponent",
     "effectTag": "other",
-    "allowedInGame": true
+    "allowedInGame": false
   },
   {
     "moveId": "tri-attack",

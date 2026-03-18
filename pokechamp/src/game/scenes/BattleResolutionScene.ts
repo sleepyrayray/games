@@ -745,7 +745,10 @@ export class BattleResolutionScene extends Phaser.Scene {
         let actionSummary: string;
 
         if (action.skipped) {
-          actionSummary = action.notes[0] ?? `${actorName} could not act.`;
+          actionSummary =
+            action.notes.length > 0
+              ? action.notes.join(" ")
+              : `${actorName} could not act.`;
         } else if (!action.hit) {
           actionSummary = `${actorName} used ${moveLabel} and missed.`;
         } else if (action.typeEffectiveness === 0 && !action.targetsSelf) {
@@ -795,6 +798,10 @@ export class BattleResolutionScene extends Phaser.Scene {
 
     if (effects.majorStatus) {
       parts.push(`Status ${toDisplayLabel(effects.majorStatus)}`);
+    }
+
+    if (effects.confusedTurnsRemaining > 0) {
+      parts.push("Confused");
     }
 
     if (effects.seeded) {

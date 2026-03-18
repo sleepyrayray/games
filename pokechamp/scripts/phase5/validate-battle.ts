@@ -1,3 +1,9 @@
+import rawMoves from "../../data/raw/pokeapi/moves.json" with {
+  type: "json",
+};
+import runtimeMoves from "../../data/runtime/moves.json" with {
+  type: "json",
+};
 import pokemonDataset from "../../data/runtime/pokemon.json" with {
   type: "json",
 };
@@ -17,17 +23,88 @@ import type {
 } from "../../src/types/pokechamp-data.ts";
 
 function main(): void {
+  assertRuntimeMovePoolIsSupported();
   assertHealingMoveRestoresHp();
+  assertRestFullyHealsAndSleeps();
   assertProtectBlocksDamage();
   assertStatBoostsImproveFutureDamage();
   assertStatDropsImproveFutureDamage();
   assertPoisonAppliesResidualDamage();
+  assertConfusionAppliesAndDisruptsTurns();
+  assertFreezeAppliesAndSkipsATurn();
+  assertDreamEaterRequiresSleep();
 
   console.log("Phase 5 battle validation passed.");
+  console.log("- runtime allowed moves stay inside the supported simplified ruleset");
   console.log("- heal moves restore HP");
+  console.log("- Rest fully heals and applies sleep");
   console.log("- Protect blocks direct damage");
   console.log("- stat boosts and drops persist into future move planning");
   console.log("- poison-style status effects apply residual end-of-turn damage");
+  console.log("- confusion, freeze, and dream-eater edge cases behave predictably");
+}
+
+function assertRuntimeMovePoolIsSupported(): void {
+  const blockedRuntimeMoveIds = new Set([
+    "beat-up",
+    "curse",
+    "heal-pulse",
+    "purify",
+    "sketch",
+    "splash",
+    "teleport",
+    "throat-chop",
+    "transform",
+  ]);
+  const unsupportedAllowedMoves = (runtimeMoves as MoveRecord[])
+    .filter((move) => move.allowedInGame && blockedRuntimeMoveIds.has(move.moveId))
+    .map((move) => move.moveId);
+
+  assert(
+    unsupportedAllowedMoves.length === 0,
+    `Expected blocked runtime moves to stay excluded, but found: ${unsupportedAllowedMoves.join(", ")}`,
+  );
+
+  const allowedOtherMoves = (runtimeMoves as MoveRecord[])
+    .filter((move) => move.allowedInGame && move.effectTag === "other")
+    .map((move) => move.moveId)
+    .sort();
+
+  assert(
+    allowedOtherMoves.length === 0,
+    `Expected the supported runtime move pool to avoid remaining "other" moves, received: ${allowedOtherMoves.join(", ")}`,
+  );
+
+  const supportedAilments = new Set([
+    "burn",
+    "confusion",
+    "freeze",
+    "leech-seed",
+    "paralysis",
+    "poison",
+    "sleep",
+    "trap",
+    "yawn",
+  ]);
+  const unsupportedAilments = (runtimeMoves as MoveRecord[])
+    .filter((move) => move.allowedInGame && move.effectTag === "status-apply")
+    .filter((move) => {
+      const ailment = (
+        rawMoves as unknown as Record<
+          string,
+          { meta?: { ailment?: { name?: string } | null } | null }
+        >
+      )[move.moveId]?.meta?.ailment?.name;
+
+      return !ailment || !supportedAilments.has(ailment);
+    })
+    .map((move) => move.moveId)
+    .sort();
+
+  assert(
+    unsupportedAilments.length === 0,
+    `Expected every allowed status-apply move to use a supported ailment, but found: ${unsupportedAilments.join(", ")}`,
+  );
 }
 
 function assertHealingMoveRestoresHp(): void {
@@ -56,6 +133,33 @@ function assertHealingMoveRestoresHp(): void {
       .flatMap((action) => action.notes)
       .some((note) => note.includes("restored")),
     "Expected the battle log to mention restored HP",
+  );
+}
+
+function assertRestFullyHealsAndSleeps(): void {
+  const context = buildTestContext({
+    enemyMoves: [createRecoverMove()],
+    playerMoves: [createRestMove()],
+    seed: "phase5-rest",
+  });
+  const initialState = createBattleSession(context);
+  const damagedState: BattleSessionState = {
+    ...initialState,
+    playerCurrentHp: Math.floor(initialState.playerStats.hp / 3),
+  };
+  const nextState = resolveBattleTurn({
+    context,
+    playerMoveId: "rest",
+    state: damagedState,
+  });
+
+  assert(
+    nextState.playerCurrentHp === nextState.playerStats.hp,
+    "Expected Rest to fully restore the player's HP",
+  );
+  assert(
+    nextState.playerEffects.majorStatus === "sleep",
+    "Expected Rest to put the player to sleep",
   );
 }
 
@@ -174,6 +278,108 @@ function assertPoisonAppliesResidualDamage(): void {
   );
 }
 
+function assertConfusionAppliesAndDisruptsTurns(): void {
+  const context = buildTestContext({
+    enemyMoves: [createRecoverMove()],
+    playerMoves: [createConfusionMove()],
+    seed: "phase5-confusion",
+  });
+  const initialState = createBattleSession(context);
+  const appliedState = resolveBattleTurn({
+    context,
+    playerMoveId: "confusion",
+    state: initialState,
+  });
+
+  assert(
+    appliedState.enemyEffects.confusedTurnsRemaining > 0,
+    "Expected Confusion to apply a confusion timer",
+  );
+
+  const enemyContext = {
+    ...context,
+    seed: `${context.seed}:enemy-turn`,
+    enemy: context.player,
+    player: context.enemy,
+  };
+  const enemyTurnState = resolveBattleTurn({
+    context: enemyContext,
+    playerMoveId: "recover",
+    state: {
+      ...appliedState,
+      enemyCurrentHp: appliedState.playerCurrentHp,
+      enemyEffects: appliedState.playerEffects,
+      enemyLastPlan: appliedState.playerLastPlan,
+      enemyStats: appliedState.playerStats,
+      enemyStatStages: appliedState.playerStatStages,
+      playerCurrentHp: appliedState.enemyCurrentHp,
+      playerEffects: appliedState.enemyEffects,
+      playerLastPlan: appliedState.enemyLastPlan,
+      playerStats: appliedState.enemyStats,
+      playerStatStages: appliedState.enemyStatStages,
+    },
+  });
+
+  assert(
+    enemyTurnState.turns[enemyTurnState.turns.length - 1]?.actions.some((action) =>
+      action.notes.some((note) => note.includes("confusion")),
+    ) ?? false,
+    "Expected confusion turns to mention confusion in the battle log",
+  );
+}
+
+function assertFreezeAppliesAndSkipsATurn(): void {
+  const context = buildTestContext({
+    enemyMoves: [createRecoverMove()],
+    playerMoves: [createFreezeMove()],
+    seed: "phase5-freeze",
+  });
+  const initialState = createBattleSession(context);
+  const appliedState = resolveBattleTurn({
+    context,
+    playerMoveId: "ice-beam",
+    state: initialState,
+  });
+  const turnActions = appliedState.turns[appliedState.turns.length - 1]?.actions ?? [];
+  const playerAction = turnActions.find((action) => action.actorSide === "player");
+  const enemyAction = turnActions.find((action) => action.actorSide === "enemy");
+
+  assert(
+    playerAction?.notes.some((note) => note.includes("freeze")) ?? false,
+    "Expected Ice Beam test move to apply freeze in the battle log",
+  );
+  assert(
+    enemyAction?.skipped ?? false,
+    "Expected freeze to force a skipped turn",
+  );
+}
+
+function assertDreamEaterRequiresSleep(): void {
+  const context = buildTestContext({
+    enemyMoves: [createRecoverMove()],
+    playerMoves: [createDreamEaterMove()],
+    seed: "phase5-dream-eater",
+  });
+  const initialState = createBattleSession(context);
+  const awakeState = resolveBattleTurn({
+    context,
+    playerMoveId: "dream-eater",
+    state: initialState,
+  });
+  const playerAction = awakeState.turns[0]?.actions.find(
+    (action) => action.actorSide === "player",
+  );
+
+  assert(
+    awakeState.enemyCurrentHp === initialState.enemyCurrentHp,
+    "Expected Dream Eater to fail against an awake target",
+  );
+  assert(
+    playerAction?.notes.some((note) => note.includes("sleeping target")) ?? false,
+    "Expected Dream Eater to log its sleep requirement",
+  );
+}
+
 function resolveMovePlan(
   context: BattleResolutionContext,
   state: BattleSessionState,
@@ -283,6 +489,25 @@ function createRecoverMove(): MoveRecord {
   };
 }
 
+function createRestMove(): MoveRecord {
+  return {
+    accuracy: 100,
+    allowedInGame: true,
+    category: "status",
+    effectTag: "heal",
+    effectData: {
+      healing: 100,
+    },
+    moveId: "rest",
+    name: "Rest",
+    power: 0,
+    pp: 10,
+    priority: 0,
+    target: "self",
+    type: "psychic",
+  };
+}
+
 function createProtectMove(): MoveRecord {
   return {
     accuracy: 100,
@@ -360,6 +585,63 @@ function createToxicMove(): MoveRecord {
     priority: 0,
     target: "opponent",
     type: "poison",
+  };
+}
+
+function createConfusionMove(): MoveRecord {
+  return {
+    accuracy: 100,
+    allowedInGame: true,
+    category: "special",
+    effectTag: "status-apply",
+    effectData: {
+      ailmentChance: 100,
+    },
+    moveId: "confusion",
+    name: "Confusion",
+    power: 50,
+    pp: 25,
+    priority: 0,
+    target: "opponent",
+    type: "psychic",
+  };
+}
+
+function createFreezeMove(): MoveRecord {
+  return {
+    accuracy: 100,
+    allowedInGame: true,
+    category: "special",
+    effectTag: "status-apply",
+    effectData: {
+      ailmentChance: 100,
+    },
+    moveId: "ice-beam",
+    name: "Ice Beam",
+    power: 90,
+    pp: 10,
+    priority: 0,
+    target: "opponent",
+    type: "ice",
+  };
+}
+
+function createDreamEaterMove(): MoveRecord {
+  return {
+    accuracy: 100,
+    allowedInGame: true,
+    category: "special",
+    effectTag: "drain",
+    effectData: {
+      drain: 50,
+    },
+    moveId: "dream-eater",
+    name: "Dream Eater",
+    power: 100,
+    pp: 10,
+    priority: 0,
+    target: "opponent",
+    type: "psychic",
   };
 }
 
