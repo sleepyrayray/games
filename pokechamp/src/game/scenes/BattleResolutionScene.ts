@@ -91,7 +91,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       eyebrow: `BATTLE FLOOR ${context.floorNumber} OF ${FLOOR_COUNT}`,
       title: `${TYPE_LABELS[context.floorType]} Battle`,
       subtitle:
-        "Phase 4 combat prototype: pick one direct-damage move each turn. Priority, accuracy, and STAB are live; type effectiveness and status systems still wait for a later phase.",
+        "Phase 4 combat prototype: pick any legal move each turn. Priority, accuracy, and STAB are live; utility moves resolve as light prototype actions while type effectiveness and full status systems wait for a later phase.",
     });
     const moveChoices = buildBattleMoveChoices({
       attacker: context.player,
@@ -666,6 +666,8 @@ export class BattleResolutionScene extends Phaser.Scene {
     const detailLine = options.choice.isSelectable
       ? options.choice.plan.isFallback
         ? "Fallback strike covers unsupported movesets."
+        : options.choice.plan.category === "status" || options.choice.plan.power <= 0
+          ? `Prototype utility action • Est. impact ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
         : `Estimated damage ${options.choice.plan.expectedDamage}${options.choice.plan.priority !== 0 ? ` • Priority ${options.choice.plan.priority > 0 ? "+" : ""}${options.choice.plan.priority}` : ""}`
       : options.choice.disabledReason ?? "Unavailable";
 
@@ -720,7 +722,7 @@ export class BattleResolutionScene extends Phaser.Scene {
     if (lines.length === 0) {
       return [
         "No turns resolved yet. Choose one of the legal move buttons to start the battle.",
-        "Disabled moves are shown for transparency, but only direct-damage actions work in this Phase 4 prototype.",
+        "Allowed utility moves are clickable too, but they still resolve with simplified prototype effects in this Phase 4 slice.",
       ];
     }
 

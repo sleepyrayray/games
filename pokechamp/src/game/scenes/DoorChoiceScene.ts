@@ -320,31 +320,10 @@ export class DoorChoiceScene extends Phaser.Scene {
     createActionButton(this, {
       x: layout.bodyX,
       y: layout.bodyY + 384,
-      width: 300,
-      height: 92,
-      label: "Back To Rewards",
-      description: "Return to the three reward choices and pick a different partner.",
-      accentColor: 0x5ab9d4,
-      onPress: () => {
-        const rewardContext = runtime.getRewardDraftContext();
-
-        if (!rewardContext) {
-          this.scene.start(TowerLobbyScene.KEY);
-
-          return;
-        }
-
-        this.scene.start(RewardDraftScene.KEY, { rewardContext });
-      },
-    });
-
-    createActionButton(this, {
-      x: layout.bodyX + 320,
-      y: layout.bodyY + 384,
-      width: 300,
+      width: 320,
       height: 92,
       label: "Return To Lobby",
-      description: "Keep the current run state saved and choose the door later.",
+      description: "Keep the locked reward and current run state saved, then choose the door later.",
       accentColor: 0xf3c969,
       onPress: () => {
         this.scene.start(TowerLobbyScene.KEY);

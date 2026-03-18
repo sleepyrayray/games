@@ -79,7 +79,7 @@ export class RewardDraftScene extends Phaser.Scene {
       .text(
         layout.bodyX + 24,
         layout.bodyY + 50,
-        `${rewardContext.rewardOffer.availableSpeciesCount} legal reward species remain across ${rewardContext.rewardOffer.availableFormCount} forms. Choose one partner to carry into the next floor, or leave this reward checkpoint saved for later.`,
+        `${rewardContext.rewardOffer.availableSpeciesCount} legal reward species remain across ${rewardContext.rewardOffer.availableFormCount} forms. Choose one partner to carry into the next floor. Once you lock a reward, only the next-door choice remains.`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,
@@ -205,7 +205,7 @@ export class RewardDraftScene extends Phaser.Scene {
       width: width - 40,
       height: 58,
       label: `Take ${choice.name}`,
-      description: "Commit this partner, then choose the next floor door.",
+      description: "Lock this partner permanently, then choose the next floor door.",
       accentColor: PHASE_THREE_COLORS.accent,
       onPress: () => {
         const pendingChoice = runtime.chooseReward(choice.battlePokemonId);

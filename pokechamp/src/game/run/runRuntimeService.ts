@@ -345,6 +345,10 @@ export class RunRuntimeService {
       return null;
     }
 
+    if (this.getPendingDoorChoiceContext()) {
+      return null;
+    }
+
     if (currentFloor.state.currentFloor >= FLOOR_LEVELS.length) {
       return null;
     }

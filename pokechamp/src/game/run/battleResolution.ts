@@ -14,7 +14,6 @@ import {
 type BattleSide = "enemy" | "player";
 
 const FALLBACK_MOVE_ID: MoveId = "__fallback-strike__";
-const UNSUPPORTED_MOVE_REASON = "Status and utility moves arrive later.";
 
 export const BATTLE_TURN_LIMIT = 12;
 
@@ -163,14 +162,6 @@ export function buildBattleMoveChoices(options: {
     if (!move.allowedInGame) {
       return {
         disabledReason: "This move is excluded from the current prototype ruleset.",
-        isSelectable: false,
-        plan: toDisabledBattleMovePlan(move),
-      };
-    }
-
-    if (move.category === "status" || move.power <= 0) {
-      return {
-        disabledReason: UNSUPPORTED_MOVE_REASON,
         isSelectable: false,
         plan: toDisabledBattleMovePlan(move),
       };
@@ -648,9 +639,10 @@ function toBattleMovePlan(options: {
   defenderStats: BattleDerivedStats;
   move: MoveRecord;
 }): BattleMovePlan {
+  const accuracy = normalizeMoveAccuracy(options.move.accuracy);
   const stab = options.attacker.generated.types.includes(options.move.type) ? 1.2 : 1;
   const expectedDamage = calculateExpectedDamage({
-    accuracy: options.move.accuracy,
+    accuracy,
     attackerStats: options.attackerStats,
     category: options.move.category,
     defenderStats: options.defenderStats,
@@ -665,7 +657,7 @@ function toBattleMovePlan(options: {
     (stab > 1 ? 4 : 0);
 
   return {
-    accuracy: options.move.accuracy,
+    accuracy,
     category: options.move.category,
     expectedDamage,
     isFallback: false,
@@ -680,7 +672,7 @@ function toBattleMovePlan(options: {
 
 function toDisabledBattleMovePlan(move: MoveRecord): BattleMovePlan {
   return {
-    accuracy: move.accuracy,
+    accuracy: normalizeMoveAccuracy(move.accuracy),
     category: move.category,
     expectedDamage: 0,
     isFallback: false,
@@ -691,6 +683,10 @@ function toDisabledBattleMovePlan(move: MoveRecord): BattleMovePlan {
     score: 0,
     typeId: move.type,
   };
+}
+
+function normalizeMoveAccuracy(accuracy: number): number {
+  return accuracy > 0 ? accuracy : 100;
 }
 
 function buildEffectBonus(move: MoveRecord): number {

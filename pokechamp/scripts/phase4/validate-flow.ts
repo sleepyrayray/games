@@ -4,13 +4,16 @@ import pokemonDataset from "../../data/runtime/pokemon.json" with {
 };
 import {
   buildBattleMoveChoices,
+  deriveBattleStats,
   resolveBattleTurn,
+  type BattleCombatantContext,
 } from "../../src/game/run/battleResolution.ts";
 import {
   RunRuntimeService,
   type BattleSessionContext,
   type RunCheckpointStage,
 } from "../../src/game/run/runRuntimeService.ts";
+import type { GeneratedBattlePokemon } from "../../src/game/run/rulesSandbox.ts";
 import type {
   BattleReadyPokemonRecord,
   MoveRecord,
@@ -68,6 +71,7 @@ function main(): void {
   const options = parseArgs(process.argv.slice(2));
   const storage = new MemoryStorage();
   installWindow(storage);
+  assertAllowedUtilityMovesRemainSelectable();
   const results: FlowResult[] = [];
 
   for (let runIndex = 0; runIndex < options.runs; runIndex += 1) {
@@ -211,9 +215,17 @@ function runSingleFlow(
     runtime.chooseReward(chosenReward.battlePokemonId);
     assertStage(runtime, "door");
     verifiedStages.push("door");
+    assert(
+      runtime.getRewardDraftContext() === null,
+      "Expected the reward draft to lock once a reward is chosen",
+    );
 
     runtime = resetRuntimeSingleton();
     assertStage(runtime, "door");
+    assert(
+      runtime.getRewardDraftContext() === null,
+      "Expected the locked reward checkpoint to stay one-way after reload",
+    );
 
     const pendingDoorChoice = runtime.getPendingDoorChoiceContext();
 
@@ -303,6 +315,31 @@ function runSingleFlow(
   );
 }
 
+function assertAllowedUtilityMovesRemainSelectable(): void {
+  const candidate = findUtilityMoveCandidate();
+
+  if (!candidate) {
+    throw new Error("Expected at least one allowed utility move in the runtime data");
+  }
+
+  const combatant = buildCombatantContext(candidate.record, candidate.level);
+  const choices = buildBattleMoveChoices({
+    attacker: combatant,
+    attackerStats: deriveBattleStats(candidate.record, candidate.level),
+    defender: combatant,
+    defenderStats: deriveBattleStats(candidate.record, candidate.level),
+  });
+
+  candidate.utilityMoveIds.forEach((moveId) => {
+    const choice = choices.find((entry) => entry.plan.moveId === moveId);
+
+    assert(
+      !!choice?.isSelectable,
+      `Expected allowed utility move ${moveId} to stay selectable in the prototype battle UI`,
+    );
+  });
+}
+
 function resolveBestTurn(
   battleSession: BattleSessionContext,
 ) {
@@ -338,6 +375,83 @@ function chooseStrongestCandidate<
   }
 
   return bestCandidate;
+}
+
+function buildCombatantContext(
+  record: BattleReadyPokemonRecord,
+  level: number,
+): BattleCombatantContext {
+  const moves =
+    record.movesetsByFloorLevel[
+      level as keyof typeof record.movesetsByFloorLevel
+    ];
+
+  if (!moves) {
+    throw new Error(
+      `Expected a moveset for ${record.battlePokemonId} at level ${level}`,
+    );
+  }
+
+  const generated: GeneratedBattlePokemon = {
+    battlePokemonId: record.battlePokemonId,
+    speciesId: record.speciesId,
+    formId: record.formId,
+    name: record.name,
+    level,
+    types: record.types,
+    floorTypes: record.floorTypes,
+    moves: [...moves] as GeneratedBattlePokemon["moves"],
+  };
+  const moveRecords = generated.moves
+    .map((moveId) => moveById.get(moveId))
+    .filter((move): move is MoveRecord => !!move);
+
+  return {
+    generated,
+    moveRecords,
+    record,
+  };
+}
+
+function findUtilityMoveCandidate():
+  | {
+      level: number;
+      record: BattleReadyPokemonRecord;
+      utilityMoveIds: string[];
+    }
+  | null {
+  for (const record of pokemonById.values()) {
+    const availableLevels = Object.keys(record.movesetsByFloorLevel)
+      .map((level) => Number.parseInt(level, 10))
+      .filter((level) => Number.isFinite(level))
+      .sort((left, right) => left - right);
+
+    for (const level of availableLevels) {
+      const moveset = record.movesetsByFloorLevel[
+        level as keyof typeof record.movesetsByFloorLevel
+      ];
+
+      if (!moveset) {
+        continue;
+      }
+
+      const utilityMoveIds = moveset.filter((moveId) => {
+        const move = moveById.get(moveId);
+
+        return !!move && move.allowedInGame && (move.category === "status" || move.power <= 0);
+      });
+
+      if (utilityMoveIds.length > 0) {
+        return {
+          level,
+          record,
+          utilityMoveIds,
+        };
+      }
+    }
+  }
+
+  return null;
 }
 
 function scoreCandidate(battlePokemonId: string): number {
