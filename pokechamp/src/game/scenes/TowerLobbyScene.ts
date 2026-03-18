@@ -12,8 +12,8 @@ import {
 import { BattleResolutionScene } from "./BattleResolutionScene";
 import { DoorChoiceScene } from "./DoorChoiceScene";
 import { FloorScene } from "./FloorScene";
+import { IntroScene } from "./IntroScene";
 import { RewardDraftScene } from "./RewardDraftScene";
-import { StarterDraftScene } from "./StarterDraftScene";
 import {
   PHASE_THREE_COLORS,
   PHASE_THREE_FONTS,
@@ -34,6 +34,7 @@ export class TowerLobbyScene extends Phaser.Scene {
     const runtime = RunRuntimeService.getInstance();
     const savedRun = runtime.getRunState();
     const currentFloor = savedRun ? runtime.getCurrentFloorContext() : null;
+    const preferredPlayerName = runtime.getPreferredPlayerName();
     const savedBattle = currentFloor ? runtime.getBattleSession() : null;
     const pendingDoorChoice = currentFloor
       ? runtime.getPendingDoorChoiceContext()
@@ -47,7 +48,7 @@ export class TowerLobbyScene extends Phaser.Scene {
     const layout = drawSceneShell(this, {
       eyebrow: "PHASE 4 VERTICAL SLICE",
       title: GAME_TITLE,
-      subtitle: `${GAME_SUBTITLE} • Saved run and Phase 4 checkpoint state now live in local storage across floor, battle, reward, and door scenes.`,
+      subtitle: `${GAME_SUBTITLE} • Trainer ${preferredPlayerName} can launch, save, and resume the full Phase 4 slice across intro, floor, battle, reward, and door scenes.`,
     });
 
     drawPanel(this, {
@@ -115,12 +116,13 @@ export class TowerLobbyScene extends Phaser.Scene {
           `Run id: ${currentFloor.state.runId}`,
           `Current floor: ${currentFloor.state.currentFloor} / ${FLOOR_COUNT}`,
           `Floor type: ${TYPE_LABELS[currentFloor.state.currentFloorType]}`,
+          `Preferred trainer: ${preferredPlayerName}`,
           `Partner: ${currentFloor.playerPokemon.name} (Lv. ${currentFloor.playerPokemon.level})`,
           `Enemy preview: ${currentFloor.encounter.enemy.name}`,
           `Resume checkpoint: ${resumeState.summary}`,
           `Species already locked: ${currentFloor.state.usedSpecies.length}`,
         ].join("\n")
-      : "No saved run yet.\nStart a new run to generate a starter trio and persist the first RunStateRecord.";
+      : `Preferred trainer: ${preferredPlayerName}\nNo saved run yet.\nStart a new run to generate a starter trio and persist the first RunStateRecord.`;
 
     this.add
       .text(layout.bodyX + 510, layout.bodyY + 72, snapshotText, {
@@ -155,15 +157,12 @@ export class TowerLobbyScene extends Phaser.Scene {
       width: 184,
       height: 92,
       label: "Start New Run",
-      description: "Clear any saved run, generate a fresh starter trio, and enter the runtime sandbox.",
+      description: "Review the trainer intro, then generate a fresh starter trio and run seed.",
       accentColor: 0x67c5b8,
       onPress: () => {
-        const draft = runtime.beginStarterDraft({
-          clearSavedRun: true,
-          forceNew: true,
+        this.scene.start(IntroScene.KEY, {
+          playerName: preferredPlayerName,
         });
-
-        this.scene.start(StarterDraftScene.KEY, { draft });
       },
     });
 

@@ -61,7 +61,7 @@ export class StarterDraftScene extends Phaser.Scene {
       .text(
         layout.bodyX + 24,
         layout.bodyY + 18,
-        `Run seed ${draft.seed} • Floor 1 starts at Lv. ${draft.starterOffer.level} • Climb all ${FLOOR_COUNT} floors without repeating a species.`,
+        `Trainer ${draft.playerName} • Run seed ${draft.seed} • Floor 1 starts at Lv. ${draft.starterOffer.level} • Climb all ${FLOOR_COUNT} floors without repeating a species.`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,

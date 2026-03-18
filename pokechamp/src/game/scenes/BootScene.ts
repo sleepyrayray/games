@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME_TITLE } from "../config/gameRules";
+import { IntroScene } from "./IntroScene";
 
 export class BootScene extends Phaser.Scene {
   public static readonly KEY = "boot";
@@ -41,7 +42,7 @@ export class BootScene extends Phaser.Scene {
     });
 
     this.time.delayedCall(700, () => {
-      this.scene.start("tower-lobby");
+      this.scene.start(IntroScene.KEY);
     });
   }
 }

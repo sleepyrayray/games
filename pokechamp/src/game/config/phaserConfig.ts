@@ -4,6 +4,7 @@ import { BattleResolutionScene } from "../scenes/BattleResolutionScene";
 import { BootScene } from "../scenes/BootScene";
 import { DoorChoiceScene } from "../scenes/DoorChoiceScene";
 import { FloorScene } from "../scenes/FloorScene";
+import { IntroScene } from "../scenes/IntroScene";
 import { RewardDraftScene } from "../scenes/RewardDraftScene";
 import { StarterDraftScene } from "../scenes/StarterDraftScene";
 import { TowerLobbyScene } from "../scenes/TowerLobbyScene";
@@ -26,6 +27,7 @@ export const buildPhaserConfig = (
   },
   scene: [
     BootScene,
+    IntroScene,
     TowerLobbyScene,
     StarterDraftScene,
     FloorScene,

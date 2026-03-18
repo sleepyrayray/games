@@ -41,6 +41,7 @@ import {
 const DEFAULT_PLAYER_NAME = "Player";
 const BATTLE_STATE_STORAGE_KEY = "pokechamp.battle-state.v1";
 const PENDING_FLOOR_ADVANCE_STORAGE_KEY = "pokechamp.pending-floor-advance.v1";
+const PREFERRED_PLAYER_NAME_STORAGE_KEY = "pokechamp.player-name.v1";
 const RUN_STATE_STORAGE_KEY = "pokechamp.run-state.v1";
 
 interface PendingStarterDraft {
@@ -122,7 +123,7 @@ export class RunRuntimeService {
     forceNew?: boolean;
     playerName?: string;
   } = {}): StarterDraftContext {
-    const playerName = options.playerName?.trim() || DEFAULT_PLAYER_NAME;
+    const playerName = this.resolvePlayerName(options.playerName);
 
     if (options.clearSavedRun) {
       this.clearRunState();
@@ -149,6 +150,29 @@ export class RunRuntimeService {
 
   public getStarterDraft(): StarterDraftContext | null {
     return this.pendingStarterDraft;
+  }
+
+  public getPreferredPlayerName(): string {
+    try {
+      const storedValue = window.localStorage.getItem(
+        PREFERRED_PLAYER_NAME_STORAGE_KEY,
+      );
+
+      return normalizePlayerName(storedValue);
+    } catch {
+      return DEFAULT_PLAYER_NAME;
+    }
+  }
+
+  public setPreferredPlayerName(playerName: string): string {
+    const normalizedName = normalizePlayerName(playerName);
+
+    window.localStorage.setItem(
+      PREFERRED_PLAYER_NAME_STORAGE_KEY,
+      normalizedName,
+    );
+
+    return normalizedName;
   }
 
   public startRunFromStarter(
@@ -780,12 +804,30 @@ export class RunRuntimeService {
   private saveRunState(state: RunStateRecord): void {
     window.localStorage.setItem(RUN_STATE_STORAGE_KEY, JSON.stringify(state));
   }
+
+  private resolvePlayerName(playerName?: string): string {
+    if (playerName && playerName.trim().length > 0) {
+      return this.setPreferredPlayerName(playerName);
+    }
+
+    return this.getPreferredPlayerName();
+  }
 }
 
 function createRunSeed(): string {
   const randomPart = Math.random().toString(36).slice(2, 10);
 
   return `${Date.now().toString(36)}-${randomPart}`;
+}
+
+function normalizePlayerName(playerName: string | null | undefined): string {
+  const trimmedName = playerName?.trim();
+
+  if (!trimmedName) {
+    return DEFAULT_PLAYER_NAME;
+  }
+
+  return trimmedName.slice(0, 12);
 }
 
 function isRunStateRecord(value: unknown): value is RunStateRecord {
