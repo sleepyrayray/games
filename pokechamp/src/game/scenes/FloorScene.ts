@@ -458,14 +458,8 @@ export class FloorScene extends Phaser.Scene {
       return;
     }
 
-    const battleContext = RunRuntimeService.getInstance().getBattleContext();
-
-    if (!battleContext) {
-      throw new Error("Expected battle context for the current floor");
-    }
-
     this.transitionLocked = true;
-    this.scene.start(BattleResolutionScene.KEY, { battleContext });
+    this.scene.start(BattleResolutionScene.KEY);
   }
 
   private updatePlayerMovement(delta: number): void {

@@ -209,13 +209,7 @@ export class DoorChoiceScene extends Phaser.Scene {
           : "Open the battle-resolution scene for this floor encounter.",
       accentColor: 0x67c5b8,
       onPress: () => {
-        const battleContext = runtime.getBattleContext();
-
-        if (!battleContext) {
-          throw new Error("Expected battle context for the current floor");
-        }
-
-        this.scene.start(BattleResolutionScene.KEY, { battleContext });
+        this.scene.start(BattleResolutionScene.KEY);
       },
     });
 

@@ -5,8 +5,14 @@ import {
   GAME_TITLE,
   TYPE_LABELS,
 } from "../config/gameRules";
-import { RunRuntimeService } from "../run/runRuntimeService";
+import {
+  RunRuntimeService,
+  type BattleSessionContext,
+} from "../run/runRuntimeService";
+import { BattleResolutionScene } from "./BattleResolutionScene";
+import { DoorChoiceScene } from "./DoorChoiceScene";
 import { FloorScene } from "./FloorScene";
+import { RewardDraftScene } from "./RewardDraftScene";
 import { StarterDraftScene } from "./StarterDraftScene";
 import {
   PHASE_THREE_COLORS,
@@ -28,10 +34,19 @@ export class TowerLobbyScene extends Phaser.Scene {
     const runtime = RunRuntimeService.getInstance();
     const savedRun = runtime.getRunState();
     const currentFloor = savedRun ? runtime.getCurrentFloorContext() : null;
+    const savedBattle = currentFloor ? runtime.getBattleSession() : null;
+    const pendingDoorChoice = currentFloor
+      ? runtime.getPendingDoorChoiceContext()
+      : null;
+    const resumeState = getResumeState({
+      currentFloorExists: currentFloor !== null,
+      pendingDoorChoiceExists: pendingDoorChoice !== null,
+      savedBattle,
+    });
     const layout = drawSceneShell(this, {
       eyebrow: "PHASE 4 VERTICAL SLICE",
       title: GAME_TITLE,
-      subtitle: `${GAME_SUBTITLE} • Saved run state now lives in local storage and flows through starter, reward, and door scenes.`,
+      subtitle: `${GAME_SUBTITLE} • Saved run and Phase 4 checkpoint state now live in local storage across floor, battle, reward, and door scenes.`,
     });
 
     drawPanel(this, {
@@ -56,7 +71,7 @@ export class TowerLobbyScene extends Phaser.Scene {
       "Enemy encounters are generated from legal floor type and floor level pools.",
       "Rewards always produce exactly 3 legal next-floor choices when the run can continue.",
       "Species duplication is blocked run-wide, including alternate forms.",
-      "The active RunStateRecord is saved in local storage for resume support.",
+      "The active RunStateRecord and current Phase 4 checkpoint are saved in local storage for resume support.",
     ];
 
     overviewLines.forEach((line, index) => {
@@ -101,6 +116,7 @@ export class TowerLobbyScene extends Phaser.Scene {
           `Floor type: ${TYPE_LABELS[currentFloor.state.currentFloorType]}`,
           `Partner: ${currentFloor.playerPokemon.name} (Lv. ${currentFloor.playerPokemon.level})`,
           `Enemy preview: ${currentFloor.encounter.enemy.name}`,
+          `Resume checkpoint: ${resumeState.summary}`,
           `Species already locked: ${currentFloor.state.usedSpecies.length}`,
         ].join("\n")
       : "No saved run yet.\nStart a new run to generate a starter trio and persist the first RunStateRecord.";
@@ -155,13 +171,39 @@ export class TowerLobbyScene extends Phaser.Scene {
       y: layout.bodyY + 276,
       width: 184,
       height: 92,
-      label: currentFloor ? "Resume Run" : "No Save Yet",
-      description: currentFloor
-        ? "Load the active floor room from the saved RunStateRecord."
-        : "An active floor room will appear here after you begin a run.",
+      label: resumeState.label,
+      description: resumeState.description,
       accentColor: currentFloor ? 0x5ab9d4 : 0x4d8193,
       onPress: () => {
         if (!currentFloor) {
+          return;
+        }
+
+        if (pendingDoorChoice) {
+          this.scene.start(DoorChoiceScene.KEY, {
+            mode: "choose-next-floor",
+            pendingChoice: pendingDoorChoice,
+          });
+
+          return;
+        }
+
+        if (
+          savedBattle?.battleState.outcome === "player-win" &&
+          currentFloor.state.currentFloor < FLOOR_COUNT
+        ) {
+          const rewardContext = runtime.getRewardDraftContext();
+
+          if (rewardContext) {
+            this.scene.start(RewardDraftScene.KEY, { rewardContext });
+
+            return;
+          }
+        }
+
+        if (savedBattle) {
+          this.scene.start(BattleResolutionScene.KEY, savedBattle);
+
           return;
         }
 
@@ -216,4 +258,52 @@ export class TowerLobbyScene extends Phaser.Scene {
         .setOrigin(0, 0);
     }
   }
+}
+
+function getResumeState(options: {
+  currentFloorExists: boolean;
+  pendingDoorChoiceExists: boolean;
+  savedBattle: BattleSessionContext | null;
+}): {
+  description: string;
+  label: string;
+  summary: string;
+} {
+  if (!options.currentFloorExists) {
+    return {
+      description: "An active floor room will appear here after you begin a run.",
+      label: "No Save Yet",
+      summary: "None",
+    };
+  }
+
+  if (options.pendingDoorChoiceExists) {
+    return {
+      description: "Resume the saved door-choice checkpoint after locking in a reward.",
+      label: "Resume Door",
+      summary: "Door choice pending",
+    };
+  }
+
+  if (!options.savedBattle) {
+    return {
+      description: "Load the active floor room from the saved RunStateRecord.",
+      label: "Resume Run",
+      summary: "Floor room ready",
+    };
+  }
+
+  if (options.savedBattle.battleState.outcome === "player-win") {
+    return {
+      description: "Resume from the saved victory checkpoint and continue into rewards.",
+      label: "Resume Reward",
+      summary: "Victory checkpoint",
+    };
+  }
+
+  return {
+    description: "Resume the saved battle checkpoint exactly where the current fight stopped.",
+    label: "Resume Battle",
+    summary: "Battle in progress",
+  };
 }

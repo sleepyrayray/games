@@ -49,8 +49,12 @@ export class BattleResolutionScene extends Phaser.Scene {
 
   public create(): void {
     const runtime = RunRuntimeService.getInstance();
+    const persistedBattle =
+      this.battleStateFromData ? null : runtime.beginOrResumeBattleSession();
     const battleContext =
-      this.battleContextFromData ?? runtime.getBattleContext();
+      this.battleContextFromData ??
+      persistedBattle?.battleContext ??
+      runtime.getBattleContext();
 
     if (!battleContext) {
       this.scene.start(TowerLobbyScene.KEY);
@@ -59,7 +63,9 @@ export class BattleResolutionScene extends Phaser.Scene {
     }
 
     const battleState =
-      this.battleStateFromData ?? createBattleSession(battleContext);
+      this.battleStateFromData ??
+      persistedBattle?.battleState ??
+      createBattleSession(battleContext);
 
     if (battleState.outcome) {
       this.renderResolvedBattle(battleContext, battleState);
@@ -248,6 +254,8 @@ export class BattleResolutionScene extends Phaser.Scene {
 
           if (nextState.outcome === "enemy-win") {
             RunRuntimeService.getInstance().clearRunState();
+          } else {
+            RunRuntimeService.getInstance().saveBattleSessionState(nextState);
           }
 
           this.scene.restart({
