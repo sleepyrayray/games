@@ -133,11 +133,34 @@ button {
 .button-stack,
 .field-list,
 .theme-grid,
+.vote-grid,
 .summary-grid,
 .instruction-list,
 .setup-summary {
   display: grid;
   gap: 0.75rem;
+}
+
+.phase-hero {
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.phase-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.phase-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.38rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(24, 32, 24, 0.08);
+  color: #344034;
+  font-size: 0.78rem;
 }
 
 .instruction-card {
@@ -242,8 +265,6 @@ button {
 }
 
 .choice-card span,
-.tap-card,
-.word-card,
 .summary-card strong {
   font-size: 1.08rem;
   color: #20271b;
@@ -261,6 +282,10 @@ button {
 .choice-card-active span,
 .choice-card-active small {
   color: #f9f7f1;
+}
+
+.choice-card-vote {
+  min-height: 4.75rem;
 }
 
 .field-row {
@@ -334,11 +359,98 @@ button {
   text-align: center;
 }
 
+.handoff-card {
+  gap: 0.45rem;
+  align-items: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0)),
+    #f8f5eb;
+}
+
+.handoff-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  color: #687063;
+}
+
+.handoff-card strong {
+  font-size: clamp(1.75rem, 8vw, 2.35rem);
+  line-height: 1.05;
+  color: #20271b;
+}
+
+.handoff-card small {
+  color: #596154;
+}
+
 .word-card {
-  font-size: clamp(1.8rem, 8vw, 2.5rem);
-  text-transform: capitalize;
+  gap: 0.55rem;
   background: #20271b;
+}
+
+.word-card-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: rgba(249, 247, 241, 0.72);
+}
+
+.word-card-value {
+  font-size: clamp(2rem, 9vw, 2.85rem);
+  line-height: 1.02;
+  text-transform: capitalize;
+}
+
+.word-card-note {
+  color: rgba(249, 247, 241, 0.78);
+  font-size: 0.86rem;
+}
+
+.word-card,
+.word-card-value,
+.word-card-note,
+.word-card-label {
   color: #f9f7f1;
+}
+
+.checklist-card,
+.selection-inline-note {
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: #f4efe3;
+  border: 1px solid rgba(24, 32, 24, 0.08);
+}
+
+.checklist-card {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.checklist-card span,
+.selection-inline-note span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  color: #697061;
+}
+
+.checklist-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.checklist-list p,
+.selection-inline-note strong {
+  margin: 0;
+  color: #20271b;
+}
+
+.selection-inline-note {
+  display: grid;
+  gap: 0.2rem;
+  margin: 1rem 0;
 }
 
 .summary-grid {
@@ -378,6 +490,7 @@ button {
   }
 
   .theme-grid,
+  .vote-grid,
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

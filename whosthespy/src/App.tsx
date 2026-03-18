@@ -686,6 +686,13 @@ export default function App() {
           state.voting.phase === 'revote' ? state.voting.tiedPlayerIds : [],
         )
       : [];
+  const revealStepLabel =
+    state.round && currentRevealPlayer
+      ? `${state.revealIndex + 1} of ${state.round.revealOrder.length}`
+      : null;
+  const votingStepLabel = state.voting
+    ? `${state.voting.currentVoterIndex + 1} of ${state.voting.voterOrder.length}`
+    : null;
   const eliminatedPlayerName = state.round
     ? getPlayerName(state.round.players, state.lastEliminatedPlayerId)
     : null;
@@ -907,38 +914,61 @@ export default function App() {
 
           {state.screen === 'revealHandoff' && currentRevealPlayer ? (
             <>
-              <section className="section-copy">
-                <h2>{currentRevealPlayer.name}</h2>
-                <p>Tap to view your word.</p>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Private reveal</span>
+                  {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
+                </div>
+                <h2>Pass the phone to {currentRevealPlayer.name}</h2>
+                <p>Only {currentRevealPlayer.name} should look at the screen.</p>
               </section>
-              <button className="tap-card" onClick={() => dispatch({ type: 'showWord' })}>
-                Tap to continue
+              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showWord' })}>
+                <span className="handoff-label">Next player</span>
+                <strong>{currentRevealPlayer.name}</strong>
+                <small>Tap to view your word</small>
               </button>
             </>
           ) : null}
 
           {state.screen === 'revealWord' && currentRevealPlayer && currentAssignment ? (
             <>
-              <section className="section-copy">
-                <h2>Your word</h2>
-                <p>Tap the word to hide it and pass the device.</p>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Private word</span>
+                  {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
+                </div>
+                <h2>Memorize it, then hide it.</h2>
+                <p>Tap the card after you are ready to pass the phone.</p>
               </section>
               <button className="word-card" onClick={() => dispatch({ type: 'hideWord' })}>
-                {currentAssignment.word}
+                <span className="word-card-label">Your word</span>
+                <strong className="word-card-value">{currentAssignment.word}</strong>
+                <small className="word-card-note">Tap to hide and continue</small>
               </button>
             </>
           ) : null}
 
           {state.screen === 'hintRound' ? (
             <>
-              <section className="section-copy">
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Phones down</span>
+                  {state.round ? <span className="phase-chip">{state.round.theme.name}</span> : null}
+                </div>
                 <h2>Hint Round</h2>
                 <p>Everyone gives one spoken hint.</p>
-                <p>Continue when the group is ready to vote.</p>
+              </section>
+              <section className="checklist-card">
+                <span>Quick reminder</span>
+                <div className="checklist-list">
+                  <p>Give one spoken hint each.</p>
+                  <p>No extra app input until the group is ready.</p>
+                  <p>Start voting once the table wants to lock in guesses.</p>
+                </div>
               </section>
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'continueToVoting' })}>
-                  Continue to Voting
+                  Start Voting
                 </button>
               </div>
             </>
@@ -946,30 +976,51 @@ export default function App() {
 
           {state.screen === 'voteHandoff' && currentVotingPlayer ? (
             <>
-              <section className="section-copy">
-                <h2>{currentVotingPlayer.name}</h2>
-                <p>Tap to vote.</p>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">
+                    {state.voting?.phase === 'revote' ? 'Private revote' : 'Private vote'}
+                  </span>
+                  {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
+                </div>
+                <h2>Pass the phone to {currentVotingPlayer.name}</h2>
+                <p>Only {currentVotingPlayer.name} should look while choosing a vote.</p>
               </section>
-              <button className="tap-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
-                Tap to continue
+              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
+                <span className="handoff-label">
+                  {state.voting?.phase === 'revote' ? 'Revote' : 'Vote'}
+                </span>
+                <strong>{currentVotingPlayer.name}</strong>
+                <small>Tap to open the ballot</small>
               </button>
             </>
           ) : null}
 
           {state.screen === 'vote' && currentVotingPlayer ? (
             <>
-              <section className="section-copy">
-                <h2>Choose who to eliminate</h2>
-                <p>{state.voting?.phase === 'revote' ? 'Revote between tied players only.' : 'Vote in private.'}</p>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">
+                    {state.voting?.phase === 'revote' ? 'Revote' : 'Vote'}
+                  </span>
+                  {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
+                </div>
+                <h2>{currentVotingPlayer.name}, choose one player.</h2>
+                <p>
+                  {state.voting?.phase === 'revote'
+                    ? 'Only tied players appear in this revote.'
+                    : 'Your choice stays private until every vote is in.'}
+                </p>
               </section>
-              <div className="theme-grid">
+              <div className="vote-grid">
                 {voteOptions.map((player) => (
                   <button
                     key={player.id}
+                    type="button"
                     className={
                       state.selectedVoteTargetId === player.id
-                        ? 'choice-card choice-card-active'
-                        : 'choice-card'
+                        ? 'choice-card choice-card-vote choice-card-active'
+                        : 'choice-card choice-card-vote'
                     }
                     onClick={() => dispatch({ type: 'selectVoteTarget', playerId: player.id })}
                   >
@@ -977,8 +1028,18 @@ export default function App() {
                   </button>
                 ))}
               </div>
+              <section className="selection-inline-note">
+                <span>Selected</span>
+                <strong>
+                  {getPlayerName(state.round?.players ?? [], state.selectedVoteTargetId) ?? 'No player selected yet'}
+                </strong>
+              </section>
               <div className="button-stack">
-                <button className="button button-primary" onClick={() => dispatch({ type: 'submitVote' })}>
+                <button
+                  className="button button-primary"
+                  disabled={!state.selectedVoteTargetId}
+                  onClick={() => dispatch({ type: 'submitVote' })}
+                >
                   Submit Vote
                 </button>
               </div>
