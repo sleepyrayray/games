@@ -78,7 +78,7 @@ export class RewardDraftScene extends Phaser.Scene {
       .text(
         layout.bodyX + 24,
         layout.bodyY + 50,
-        `${rewardContext.rewardOffer.availableSpeciesCount} legal reward species remain across ${rewardContext.rewardOffer.availableFormCount} forms. Choose one partner to carry into the next floor.`,
+        `${rewardContext.rewardOffer.availableSpeciesCount} legal reward species remain across ${rewardContext.rewardOffer.availableFormCount} forms. Choose one partner to carry into the next floor, or leave this reward checkpoint saved for later.`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,
@@ -111,6 +111,19 @@ export class RewardDraftScene extends Phaser.Scene {
         this.scene.start(FloorScene.KEY, {
           currentFloor: rewardContext.currentFloor,
         });
+      },
+    });
+
+    createActionButton(this, {
+      x: layout.bodyX + 300,
+      y: layout.bodyY + 404,
+      width: 280,
+      height: 72,
+      label: "Return To Lobby",
+      description: "Keep the reward checkpoint saved and choose later from the lobby.",
+      accentColor: 0xf3c969,
+      onPress: () => {
+        this.scene.start(TowerLobbyScene.KEY);
       },
     });
   }

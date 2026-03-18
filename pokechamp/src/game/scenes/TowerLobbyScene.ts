@@ -40,6 +40,7 @@ export class TowerLobbyScene extends Phaser.Scene {
       : null;
     const resumeState = getResumeState({
       currentFloorExists: currentFloor !== null,
+      currentFloorNumber: currentFloor?.state.currentFloor ?? null,
       pendingDoorChoiceExists: pendingDoorChoice !== null,
       savedBattle,
     });
@@ -262,6 +263,7 @@ export class TowerLobbyScene extends Phaser.Scene {
 
 function getResumeState(options: {
   currentFloorExists: boolean;
+  currentFloorNumber: number | null;
   pendingDoorChoiceExists: boolean;
   savedBattle: BattleSessionContext | null;
 }): {
@@ -294,6 +296,15 @@ function getResumeState(options: {
   }
 
   if (options.savedBattle.battleState.outcome === "player-win") {
+    if (options.currentFloorNumber === FLOOR_COUNT) {
+      return {
+        description:
+          "Resume the saved final victory checkpoint and claim the tower clear.",
+        label: "Claim Win",
+        summary: "Final victory checkpoint",
+      };
+    }
+
     return {
       description: "Resume from the saved victory checkpoint and continue into rewards.",
       label: "Resume Reward",

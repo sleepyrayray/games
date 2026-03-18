@@ -124,7 +124,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       .text(
         layout.bodyX + 20,
         infoBarY + 34,
-        "Retreating leaves the run saved, but this prototype restarts the current battle when you re-enter.",
+        "Retreating saves this battle checkpoint, so the lobby can reopen the fight from the same turn state later.",
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.title,
@@ -394,6 +394,22 @@ export class BattleResolutionScene extends Phaser.Scene {
           }
 
           this.scene.start(RewardDraftScene.KEY, { rewardContext });
+        },
+      });
+
+      createActionButton(this, {
+        x: layout.bodyX + 356,
+        y: layout.bodyY + 296,
+        width: 300,
+        height: 88,
+        label: "Return To Lobby",
+        description:
+          context.floorNumber === FLOOR_COUNT
+            ? "Keep the final victory checkpoint saved and claim the tower later."
+            : "Keep the saved victory checkpoint and continue into rewards later.",
+        accentColor: 0xf3c969,
+        onPress: () => {
+          this.scene.start(TowerLobbyScene.KEY);
         },
       });
     } else {
