@@ -363,6 +363,7 @@ export interface BattleResolutionResult {
 interface BattleSimulationState {
   effectsBySide: Record<BattleSide, BattlePersistentEffects>;
   hpBySide: Record<BattleSide, number>;
+  lastPlansBySide: Record<BattleSide, BattleMovePlan | null>;
   plans: Record<BattleSide, BattleMovePlan>;
   protectedBySide: Record<BattleSide, boolean>;
   statStagesBySide: Record<BattleSide, BattleStatStages>;
@@ -519,6 +520,7 @@ export function buildBattleMoveChoices(options: {
   attacker: BattleCombatantContext;
   attackerCurrentHp?: number;
   attackerEffects?: BattlePersistentEffects;
+  attackerLastPlan?: BattleMovePlan | null;
   attackerStats: BattleDerivedStats;
   attackerStatStages?: BattleStatStages;
   defender: BattleCombatantContext;
@@ -544,6 +546,7 @@ export function buildBattleMoveChoices(options: {
         attackerCurrentHp:
           options.attackerCurrentHp ?? options.attackerStats.hp,
         attackerEffects: options.attackerEffects,
+        attackerLastPlan: options.attackerLastPlan,
         attackerStats: options.attackerStats,
         attackerStatStages: options.attackerStatStages,
         defender: options.defender,
@@ -579,6 +582,7 @@ export function selectBattleMove(options: {
   attacker: BattleCombatantContext;
   attackerCurrentHp?: number;
   attackerEffects?: BattlePersistentEffects;
+  attackerLastPlan?: BattleMovePlan | null;
   attackerStats: BattleDerivedStats;
   attackerStatStages?: BattleStatStages;
   defender: BattleCombatantContext;
@@ -627,6 +631,7 @@ export function resolveBattleTurn(options: {
     attacker: options.context.enemy,
     attackerCurrentHp: options.state.enemyCurrentHp,
     attackerEffects: options.state.enemyEffects,
+    attackerLastPlan: options.state.enemyLastPlan,
     attackerStats: options.state.enemyStats,
     attackerStatStages: options.state.enemyStatStages,
     defender: options.context.player,
@@ -644,6 +649,10 @@ export function resolveBattleTurn(options: {
     hpBySide: {
       player: options.state.playerCurrentHp,
       enemy: options.state.enemyCurrentHp,
+    },
+    lastPlansBySide: {
+      player: options.state.playerLastPlan,
+      enemy: options.state.enemyLastPlan,
     },
     plans: {
       player: playerPlan,
@@ -720,6 +729,7 @@ export function resolveBattle(
       attacker: context.player,
       attackerCurrentHp: state.playerCurrentHp,
       attackerEffects: state.playerEffects,
+      attackerLastPlan: state.playerLastPlan,
       attackerStats: state.playerStats,
       attackerStatStages: state.playerStatStages,
       defender: context.enemy,
@@ -1024,8 +1034,15 @@ function resolveMoveExecution(options: {
   if (!hit) {
     notes.push(`${options.movePlan.moveName} missed.`);
   } else if (actualMoveRecord.effectTag === "protect" && options.movePlan.targetsSelf) {
-    options.simulationState.protectedBySide[options.attackerSide] = true;
-    notes.push(`${actorName} braced behind Protect.`);
+    if (
+      options.simulationState.lastPlansBySide[options.attackerSide]?.moveId ===
+      "protect"
+    ) {
+      notes.push(`${actorName}'s Protect failed after being used last turn.`);
+    } else {
+      options.simulationState.protectedBySide[options.attackerSide] = true;
+      notes.push(`${actorName} braced behind Protect.`);
+    }
   } else if (
     !options.movePlan.targetsSelf &&
       options.simulationState.protectedBySide[options.defenderSide]
@@ -1314,6 +1331,7 @@ function toBattleMovePlan(options: {
   attacker: BattleCombatantContext;
   attackerCurrentHp: number;
   attackerEffects?: BattlePersistentEffects;
+  attackerLastPlan?: BattleMovePlan | null;
   attackerStats: BattleDerivedStats;
   attackerStatStages?: BattleStatStages;
   defender: BattleCombatantContext;
@@ -1377,6 +1395,7 @@ function toBattleMovePlan(options: {
     score: buildMoveScore({
       attackerCurrentHp: options.attackerCurrentHp,
       attackerEffects,
+      attackerLastPlan: options.attackerLastPlan,
       attackerStats: options.attackerStats,
       attackerStatStages,
       defenderCurrentHp: options.defenderCurrentHp,
@@ -1445,6 +1464,7 @@ function buildEffectBonus(move: MoveRecord): number {
 function buildMoveScore(options: {
   attackerCurrentHp: number;
   attackerEffects: BattlePersistentEffects;
+  attackerLastPlan?: BattleMovePlan | null;
   attackerStats: BattleDerivedStats;
   attackerStatStages: BattleStatStages;
   defenderCurrentHp: number;
@@ -1472,10 +1492,12 @@ function buildMoveScore(options: {
     const healingRatio =
       options.move.moveId === "rest" ? 1 : getMoveHealingRatio(options.move);
     const sleepPenalty = options.move.moveId === "rest" ? 18 : 0;
+    const repeatedHealPenalty =
+      options.attackerLastPlan?.moveId === options.move.moveId ? 28 : 0;
 
     score +=
       missingHp === 0
-        ? -10 - sleepPenalty
+        ? -10 - sleepPenalty - repeatedHealPenalty
         : Math.floor(
             Math.min(
               missingHp,
@@ -1485,13 +1507,18 @@ function buildMoveScore(options: {
               ),
             ) *
               (options.attackerCurrentHp / options.attackerStats.hp < 0.4 ? 0.9 : 0.55),
-          ) - sleepPenalty;
+          ) -
+          sleepPenalty -
+          repeatedHealPenalty;
   }
 
   if (options.move.effectTag === "protect") {
     const hpRatio = options.attackerCurrentHp / options.attackerStats.hp;
+    const repeatedProtectPenalty =
+      options.attackerLastPlan?.moveId === "protect" ? 48 : 0;
 
-    score += hpRatio < 0.35 ? 18 : hpRatio < 0.6 ? 9 : 3;
+    score +=
+      (hpRatio < 0.35 ? 18 : hpRatio < 0.6 ? 9 : 3) - repeatedProtectPenalty;
   }
 
   if (options.move.effectTag === "drain") {

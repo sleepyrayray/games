@@ -21,7 +21,8 @@
     "phase3:simulate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts",
     "phase3:validate": "node --experimental-strip-types ./scripts/phase3/simulate-runs.ts --runs 500",
     "phase4:validate": "node --experimental-strip-types ./scripts/phase4/validate-flow.ts",
-    "phase5:validate": "node --experimental-strip-types ./scripts/phase5/validate-battle.ts"
+    "phase5:validate": "node --experimental-strip-types ./scripts/phase5/validate-battle.ts",
+    "phase5:simulate": "node --experimental-strip-types ./scripts/phase5/simulate-battles.ts"
   },
   "dependencies": {
     "phaser": "^3.88.2"

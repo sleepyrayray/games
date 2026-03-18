@@ -981,7 +981,7 @@ function getLegalMoveRecords(
     (moveRecord) => moveRecord.allowedInGame,
   );
 
-  return allowedMoves.length > 0 ? allowedMoves : legalMoves;
+  return allowedMoves;
 }
 
 function rankMoves(

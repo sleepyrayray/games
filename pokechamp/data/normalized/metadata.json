@@ -2,7 +2,7 @@
   "source": "pokeapi",
   "apiBaseUrl": "https://pokeapi.co/api/v2",
   "fetchedAt": "2026-03-17T05:21:24.336Z",
-  "builtAt": "2026-03-18T03:34:23.609Z",
+  "builtAt": "2026-03-18T03:51:41.820Z",
   "preferredLearnsetVersionGroups": [
     "scarlet-violet",
     "legends-arceus",
@@ -1509,8 +1509,16 @@
   ],
   "skippedRuntimeForms": [
     {
+      "formId": "abra",
+      "reason": "No legal level-up moves at floor level 8."
+    },
+    {
       "formId": "caterpie",
       "reason": "No legal tower floor levels in the 8-70 curve."
+    },
+    {
+      "formId": "ditto",
+      "reason": "No legal level-up moves at floor level 8."
     },
     {
       "formId": "doublade",
@@ -1521,12 +1529,24 @@
       "reason": "No legal tower floor levels in the 8-70 curve."
     },
     {
+      "formId": "feebas",
+      "reason": "No legal level-up moves at floor level 8."
+    },
+    {
+      "formId": "magikarp",
+      "reason": "No legal level-up moves at floor level 8."
+    },
+    {
       "formId": "marill",
       "reason": "No legal tower floor levels in the 8-70 curve."
     },
     {
       "formId": "rhydon",
       "reason": "No legal tower floor levels in the 8-70 curve."
+    },
+    {
+      "formId": "smeargle",
+      "reason": "No legal level-up moves at floor level 8."
     },
     {
       "formId": "spewpa",
@@ -1547,8 +1567,8 @@
     "learnsets": 954,
     "moves": 638,
     "evolutionWindows": 954,
-    "movesetPools": 8458,
-    "runtimePokemon": 946,
-    "runtimeMoves": 412
+    "movesetPools": 8412,
+    "runtimePokemon": 941,
+    "runtimeMoves": 408
   }
 }

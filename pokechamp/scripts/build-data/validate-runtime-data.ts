@@ -78,6 +78,9 @@ function validatePokemon(
 ): void {
   const seenBattlePokemonIds = new Set<string>();
   const moveIds = new Set(moveRecords.map((moveRecord) => moveRecord.moveId));
+  const moveById = new Map(
+    moveRecords.map((moveRecord) => [moveRecord.moveId, moveRecord] as const),
+  );
   const excludedSpecies = new Set(metadata.excludedSpecies);
   const excludedForms = new Set(metadata.excludedForms);
   const blockedFormFragments = ["-mega", "-gmax", "-totem", "-cap"];
@@ -165,6 +168,10 @@ function validatePokemon(
       assert(
         moveSet.length >= 1 && moveSet.length <= 4,
         `Moveset for ${pokemonRecord.formId} at ${floorLevelKey} must contain 1-4 moves`,
+      );
+      assert(
+        moveSet.some((moveId) => moveById.get(moveId)?.allowedInGame),
+        `Moveset for ${pokemonRecord.formId} at ${floorLevelKey} must contain at least one allowed move`,
       );
       assert(
         new Set(moveSet).size === moveSet.length,

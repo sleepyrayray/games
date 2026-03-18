@@ -4533,19 +4533,6 @@
     "allowedInGame": true
   },
   {
-    "moveId": "sketch",
-    "name": "Sketch",
-    "type": "normal",
-    "category": "status",
-    "power": 0,
-    "accuracy": 100,
-    "pp": 1,
-    "priority": 0,
-    "target": "opponent",
-    "effectTag": "other",
-    "allowedInGame": false
-  },
-  {
     "moveId": "skitter-smack",
     "name": "Skitter Smack",
     "type": "bug",
@@ -4863,19 +4850,6 @@
     "target": "opponent",
     "effectTag": "none",
     "allowedInGame": true
-  },
-  {
-    "moveId": "splash",
-    "name": "Splash",
-    "type": "normal",
-    "category": "status",
-    "power": 0,
-    "accuracy": 100,
-    "pp": 40,
-    "priority": 0,
-    "target": "self",
-    "effectTag": "other",
-    "allowedInGame": false
   },
   {
     "moveId": "spore",
@@ -5230,19 +5204,6 @@
     "allowedInGame": true
   },
   {
-    "moveId": "teleport",
-    "name": "Teleport",
-    "type": "psychic",
-    "category": "status",
-    "power": 0,
-    "accuracy": 100,
-    "pp": 20,
-    "priority": -6,
-    "target": "self",
-    "effectTag": "other",
-    "allowedInGame": false
-  },
-  {
     "moveId": "thief",
     "name": "Thief",
     "type": "dark",
@@ -5373,19 +5334,6 @@
     "target": "opponent",
     "effectTag": "status-apply",
     "allowedInGame": true
-  },
-  {
-    "moveId": "transform",
-    "name": "Transform",
-    "type": "normal",
-    "category": "status",
-    "power": 0,
-    "accuracy": 100,
-    "pp": 10,
-    "priority": 0,
-    "target": "opponent",
-    "effectTag": "other",
-    "allowedInGame": false
   },
   {
     "moveId": "tri-attack",

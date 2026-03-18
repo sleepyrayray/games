@@ -87,46 +87,6 @@
     }
   },
   {
-    "battlePokemonId": "abra",
-    "speciesId": "abra",
-    "formId": "abra",
-    "name": "Abra",
-    "types": [
-      "psychic"
-    ],
-    "baseStats": {
-      "hp": 25,
-      "attack": 20,
-      "defense": 15,
-      "specialAttack": 105,
-      "specialDefense": 55,
-      "speed": 90
-    },
-    "legalLevelRange": {
-      "min": 1,
-      "max": 15
-    },
-    "floorTypes": [
-      "psychic"
-    ],
-    "movesetsByFloorLevel": {
-      "8": [
-        "teleport"
-      ],
-      "12": [
-        "teleport"
-      ],
-      "15": [
-        "teleport"
-      ]
-    },
-    "sprite": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png",
-      "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/63.png",
-      "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/63.png"
-    }
-  },
-  {
     "battlePokemonId": "absol",
     "speciesId": "absol",
     "formId": "absol",
@@ -16667,91 +16627,6 @@
     }
   },
   {
-    "battlePokemonId": "ditto",
-    "speciesId": "ditto",
-    "formId": "ditto",
-    "name": "Ditto",
-    "types": [
-      "normal"
-    ],
-    "baseStats": {
-      "hp": 48,
-      "attack": 48,
-      "defense": 48,
-      "specialAttack": 48,
-      "specialDefense": 48,
-      "speed": 48
-    },
-    "legalLevelRange": {
-      "min": 1,
-      "max": 100
-    },
-    "floorTypes": [
-      "normal"
-    ],
-    "movesetsByFloorLevel": {
-      "8": [
-        "transform"
-      ],
-      "12": [
-        "transform"
-      ],
-      "15": [
-        "transform"
-      ],
-      "19": [
-        "transform"
-      ],
-      "23": [
-        "transform"
-      ],
-      "26": [
-        "transform"
-      ],
-      "30": [
-        "transform"
-      ],
-      "34": [
-        "transform"
-      ],
-      "37": [
-        "transform"
-      ],
-      "41": [
-        "transform"
-      ],
-      "44": [
-        "transform"
-      ],
-      "48": [
-        "transform"
-      ],
-      "52": [
-        "transform"
-      ],
-      "55": [
-        "transform"
-      ],
-      "59": [
-        "transform"
-      ],
-      "63": [
-        "transform"
-      ],
-      "66": [
-        "transform"
-      ],
-      "70": [
-        "transform"
-      ]
-    },
-    "sprite": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png",
-      "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/132.png",
-      "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png"
-    }
-  },
-  {
     "battlePokemonId": "dodrio",
     "speciesId": "dodrio",
     "formId": "dodrio",
@@ -22624,46 +22499,6 @@
       "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/22.png",
       "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/22.png",
       "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/22.png"
-    }
-  },
-  {
-    "battlePokemonId": "feebas",
-    "speciesId": "feebas",
-    "formId": "feebas",
-    "name": "Feebas",
-    "types": [
-      "water"
-    ],
-    "baseStats": {
-      "hp": 20,
-      "attack": 15,
-      "defense": 20,
-      "specialAttack": 10,
-      "specialDefense": 55,
-      "speed": 80
-    },
-    "legalLevelRange": {
-      "min": 1,
-      "max": 17
-    },
-    "floorTypes": [
-      "water"
-    ],
-    "movesetsByFloorLevel": {
-      "8": [
-        "splash"
-      ],
-      "12": [
-        "splash"
-      ],
-      "15": [
-        "tackle"
-      ]
-    },
-    "sprite": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/349.png",
-      "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/349.png",
-      "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/349.png"
     }
   },
   {
@@ -40413,49 +40248,6 @@
       "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/219.png",
       "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/219.png",
       "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/219.png"
-    }
-  },
-  {
-    "battlePokemonId": "magikarp",
-    "speciesId": "magikarp",
-    "formId": "magikarp",
-    "name": "Magikarp",
-    "types": [
-      "water"
-    ],
-    "baseStats": {
-      "hp": 20,
-      "attack": 10,
-      "defense": 55,
-      "specialAttack": 15,
-      "specialDefense": 20,
-      "speed": 80
-    },
-    "legalLevelRange": {
-      "min": 1,
-      "max": 19
-    },
-    "floorTypes": [
-      "water"
-    ],
-    "movesetsByFloorLevel": {
-      "8": [
-        "splash"
-      ],
-      "12": [
-        "splash"
-      ],
-      "15": [
-        "tackle"
-      ],
-      "19": [
-        "tackle"
-      ]
-    },
-    "sprite": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png",
-      "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/129.png",
-      "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png"
     }
   },
   {
@@ -62730,91 +62522,6 @@
       "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/685.png",
       "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/685.png",
       "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/685.png"
-    }
-  },
-  {
-    "battlePokemonId": "smeargle",
-    "speciesId": "smeargle",
-    "formId": "smeargle",
-    "name": "Smeargle",
-    "types": [
-      "normal"
-    ],
-    "baseStats": {
-      "hp": 55,
-      "attack": 20,
-      "defense": 35,
-      "specialAttack": 20,
-      "specialDefense": 45,
-      "speed": 75
-    },
-    "legalLevelRange": {
-      "min": 1,
-      "max": 100
-    },
-    "floorTypes": [
-      "normal"
-    ],
-    "movesetsByFloorLevel": {
-      "8": [
-        "sketch"
-      ],
-      "12": [
-        "sketch"
-      ],
-      "15": [
-        "sketch"
-      ],
-      "19": [
-        "sketch"
-      ],
-      "23": [
-        "sketch"
-      ],
-      "26": [
-        "sketch"
-      ],
-      "30": [
-        "sketch"
-      ],
-      "34": [
-        "sketch"
-      ],
-      "37": [
-        "sketch"
-      ],
-      "41": [
-        "sketch"
-      ],
-      "44": [
-        "sketch"
-      ],
-      "48": [
-        "sketch"
-      ],
-      "52": [
-        "sketch"
-      ],
-      "55": [
-        "sketch"
-      ],
-      "59": [
-        "sketch"
-      ],
-      "63": [
-        "sketch"
-      ],
-      "66": [
-        "sketch"
-      ],
-      "70": [
-        "sketch"
-      ]
-    },
-    "sprite": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/235.png",
-      "back": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/235.png",
-      "icon": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/235.png"
     }
   },
   {

@@ -102,6 +102,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       attacker: context.player,
       attackerCurrentHp: battleState.playerCurrentHp,
       attackerEffects: battleState.playerEffects,
+      attackerLastPlan: battleState.playerLastPlan,
       attackerStats: battleState.playerStats,
       attackerStatStages: battleState.playerStatStages,
       defender: context.enemy,
