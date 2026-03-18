@@ -6,6 +6,7 @@ import {
   getAssignment,
   getVoteOptions,
   incrementRound,
+  normalizeInput,
   normalizeForCompare,
   resolveVotes,
   validatePlayerNames,
@@ -65,6 +66,44 @@ const initialState: AppState = {
   spyGuess: '',
   result: null,
   notice: null,
+};
+
+const INSTRUCTION_STEPS = [
+  {
+    step: '1',
+    title: 'Set up the round',
+    body: 'Pick a theme and add 3 to 10 players on the same device.',
+  },
+  {
+    step: '2',
+    title: 'Pass and reveal',
+    body: 'Each player taps in, sees only their word, then hides it before passing the device.',
+  },
+  {
+    step: '3',
+    title: 'Listen for the mismatch',
+    body: 'Everyone gives one spoken hint, and that is when the odd word should start to stand out.',
+  },
+  {
+    step: '4',
+    title: 'Vote in private',
+    body: 'Each active player votes quietly on the device. If the spy is caught, they get one final guess.',
+  },
+];
+
+const THEME_DETAILS: Record<ThemeId, { blurb: string }> = {
+  foods: {
+    blurb: 'Fast clues and familiar words.',
+  },
+  animals: {
+    blurb: 'Easy to read and good for mixed groups.',
+  },
+  countries: {
+    blurb: 'Broader knowledge and wider clue variety.',
+  },
+  jobs: {
+    blurb: 'Great for descriptive, social hints.',
+  },
 };
 
 function reducer(state: AppState, action: Action): AppState {
@@ -532,16 +571,67 @@ function formatNames(players: Player[], playerIds: string[]) {
     .join(', ');
 }
 
+function getDuplicateNameKeys(playerNames: string[]) {
+  const counts = new Map<string, number>();
+
+  for (const playerName of playerNames) {
+    const normalizedName = normalizeInput(playerName);
+
+    if (!normalizedName) {
+      continue;
+    }
+
+    const key = normalizeForCompare(normalizedName);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return new Set(
+    Array.from(counts.entries())
+      .filter(([, count]) => count > 1)
+      .map(([key]) => key),
+  );
+}
+
+function getEyebrowLabel(screen: ScreenId) {
+  switch (screen) {
+    case 'title':
+      return 'Local multiplayer party game';
+    case 'instructions':
+      return 'Rules';
+    case 'themeSelection':
+    case 'playerEntry':
+      return 'Setup';
+    case 'revealHandoff':
+    case 'revealWord':
+      return 'Reveal';
+    case 'hintRound':
+      return 'Live play';
+    case 'voteHandoff':
+    case 'vote':
+    case 'tie':
+      return 'Voting';
+    case 'elimination':
+      return 'Elimination';
+    case 'spyGuessHandoff':
+    case 'spyGuess':
+      return 'Final guess';
+    case 'result':
+      return 'Result';
+    default:
+      return 'Game';
+  }
+}
+
 function getScreenLabel(screen: ScreenId) {
   switch (screen) {
     case 'title':
-      return 'Title';
+      return "Who's the Spy?";
     case 'instructions':
-      return 'Instructions';
+      return 'How to Play';
     case 'themeSelection':
-      return 'Theme';
+      return 'Choose a Theme';
     case 'playerEntry':
-      return 'Players';
+      return 'Add Players';
     case 'revealHandoff':
     case 'revealWord':
       return 'Reveal';
@@ -566,6 +656,24 @@ function getScreenLabel(screen: ScreenId) {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const selectedTheme = state.setup.selectedThemeId
+    ? getThemeById(state.setup.selectedThemeId)
+    : null;
+  const normalizedPlayerNames = state.setup.playerNames.map(normalizeInput);
+  const duplicateNameKeys = getDuplicateNameKeys(state.setup.playerNames);
+  const filledPlayerCount = normalizedPlayerNames.filter(Boolean).length;
+  const readyPlayerCount = normalizedPlayerNames.filter((playerName) => {
+    if (!playerName) {
+      return false;
+    }
+
+    return !duplicateNameKeys.has(normalizeForCompare(playerName));
+  }).length;
+  const setupValidation = validatePlayerNames(state.setup.playerNames);
+  const canContinueFromTheme = Boolean(selectedTheme);
+  const canAddPlayer = state.setup.playerNames.length < MAX_PLAYERS;
+  const canStartGame = Boolean(selectedTheme) && !setupValidation.error;
+  const hasSetupProgress = Boolean(selectedTheme) || filledPlayerCount > 0;
   const currentRevealPlayer = getCurrentRevealPlayer(state);
   const currentVotingPlayer = getCurrentVotingPlayer(state);
   const currentAssignment =
@@ -583,19 +691,44 @@ export default function App() {
   const eliminatedPlayerName = state.round
     ? getPlayerName(state.round.players, state.lastEliminatedPlayerId)
     : null;
+  const setupHelperText = (() => {
+    if (duplicateNameKeys.size > 0) {
+      return 'Each player name needs to be unique.';
+    }
+
+    if (filledPlayerCount < MIN_PLAYERS) {
+      return `Name at least ${MIN_PLAYERS} players to start.`;
+    }
+
+    if (readyPlayerCount < state.setup.playerNames.length) {
+      return 'Fill every player slot or remove the extras.';
+    }
+
+    return 'Ready. Start the round when the group is set.';
+  })();
+  const topStatusItems = state.round
+    ? [state.round.theme.name, `Round ${state.round.roundNumber}`]
+    : state.screen === 'playerEntry' && selectedTheme
+      ? [selectedTheme.name, `${state.setup.playerNames.length} seats`]
+      : state.screen === 'themeSelection'
+        ? [`${THEMES.length} themes`]
+        : [];
 
   return (
     <div className="app-shell">
       <div className="phone-frame">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Who's the Spy?</p>
+            <p className="eyebrow">{getEyebrowLabel(state.screen)}</p>
             <h1>{getScreenLabel(state.screen)}</h1>
           </div>
-          {state.round ? (
+          {topStatusItems.length > 0 ? (
             <div className="status-stack">
-              <span className="status-pill">{state.round.theme.name}</span>
-              <span className="status-pill">Round {state.round.roundNumber}</span>
+              {topStatusItems.map((item) => (
+                <span key={item} className="status-pill">
+                  {item}
+                </span>
+              ))}
             </div>
           ) : null}
         </header>
@@ -605,17 +738,40 @@ export default function App() {
 
           {state.screen === 'title' ? (
             <>
-              <section className="hero">
-                <p className="hero-kicker">Local multiplayer party game</p>
+              <section className="hero hero-title">
                 <h2>One device. Hidden words. Fast rounds.</h2>
                 <p className="hero-copy">
-                  Built mobile-first for quick pass-the-device play, with the same clean flow on
-                  desktop.
+                  Built for quick pass-the-device play on mobile, with a wider version of the same
+                  flow on desktop.
                 </p>
+                <div className="pill-row">
+                  <span className="hero-pill">3 to 10 players</span>
+                  <span className="hero-pill">One shared device</span>
+                  <span className="hero-pill">No timer</span>
+                </div>
               </section>
+              <section className="feature-panel">
+                <article className="feature-card">
+                  <span>Setup</span>
+                  <strong>Pick a theme and add names in under two minutes.</strong>
+                </article>
+                <article className="feature-card">
+                  <span>Reveal</span>
+                  <strong>Players only see their word, then figure out the mismatch during hints.</strong>
+                </article>
+              </section>
+              {hasSetupProgress ? (
+                <section className="resume-panel">
+                  <span>Current setup</span>
+                  <strong>
+                    {selectedTheme ? selectedTheme.name : 'No theme selected'} · {filledPlayerCount}{' '}
+                    players named
+                  </strong>
+                </section>
+              ) : null}
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
-                  Play
+                  {hasSetupProgress ? 'Continue Setup' : 'Start Setup'}
                 </button>
                 <button className="button button-secondary" onClick={() => dispatch({ type: 'openInstructions' })}>
                   Instructions
@@ -627,15 +783,25 @@ export default function App() {
           {state.screen === 'instructions' ? (
             <>
               <section className="section-copy">
-                <h2>How to Play</h2>
-                <p>Choose a theme, add players, and pass the device so each person can see their word in private.</p>
-                <p>The app only shows each player's word, so players figure out whether they might be the spy during the spoken hint round.</p>
-                <p>Everyone gives one spoken hint in real life, then each active player votes in private on the same device.</p>
-                <p>If the spy is found, they get one final chance to guess the common word and steal the win.</p>
+                <p>Read this once, then the table can mostly play from the flow on screen.</p>
               </section>
-              <div className="button-stack">
+              <section className="instruction-list">
+                {INSTRUCTION_STEPS.map((item) => (
+                  <article key={item.step} className="instruction-card">
+                    <span className="instruction-step">{item.step}</span>
+                    <div className="instruction-copy">
+                      <strong>{item.title}</strong>
+                      <p>{item.body}</p>
+                    </div>
+                  </article>
+                ))}
+              </section>
+              <div className="button-row">
                 <button className="button button-secondary" onClick={() => dispatch({ type: 'goHome' })}>
                   Back
+                </button>
+                <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
+                  Start Setup
                 </button>
               </div>
             </>
@@ -644,30 +810,45 @@ export default function App() {
           {state.screen === 'themeSelection' ? (
             <>
               <section className="section-copy">
-                <h2>Choose a Theme</h2>
-                <p>Pick one theme for this round.</p>
+                <p>Pick one theme for this round. Keep it broad enough that players can hint naturally.</p>
               </section>
               <div className="theme-grid">
                 {THEMES.map((theme) => (
                   <button
                     key={theme.id}
+                    type="button"
                     className={
                       state.setup.selectedThemeId === theme.id
-                        ? 'choice-card choice-card-active'
-                        : 'choice-card'
+                        ? 'choice-card choice-card-theme choice-card-active'
+                        : 'choice-card choice-card-theme'
                     }
+                    aria-pressed={state.setup.selectedThemeId === theme.id}
                     onClick={() => dispatch({ type: 'selectTheme', themeId: theme.id })}
                   >
                     <span>{theme.name}</span>
-                    <small>{theme.words.length} starter words</small>
+                    <strong className="choice-detail">{THEME_DETAILS[theme.id].blurb}</strong>
+                    <small>{theme.words.slice(0, 3).join(' · ')}</small>
                   </button>
                 ))}
               </div>
+              <section className="selection-note">
+                <span>{selectedTheme ? 'Selected theme' : 'Theme preview'}</span>
+                <strong>{selectedTheme ? selectedTheme.name : 'Choose one to continue'}</strong>
+                <p>
+                  {selectedTheme
+                    ? `${selectedTheme.words.length} prototype words loaded for this theme.`
+                    : 'Each theme already has a starter word pool for prototype rounds.'}
+                </p>
+              </section>
               <div className="button-row">
                 <button className="button button-secondary" onClick={() => dispatch({ type: 'goHome' })}>
                   Back
                 </button>
-                <button className="button button-primary" onClick={() => dispatch({ type: 'continueFromTheme' })}>
+                <button
+                  className="button button-primary"
+                  disabled={!canContinueFromTheme}
+                  onClick={() => dispatch({ type: 'continueFromTheme' })}
+                >
                   Continue
                 </button>
               </div>
@@ -677,22 +858,51 @@ export default function App() {
           {state.screen === 'playerEntry' ? (
             <>
               <section className="section-copy">
-                <h2>Add Players</h2>
-                <p>
-                  {MIN_PLAYERS} to {MAX_PLAYERS} players. Keep the names short so they are easy to scan
-                  on mobile.
-                </p>
+                <p>{MIN_PLAYERS} to {MAX_PLAYERS} players. Keep names short and easy to scan on a phone.</p>
               </section>
+              <section className="setup-summary">
+                <article className="summary-card">
+                  <span>Theme</span>
+                  <strong>{selectedTheme?.name ?? 'No theme selected'}</strong>
+                </article>
+                <article className="summary-card">
+                  <span>Players ready</span>
+                  <strong>
+                    {readyPlayerCount} / {state.setup.playerNames.length}
+                  </strong>
+                </article>
+              </section>
+              <p className="setup-helper">{setupHelperText}</p>
               <div className="field-list">
                 {state.setup.playerNames.map((playerName, index) => (
                   <label key={`player-field-${index}`} className="field-row">
-                    <span>Player {index + 1}</span>
+                    <div className="field-label-row">
+                      <span>Player {index + 1}</span>
+                      <em
+                        className={
+                          !normalizedPlayerNames[index]
+                            ? 'field-badge field-badge-warning'
+                            : duplicateNameKeys.has(normalizeForCompare(normalizedPlayerNames[index]))
+                              ? 'field-badge field-badge-warning'
+                              : 'field-badge field-badge-ready'
+                        }
+                      >
+                        {!normalizedPlayerNames[index]
+                          ? 'Missing'
+                          : duplicateNameKeys.has(normalizeForCompare(normalizedPlayerNames[index]))
+                            ? 'Duplicate'
+                            : 'Ready'}
+                      </em>
+                    </div>
                     <div className="field-control">
                       <input
                         className="input"
                         type="text"
                         value={playerName}
                         placeholder={`Player ${index + 1}`}
+                        autoCapitalize="words"
+                        autoCorrect="off"
+                        spellCheck={false}
                         onChange={(event) =>
                           dispatch({
                             type: 'setPlayerName',
@@ -715,10 +925,18 @@ export default function App() {
                 ))}
               </div>
               <div className="button-stack">
-                <button className="button button-secondary" onClick={() => dispatch({ type: 'addPlayer' })}>
-                  Add Player
+                <button
+                  className="button button-secondary"
+                  disabled={!canAddPlayer}
+                  onClick={() => dispatch({ type: 'addPlayer' })}
+                >
+                  {canAddPlayer ? 'Add Player' : 'Player Limit Reached'}
                 </button>
-                <button className="button button-primary" onClick={() => dispatch({ type: 'startGame' })}>
+                <button
+                  className="button button-primary"
+                  disabled={!canStartGame}
+                  onClick={() => dispatch({ type: 'startGame' })}
+                >
                   Start Game
                 </button>
                 <button className="button button-ghost" onClick={() => dispatch({ type: 'backToTheme' })}>

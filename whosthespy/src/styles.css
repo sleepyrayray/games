@@ -101,7 +101,7 @@ button {
 }
 
 .screen-card {
-  padding: 1.2rem;
+  padding: 1.25rem;
   border-radius: 1.8rem;
   background: rgba(251, 249, 243, 0.92);
   border: 1px solid rgba(24, 32, 24, 0.08);
@@ -115,6 +115,10 @@ button {
   margin-bottom: 1rem;
 }
 
+.hero-title {
+  margin-bottom: 1.15rem;
+}
+
 .hero-copy,
 .section-copy p {
   margin: 0;
@@ -124,9 +128,98 @@ button {
 .button-stack,
 .field-list,
 .theme-grid,
-.summary-grid {
+.summary-grid,
+.instruction-list,
+.feature-panel,
+.setup-summary {
   display: grid;
   gap: 0.75rem;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(24, 32, 24, 0.08);
+  color: #30392e;
+  font-size: 0.82rem;
+}
+
+.feature-card,
+.selection-note,
+.resume-panel,
+.instruction-card {
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: #f4efe3;
+  border: 1px solid rgba(24, 32, 24, 0.08);
+}
+
+.feature-card,
+.selection-note,
+.resume-panel {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.feature-card span,
+.selection-note span,
+.resume-panel span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  color: #697061;
+}
+
+.feature-card strong,
+.selection-note strong,
+.resume-panel strong {
+  font-size: 1.02rem;
+  color: #20271b;
+}
+
+.selection-note p {
+  margin: 0;
+  color: #576054;
+}
+
+.instruction-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.instruction-step {
+  width: 2rem;
+  height: 2rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #20271b;
+  color: #f9f7f1;
+  font-size: 0.82rem;
+}
+
+.instruction-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.instruction-copy strong {
+  color: #20271b;
+}
+
+.instruction-copy p {
+  margin: 0;
+  color: #576054;
 }
 
 .button-row {
@@ -141,6 +234,12 @@ button {
   padding: 0.95rem 1rem;
   border-radius: 1.1rem;
   transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .button:active,
@@ -181,8 +280,8 @@ button {
 
 .choice-card {
   display: grid;
-  gap: 0.2rem;
-  min-height: 4.5rem;
+  gap: 0.35rem;
+  min-height: 5.2rem;
 }
 
 .choice-card span,
@@ -197,11 +296,18 @@ button {
   color: #6e7468;
 }
 
+.choice-detail {
+  font-size: 0.95rem;
+  line-height: 1.25;
+  color: #31382f;
+}
+
 .choice-card-active {
   background: #20271b;
   border-color: #20271b;
 }
 
+.choice-card-active .choice-detail,
 .choice-card-active span,
 .choice-card-active small {
   color: #f9f7f1;
@@ -210,6 +316,30 @@ button {
 .field-row {
   display: grid;
   gap: 0.45rem;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.field-badge {
+  font-style: normal;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.field-badge-ready {
+  background: rgba(38, 103, 51, 0.12);
+  color: #295f35;
+}
+
+.field-badge-warning {
+  background: rgba(170, 102, 19, 0.12);
+  color: #8b5410;
 }
 
 .field-control {
@@ -228,12 +358,22 @@ button {
   color: #20271b;
 }
 
+.input:focus {
+  outline: 2px solid rgba(32, 39, 27, 0.18);
+  outline-offset: 1px;
+}
+
 .icon-button {
   min-height: 3rem;
   padding: 0.75rem 0.9rem;
   border-radius: 1rem;
   background: #ede8da;
   color: #20271b;
+}
+
+.setup-helper {
+  margin: 0 0 1rem;
+  color: #566052;
 }
 
 .tap-card,
@@ -281,6 +421,11 @@ button {
 
   .screen-card {
     padding: 1.5rem;
+  }
+
+  .feature-panel,
+  .setup-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .theme-grid,
