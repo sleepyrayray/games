@@ -430,6 +430,41 @@ export class RunRuntimeService {
     };
   }
 
+  public beginChallengeBattleSession(): BattleSessionContext | null {
+    const battleContext = this.getBattleContext();
+
+    if (!battleContext) {
+      this.clearBattleSessionState();
+
+      return null;
+    }
+
+    const savedSession = this.loadValidatedBattleSessionRecord(battleContext);
+
+    if (savedSession && !savedSession.battleState.outcome) {
+      return {
+        battleContext,
+        battleState: savedSession.battleState,
+      };
+    }
+
+    if (savedSession?.battleState.outcome) {
+      this.clearBattleSessionState();
+    }
+
+    const battleState = createBattleSession(battleContext);
+
+    this.saveBattleSessionRecord({
+      battleState,
+      battleContext,
+    });
+
+    return {
+      battleContext,
+      battleState,
+    };
+  }
+
   public getBattleSession(): BattleSessionContext | null {
     const battleContext = this.getBattleContext();
 

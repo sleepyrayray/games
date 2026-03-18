@@ -119,6 +119,16 @@ function runSingleFlow(
     runtime.startRunFromStarter(chosenStarter.battlePokemonId);
     assertStage(runtime, "floor");
     verifiedStages.push("floor");
+    const floorOne = runtime.getCurrentFloorContext();
+
+    if (!floorOne) {
+      throw new Error("Expected floor 1 context after starting the run");
+    }
+
+    assert(
+      floorOne.encounter.enemy.level === floorOne.playerPokemon.level - 2,
+      "Expected floor 1 enemy level to be 2 below the player's partner",
+    );
 
     let battleSession = runtime.beginOrResumeBattleSession();
 
@@ -232,6 +242,10 @@ function runSingleFlow(
       "Expected the chosen reward to become the next floor's level-matched partner",
     );
     assert(
+      floorTwo.encounter.enemy.level === floorTwo.playerPokemon.level - 2,
+      "Expected floor 2 enemy level to be 2 below the player's partner",
+    );
+    assert(
       new Set(floorTwo.state.usedSpecies).size === floorTwo.state.usedSpecies.length,
       "Expected used species to remain unique after the floor advance",
     );
@@ -244,6 +258,11 @@ function runSingleFlow(
 
     assertStage(runtime, "battle");
     verifiedStages.push("battle");
+    assert(
+      floorTwoBattle.battleState.outcome === null &&
+        floorTwoBattle.battleState.turnsResolved === 0,
+      "Expected floor 2 battles to begin at the live interactive turn state",
+    );
 
     const floorTwoTurn = resolveBestTurn(floorTwoBattle);
 

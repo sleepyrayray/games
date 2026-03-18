@@ -115,7 +115,7 @@ interface BattleSimulationState {
 
 export function deriveBattleStats(
   record: BattleReadyPokemonRecord,
-  level: FloorLevel,
+  level: number,
 ): BattleDerivedStats {
   return {
     hp: calculateHpStat(record.baseStats.hp, level),
@@ -130,8 +130,14 @@ export function deriveBattleStats(
 export function createBattleSession(
   context: BattleResolutionContext,
 ): BattleSessionState {
-  const playerStats = deriveBattleStats(context.player.record, context.floorLevel);
-  const enemyStats = deriveBattleStats(context.enemy.record, context.floorLevel);
+  const playerStats = deriveBattleStats(
+    context.player.record,
+    context.player.generated.level,
+  );
+  const enemyStats = deriveBattleStats(
+    context.enemy.record,
+    context.enemy.generated.level,
+  );
 
   return {
     enemyCurrentHp: enemyStats.hp,
@@ -395,7 +401,7 @@ function calculateExpectedDamage(options: {
   attackerStats: BattleDerivedStats;
   category: MoveCategory;
   defenderStats: BattleDerivedStats;
-  level: FloorLevel;
+  level: number;
   power: number;
   stab: number;
 }): number {
@@ -423,7 +429,7 @@ function calculateDamage(options: {
   accuracy: number;
   attackStat: number;
   defenseStat: number;
-  level: FloorLevel;
+  level: number;
   power: number;
   stab: number;
 }): number {
@@ -443,11 +449,11 @@ function calculateDamage(options: {
   return accuracyAdjustedDamage;
 }
 
-function calculateHpStat(baseStat: number, level: FloorLevel): number {
+function calculateHpStat(baseStat: number, level: number): number {
   return Math.floor((2 * baseStat * level) / 100) + level + 10;
 }
 
-function calculateNonHpStat(baseStat: number, level: FloorLevel): number {
+function calculateNonHpStat(baseStat: number, level: number): number {
   return Math.floor((2 * baseStat * level) / 100) + 5;
 }
 
@@ -503,7 +509,7 @@ function resolveMoveExecution(options: {
   defender: BattleCombatantContext;
   defenderSide: BattleSide;
   defenderStats: BattleDerivedStats;
-  level: FloorLevel;
+  level: number;
   movePlan: BattleMovePlan;
   simulationState: BattleSimulationState;
   turnRandom: number;
@@ -608,7 +614,7 @@ function simulateTurn(
       defender: combatants[targetSide],
       defenderSide: targetSide,
       defenderStats: simulationState.statsBySide[targetSide],
-      level: context.floorLevel,
+      level: combatants[side].generated.level,
       movePlan: simulationState.plans[side],
       simulationState,
       turnRandom: createSeededRandom(`${turnSeedBase}:${side}`).next(),

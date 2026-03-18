@@ -119,7 +119,7 @@ export class DoorChoiceScene extends Phaser.Scene {
       .text(
         layout.bodyX + 24,
         layout.bodyY + 44,
-        `Current floor level: ${currentFloor.floorLevel} • Encounter pool: ${currentFloor.encounter.availableSpeciesCount} species / ${currentFloor.encounter.availableFormCount} forms`,
+        `Current floor level: ${currentFloor.floorLevel} • Enemy level: ${currentFloor.encounter.enemy.level} • Encounter pool: ${currentFloor.encounter.availableSpeciesCount} species / ${currentFloor.encounter.availableFormCount} forms`,
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.title,
@@ -145,7 +145,7 @@ export class DoorChoiceScene extends Phaser.Scene {
       width: 350,
       height: 274,
       heading: "Trainer Encounter",
-      subheading: `Must match the ${TYPE_LABELS[currentFloor.state.currentFloorType]} floor in at least one type slot`,
+      subheading: `Lv. ${currentFloor.encounter.enemy.level} • Must match the ${TYPE_LABELS[currentFloor.state.currentFloorType]} floor in at least one type slot`,
     });
 
     drawPanel(this, {
@@ -209,7 +209,9 @@ export class DoorChoiceScene extends Phaser.Scene {
           : "Open the battle-resolution scene for this floor encounter.",
       accentColor: 0x67c5b8,
       onPress: () => {
-        this.scene.start(BattleResolutionScene.KEY);
+        this.scene.start(BattleResolutionScene.KEY, {
+          entryMode: "challenge",
+        });
       },
     });
 

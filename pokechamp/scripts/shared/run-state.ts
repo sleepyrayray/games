@@ -289,7 +289,7 @@ function toCurrentRunPokemon(
   return {
     speciesId: pokemon.speciesId,
     formId: pokemon.formId,
-    level: pokemon.level,
+    level: pokemon.level as CurrentRunPokemon["level"],
     moves: [...pokemon.moves] as CurrentRunPokemon["moves"],
   };
 }

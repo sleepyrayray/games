@@ -30,6 +30,7 @@ import {
 interface BattleResolutionSceneData {
   battleContext?: BattleResolutionContext;
   battleState?: BattleSessionState;
+  entryMode?: "challenge" | "resume";
 }
 
 export class BattleResolutionScene extends Phaser.Scene {
@@ -37,6 +38,7 @@ export class BattleResolutionScene extends Phaser.Scene {
 
   private battleContextFromData: BattleResolutionContext | null = null;
   private battleStateFromData: BattleSessionState | null = null;
+  private entryMode: "challenge" | "resume" = "resume";
 
   public constructor() {
     super(BattleResolutionScene.KEY);
@@ -45,12 +47,17 @@ export class BattleResolutionScene extends Phaser.Scene {
   public init(data: BattleResolutionSceneData = {}): void {
     this.battleContextFromData = data.battleContext ?? null;
     this.battleStateFromData = data.battleState ?? null;
+    this.entryMode = data.entryMode ?? "resume";
   }
 
   public create(): void {
     const runtime = RunRuntimeService.getInstance();
     const persistedBattle =
-      this.battleStateFromData ? null : runtime.beginOrResumeBattleSession();
+      this.battleStateFromData
+        ? null
+        : this.entryMode === "challenge"
+          ? runtime.beginChallengeBattleSession()
+          : runtime.beginOrResumeBattleSession();
     const battleContext =
       this.battleContextFromData ??
       persistedBattle?.battleContext ??
@@ -110,7 +117,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       .text(
         layout.bodyX + 20,
         infoBarY + 14,
-        `Run ${context.runId} • Turn ${battleState.turnsResolved + 1} / ${BATTLE_TURN_LIMIT} • Floor level ${context.floorLevel} • ${context.usedSpeciesCount} species already locked`,
+        `Run ${context.runId} • Turn ${battleState.turnsResolved + 1} / ${BATTLE_TURN_LIMIT} • Player Lv. ${context.player.generated.level} • Enemy Lv. ${context.enemy.generated.level} • ${context.usedSpeciesCount} species already locked`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,
@@ -280,9 +287,17 @@ export class BattleResolutionScene extends Phaser.Scene {
 
     const runtime = RunRuntimeService.getInstance();
     const didPlayerWin = battleState.outcome === "player-win";
+    const activeFloorNumber =
+      runtime.getCurrentFloorContext()?.state.currentFloor ?? context.floorNumber;
+    const isFinalFloorVictory =
+      didPlayerWin && activeFloorNumber === FLOOR_COUNT;
     const layout = drawSceneShell(this, {
       eyebrow: didPlayerWin ? "VICTORY" : "DEFEAT",
-      title: didPlayerWin ? "Battle Won" : "Run Lost",
+      title: isFinalFloorVictory
+        ? "Tower Cleared"
+        : didPlayerWin
+          ? "Battle Won"
+          : "Run Lost",
       subtitle: battleState.summary,
     });
 
@@ -363,15 +378,14 @@ export class BattleResolutionScene extends Phaser.Scene {
         y: layout.bodyY + 296,
         width: 340,
         height: 88,
-        label:
-          context.floorNumber === FLOOR_COUNT ? "Claim Tower Win" : "Collect Reward",
+        label: isFinalFloorVictory ? "View Win Summary" : "Collect Reward",
         description:
-          context.floorNumber === FLOOR_COUNT
-            ? "Complete the run and archive the final victory."
+          isFinalFloorVictory
+            ? "Complete the run and open the tower-clear summary."
             : "Move to the legal reward draft for the next floor.",
         accentColor: 0x67c5b8,
         onPress: () => {
-          if (context.floorNumber === FLOOR_COUNT) {
+          if (isFinalFloorVictory) {
             const completed = runtime.completeCurrentRun();
 
             if (!completed) {
@@ -404,8 +418,8 @@ export class BattleResolutionScene extends Phaser.Scene {
         height: 88,
         label: "Return To Lobby",
         description:
-          context.floorNumber === FLOOR_COUNT
-            ? "Keep the final victory checkpoint saved and claim the tower later."
+          isFinalFloorVictory
+            ? "Keep the final victory checkpoint saved and view the win summary later."
             : "Keep the saved victory checkpoint and continue into rewards later.",
         accentColor: 0xf3c969,
         onPress: () => {
@@ -537,7 +551,7 @@ export class BattleResolutionScene extends Phaser.Scene {
       .text(
         options.x + 18,
         options.y + 122,
-        `HP ${options.currentHp} / ${options.stats.hp}`,
+        `Lv. ${options.combatant.generated.level} • HP ${options.currentHp} / ${options.stats.hp}`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,

@@ -21,6 +21,7 @@ import {
 } from "./run-state.ts";
 
 const STARTER_TYPES = ["grass", "fire", "water"] as const;
+const ENEMY_LEVEL_OFFSET = 2;
 const TYPE_INDEX = new Map(
   POKEMON_TYPES.map((typeId, index) => [typeId, index] as const),
 );
@@ -47,7 +48,7 @@ export interface GeneratedBattlePokemon {
   speciesId: SpeciesId;
   formId: string;
   name: string;
-  level: FloorLevel;
+  level: number;
   types: BattleReadyPokemonRecord["types"];
   floorTypes: BattleReadyPokemonRecord["floorTypes"];
   moves: MoveSet;
@@ -194,16 +195,20 @@ export class RulesSandbox {
     this.validateFloorLevels();
 
     for (const level of FLOOR_LEVELS) {
-      const legalRecords = this.data.pokemon
+      const legalRewardRecords = this.data.pokemon
         .filter((record) => isRecordLegalAtLevel(record, level))
         .sort(compareBattlePokemonRecords);
+      const encounterLevel = getEncounterLevelForFloorLevel(level);
+      const legalEncounterRecords = this.data.pokemon
+        .filter((record) => isRecordLegalAtLevel(record, encounterLevel))
+        .sort(compareBattlePokemonRecords);
 
-      this.rewardPoolsByLevel.set(level, bucketRecordsBySpecies(legalRecords));
+      this.rewardPoolsByLevel.set(level, bucketRecordsBySpecies(legalRewardRecords));
 
       const encounterPoolsByType = new Map<PokemonTypeId, SpeciesBucket[]>();
 
       for (const typeId of POKEMON_TYPES) {
-        const typeRecords = legalRecords.filter((record) =>
+        const typeRecords = legalEncounterRecords.filter((record) =>
           record.floorTypes.includes(typeId),
         );
         encounterPoolsByType.set(typeId, bucketRecordsBySpecies(typeRecords));
@@ -280,6 +285,7 @@ export class RulesSandbox {
     rng: RandomSource;
   }): GeneratedEncounter {
     const floorLevel = this.getFloorLevel(floorNumber);
+    const encounterLevel = getEncounterLevelForFloorLevel(floorLevel);
     const candidateBuckets = this.getEncounterCandidateBuckets(
       floorLevel,
       floorType,
@@ -293,6 +299,7 @@ export class RulesSandbox {
         {
           details: {
             blockedSpeciesCount: blockedSpecies.size,
+            encounterLevel,
             floorLevel,
             floorType,
           },
@@ -303,7 +310,7 @@ export class RulesSandbox {
 
     const chosenBucket = pickOne(candidateBuckets, rng);
     const chosenRecord = pickOne(chosenBucket.records, rng);
-    const enemy = toGeneratedBattlePokemon(chosenRecord, floorLevel);
+    const enemy = toGeneratedBattlePokemon(chosenRecord, encounterLevel);
 
     if (!enemy.floorTypes.includes(floorType)) {
       throw new RulesSandboxError(
@@ -955,12 +962,12 @@ function filterBucketsByBlockedSpecies(
 
 function isRecordLegalAtLevel(
   record: BattleReadyPokemonRecord,
-  level: FloorLevel,
+  level: number,
 ): boolean {
   return (
     level >= record.legalLevelRange.min &&
     level <= record.legalLevelRange.max &&
-    record.movesetsByFloorLevel[level] !== undefined
+    resolveMoveSetForLevel(record, level) !== null
   );
 }
 
@@ -1120,9 +1127,9 @@ function sortTypeIds(typeIds: PokemonTypeId[]): PokemonTypeId[] {
 
 function toGeneratedBattlePokemon(
   record: BattleReadyPokemonRecord,
-  level: FloorLevel,
+  level: number,
 ): GeneratedBattlePokemon {
-  const moves = record.movesetsByFloorLevel[level];
+  const moves = resolveMoveSetForLevel(record, level);
 
   if (!moves) {
     throw new RulesSandboxError(
@@ -1145,8 +1152,39 @@ function toGeneratedBattlePokemon(
     level,
     types: [...record.types] as GeneratedBattlePokemon["types"],
     floorTypes: [...record.floorTypes] as GeneratedBattlePokemon["floorTypes"],
-    moves: cloneMoveSet(moves),
+    moves,
   };
+}
+
+function getEncounterLevelForFloorLevel(floorLevel: FloorLevel): number {
+  return Math.max(1, floorLevel - ENEMY_LEVEL_OFFSET);
+}
+
+function resolveMoveSetForLevel(
+  record: BattleReadyPokemonRecord,
+  targetLevel: number,
+): MoveSet | null {
+  const exactMoves = record.movesetsByFloorLevel[targetLevel as FloorLevel];
+
+  if (exactMoves) {
+    return cloneMoveSet(exactMoves);
+  }
+
+  const availableLevels = Object.keys(record.movesetsByFloorLevel)
+    .map((level) => Number.parseInt(level, 10))
+    .filter((level) => Number.isFinite(level))
+    .sort((left, right) => left - right);
+
+  if (availableLevels.length === 0) {
+    return null;
+  }
+
+  const lowerOrEqualLevels = availableLevels.filter((level) => level <= targetLevel);
+  const chosenLevel =
+    lowerOrEqualLevels[lowerOrEqualLevels.length - 1] ?? availableLevels[0];
+  const moves = record.movesetsByFloorLevel[chosenLevel as FloorLevel];
+
+  return moves ? cloneMoveSet(moves) : null;
 }
 
 function xmur3(seed: string): () => number {

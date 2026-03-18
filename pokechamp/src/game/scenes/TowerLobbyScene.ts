@@ -64,7 +64,7 @@ export class TowerLobbyScene extends Phaser.Scene {
 
     const overviewLines = [
       "Starter offers are randomized from the validated starter trio pool.",
-      "Enemy encounters are generated from legal floor type and floor level pools.",
+      "Enemy encounters are generated from legal floor pools and spawn 2 levels below your active partner.",
       "Rewards always produce exactly 3 legal next-floor choices when the run can continue.",
       "Species duplication is blocked run-wide, including alternate forms.",
       "The active RunStateRecord and current Phase 4 checkpoint are saved in local storage for resume support.",
@@ -113,7 +113,7 @@ export class TowerLobbyScene extends Phaser.Scene {
           `Active trainer: ${currentFloor.state.playerName}`,
           `Preferred default: ${preferredPlayerName}`,
           `Partner: ${currentFloor.playerPokemon.name} (Lv. ${currentFloor.playerPokemon.level})`,
-          `Enemy preview: ${currentFloor.encounter.enemy.name}`,
+          `Enemy preview: ${currentFloor.encounter.enemy.name} (Lv. ${currentFloor.encounter.enemy.level})`,
           `Resume checkpoint: ${resumeState.summary}`,
           `Species already locked: ${currentFloor.state.usedSpecies.length}`,
         ].join("\n")
@@ -321,8 +321,8 @@ function getResumeState(checkpoint: RunCheckpointSummary): {
   if (checkpoint.stage === "final-victory") {
     return {
       description:
-        "Resume the saved final victory checkpoint and claim the tower clear.",
-      label: "Claim Win",
+        "Resume the saved final victory checkpoint and open the tower-clear summary.",
+      label: "View Win",
       summary: "Final victory checkpoint",
     };
   }

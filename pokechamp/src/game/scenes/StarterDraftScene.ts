@@ -75,7 +75,7 @@ export class StarterDraftScene extends Phaser.Scene {
       .text(
         layout.bodyX + 24,
         layout.bodyY + 48,
-        "Choosing a starter immediately blocks every other form of that species for the rest of the run.",
+        "Choosing a starter immediately blocks every other form of that species for the rest of the run. This trio is your one opening roll.",
         {
           color: PHASE_THREE_COLORS.muted,
           fontFamily: PHASE_THREE_FONTS.title,
@@ -98,29 +98,10 @@ export class StarterDraftScene extends Phaser.Scene {
     createActionButton(this, {
       x: layout.bodyX,
       y: layout.bodyY + 400,
-      width: 260,
-      height: 76,
-      label: "Reroll Trio",
-      description: "Generate a fresh random starter offer and seed.",
-      accentColor: 0x67c5b8,
-      onPress: () => {
-        const nextDraft = runtime.beginStarterDraft({
-          clearSavedRun: runtime.hasSavedRun(),
-          forceNew: true,
-          playerName: draft.playerName,
-        });
-
-        this.scene.restart({ draft: nextDraft });
-      },
-    });
-
-    createActionButton(this, {
-      x: layout.bodyX + 280,
-      y: layout.bodyY + 400,
-      width: 260,
+      width: 320,
       height: 76,
       label: "Back To Lobby",
-      description: "Return without locking in a new run yet.",
+      description: "Return without locking in this one-time starter trio yet.",
       accentColor: 0x5ab9d4,
       onPress: () => {
         this.scene.start(TowerLobbyScene.KEY);

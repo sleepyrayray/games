@@ -341,7 +341,7 @@ export class FloorScene extends Phaser.Scene {
       .text(
         trainerCardX + 22,
         topY + 84,
-        `Lv. ${currentFloor.playerPokemon.level}\nMoves: ${currentFloor.playerPokemon.moves
+        `Lv. ${currentFloor.playerPokemon.level} partner • Enemy enters at Lv. ${currentFloor.encounter.enemy.level}\nMoves: ${currentFloor.playerPokemon.moves
           .map(toDisplayLabel)
           .join(", ")}`,
         {
@@ -394,7 +394,7 @@ export class FloorScene extends Phaser.Scene {
       .text(
         width - 360,
         height - 108,
-        `A ${TYPE_LABELS[currentFloor.state.currentFloorType]} specialist guards this floor.\nTheir Pokemon is already locked in the runtime rules sandbox.\nWinning unlocks the next legal reward draft.`,
+        `A ${TYPE_LABELS[currentFloor.state.currentFloorType]} specialist guards this floor.\nTheir Pokemon is already locked in the runtime rules sandbox at Lv. ${currentFloor.encounter.enemy.level}.\nWinning unlocks the next legal reward draft.`,
         {
           color: PHASE_THREE_COLORS.copy,
           fontFamily: PHASE_THREE_FONTS.accent,
@@ -487,7 +487,9 @@ export class FloorScene extends Phaser.Scene {
     }
 
     this.transitionLocked = true;
-    this.scene.start(BattleResolutionScene.KEY);
+    this.scene.start(BattleResolutionScene.KEY, {
+      entryMode: "challenge",
+    });
   }
 
   private updatePlayerMovement(delta: number): void {
