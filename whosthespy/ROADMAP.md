@@ -120,7 +120,7 @@ Tasks:
 
 - Show one player at a time with a clear handoff screen
 - Add a deliberate reveal interaction so words are not exposed too early
-- Display the player’s secret word and role clearly
+- Display the player's secret word clearly without explicitly labeling them as the spy or a non-spy
 - Add a next-player flow that returns the screen to a safe hidden state
 - Complete the loop until all players have seen their word
 

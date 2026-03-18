@@ -20,6 +20,7 @@ The app should support the real-life social gameplay, not compete with it.
 - Mobile-first UI with desktop support
 - One shared device for all setup, reveals, voting, and endgame input
 - Each player sees their name first, then taps to reveal their word
+- The word reveal screen shows only the assigned word, not an explicit spy or non-spy label
 - After seeing their word, the player taps the word card to hide it and advance to the next player
 - Final spy guess must match the common word exactly after case-insensitive comparison
 - The app never shows vote counts or who voted for whom
@@ -34,6 +35,7 @@ The app should support the real-life social gameplay, not compete with it.
 - One word becomes the common word for all non-spies
 - The other word becomes the spy word for the spy
 - Players reveal their words privately, one by one, on the shared device
+- The app does not explicitly tell players whether they are the spy during the reveal flow
 - The spoken hint round happens in real life and is not enforced by the app
 - After the hint round, each active player votes privately on the shared device
 - Players cannot vote for themselves
@@ -78,6 +80,7 @@ Private information:
 - The spy's final typed guess until it is submitted
 
 The UI should always return to a safe, non-secret state before the device is passed to the next player.
+The app does not explicitly reveal any player's role during the initial word reveal flow.
 
 ## Screen Flow
 
@@ -188,12 +191,10 @@ Notes:
 
 ### 6. Player Word Reveal Screen
 
-Purpose: show the current player's role and word privately.
+Purpose: show the current player's word privately without explicitly revealing their role.
 
 Main copy:
 
-- For the spy: `You are the spy.`
-- For a non-spy: `You are not the spy.`
 - Show the assigned word in large text
 - Instruction: `Tap the word to hide it and pass the device.`
 
@@ -203,6 +204,7 @@ Primary actions:
 
 Notes:
 
+- No spy or non-spy label appears on this screen
 - There is no separate next-player button in v1
 - If more players remain, tapping the word card advances to the next player's handoff screen
 - If this is the last player, tapping the word card advances to the hint round screen
@@ -345,6 +347,7 @@ Purpose: let the spy try to steal the win by guessing the common word.
 
 Main copy:
 
+- Line: `You were the spy.`
 - Title: `Guess the common word`
 
 Primary actions:
@@ -436,6 +439,7 @@ Replay behavior:
 - Keep transitions quick
 - Never leave secret information visible longer than necessary
 - Return to a neutral screen before handing the device to the next player whenever private input is involved
+- Keep the reveal flow word-only so players are not explicitly told whether they are the spy
 
 ## Assumptions Locked For Now
 

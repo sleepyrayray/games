@@ -629,6 +629,7 @@ export default function App() {
               <section className="section-copy">
                 <h2>How to Play</h2>
                 <p>Choose a theme, add players, and pass the device so each person can see their word in private.</p>
+                <p>The app only shows each player's word, so players figure out whether they might be the spy during the spoken hint round.</p>
                 <p>Everyone gives one spoken hint in real life, then each active player votes in private on the same device.</p>
                 <p>If the spy is found, they get one final chance to guess the common word and steal the win.</p>
               </section>
@@ -742,7 +743,7 @@ export default function App() {
           {state.screen === 'revealWord' && currentRevealPlayer && currentAssignment ? (
             <>
               <section className="section-copy">
-                <h2>{currentAssignment.role === 'spy' ? 'You are the spy.' : 'You are not the spy.'}</h2>
+                <h2>Your word</h2>
                 <p>Tap the word to hide it and pass the device.</p>
               </section>
               <button className="word-card" onClick={() => dispatch({ type: 'hideWord' })}>
@@ -870,6 +871,7 @@ export default function App() {
           {state.screen === 'spyGuess' ? (
             <>
               <section className="section-copy">
+                <p className="eyebrow">You were the spy.</p>
                 <h2>Guess the common word</h2>
                 <p>Use the exact word. Case does not matter.</p>
               </section>
