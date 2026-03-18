@@ -387,10 +387,30 @@ export class RulesSandbox {
       );
     }
 
-    const chosenBuckets = sampleWithoutReplacement(candidateBuckets, 3, rng);
-    const choices = chosenBuckets.map((bucket) =>
-      toGeneratedBattlePokemon(pickOne(bucket.records, rng), nextFloorLevel),
-    ) as GeneratedRewardOffer["choices"];
+    const choices = this.selectRewardChoicesWithUniqueTypes(
+      candidateBuckets,
+      nextFloorLevel,
+      rng,
+    );
+
+    if (!choices) {
+      throw new RulesSandboxError(
+        "missing-reward-choices",
+        `Could not form 3 legal reward choices with unique typings for floor ${nextFloorNumber}`,
+        {
+          details: {
+            availableSpeciesCount: candidateBuckets.length,
+            availableFormCount: countRecords(candidateBuckets),
+            blockedSpeciesCount: blockedSpecies.size,
+            distinctTypingCount: countDistinctRewardTypingKeys(candidateBuckets),
+            nextFloorLevel,
+            nextFloorNumber,
+            remainingFloorTypes: sortTypeIds([...remainingFloorTypes]),
+          },
+          floorNumber: nextFloorNumber - 1,
+        },
+      );
+    }
 
     assertUniqueSpecies(
       choices.map((choice) => choice.speciesId),
@@ -398,6 +418,7 @@ export class RulesSandbox {
       "illegal-reward",
       nextFloorNumber - 1,
     );
+    assertUniqueRewardTypes(choices, nextFloorNumber - 1);
 
     for (const choice of choices) {
       if (blockedSpecies.has(choice.speciesId)) {
@@ -633,6 +654,35 @@ export class RulesSandbox {
 
         return bucket;
       });
+  }
+
+  private selectRewardChoicesWithUniqueTypes(
+    candidateBuckets: SpeciesBucket[],
+    nextFloorLevel: FloorLevel,
+    rng: RandomSource,
+  ): GeneratedRewardOffer["choices"] | null {
+    const shuffledBuckets = sampleWithoutReplacement(
+      candidateBuckets,
+      candidateBuckets.length,
+      rng,
+    ).map((bucket) => ({
+      speciesId: bucket.speciesId,
+      records: getDistinctTypingRecords(bucket, rng),
+    }));
+    const selectedRecords = selectUniqueTypeRewardRecords({
+      buckets: shuffledBuckets,
+      selectedRecords: [],
+      startIndex: 0,
+      usedTypes: new Set(),
+    });
+
+    if (!selectedRecords) {
+      return null;
+    }
+
+    return selectedRecords.map((record) =>
+      toGeneratedBattlePokemon(record, nextFloorLevel),
+    ) as GeneratedRewardOffer["choices"];
   }
 
   private validateFloorLevels(): void {
@@ -953,6 +1003,14 @@ function countRecords(buckets: SpeciesBucket[]): number {
   );
 }
 
+function countDistinctRewardTypingKeys(buckets: SpeciesBucket[]): number {
+  return new Set(
+    buckets.flatMap((bucket) =>
+      bucket.records.map((record) => toTypingKey(record.types)),
+    ),
+  ).size;
+}
+
 function filterBucketsByBlockedSpecies(
   buckets: SpeciesBucket[],
   blockedSpecies: ReadonlySet<SpeciesId>,
@@ -968,6 +1026,127 @@ function isRecordLegalAtLevel(
     level >= record.legalLevelRange.min &&
     level <= record.legalLevelRange.max &&
     resolveMoveSetForLevel(record, level) !== null
+  );
+}
+
+function getDistinctTypingRecords(
+  bucket: SpeciesBucket,
+  rng: RandomSource,
+): BattleReadyPokemonRecord[] {
+  const recordsByTypingKey = new Map<string, BattleReadyPokemonRecord[]>();
+
+  for (const record of bucket.records) {
+    const typingKey = toTypingKey(record.types);
+    const existingRecords = recordsByTypingKey.get(typingKey) ?? [];
+
+    existingRecords.push(record);
+    recordsByTypingKey.set(typingKey, existingRecords);
+  }
+
+  return sampleWithoutReplacement(
+    [...recordsByTypingKey.values()],
+    recordsByTypingKey.size,
+    rng,
+  ).map((records) => pickOne(records, rng));
+}
+
+function hasTypeOverlap(
+  typeIds: readonly PokemonTypeId[],
+  usedTypes: ReadonlySet<PokemonTypeId>,
+): boolean {
+  return typeIds.some((typeId) => usedTypes.has(typeId));
+}
+
+function selectUniqueTypeRewardRecords(options: {
+  buckets: SpeciesBucket[];
+  selectedRecords: BattleReadyPokemonRecord[];
+  startIndex: number;
+  usedTypes: Set<PokemonTypeId>;
+}): BattleReadyPokemonRecord[] | null {
+  if (options.selectedRecords.length === 3) {
+    return [...options.selectedRecords];
+  }
+
+  const remainingNeeded = 3 - options.selectedRecords.length;
+
+  for (
+    let bucketIndex = options.startIndex;
+    bucketIndex <= options.buckets.length - remainingNeeded;
+    bucketIndex += 1
+  ) {
+    const bucket = options.buckets[bucketIndex];
+
+    if (!bucket) {
+      continue;
+    }
+
+    for (const record of bucket.records) {
+      if (hasTypeOverlap(record.types, options.usedTypes)) {
+        continue;
+      }
+
+      options.selectedRecords.push(record);
+
+      for (const typeId of record.types) {
+        options.usedTypes.add(typeId);
+      }
+
+      const nestedSelection = selectUniqueTypeRewardRecords({
+        buckets: options.buckets,
+        selectedRecords: options.selectedRecords,
+        startIndex: bucketIndex + 1,
+        usedTypes: options.usedTypes,
+      });
+
+      if (nestedSelection) {
+        return nestedSelection;
+      }
+
+      options.selectedRecords.pop();
+
+      for (const typeId of record.types) {
+        options.usedTypes.delete(typeId);
+      }
+    }
+  }
+
+  return null;
+}
+
+function assertUniqueRewardTypes(
+  choices: readonly GeneratedBattlePokemon[],
+  floorNumber: number,
+): void {
+  const seenTypes = new Set<PokemonTypeId>();
+  const duplicateTypes = new Set<PokemonTypeId>();
+
+  for (const choice of choices) {
+    for (const typeId of choice.types) {
+      if (seenTypes.has(typeId)) {
+        duplicateTypes.add(typeId);
+      }
+
+      seenTypes.add(typeId);
+    }
+  }
+
+  if (duplicateTypes.size === 0) {
+    return;
+  }
+
+  throw new RulesSandboxError(
+    "illegal-reward",
+    `Reward offer repeated typing across choices: ${sortTypeIds([...duplicateTypes]).join(", ")}`,
+    {
+      details: {
+        duplicateTypes: sortTypeIds([...duplicateTypes]),
+        rewardChoices: choices.map((choice) => ({
+          battlePokemonId: choice.battlePokemonId,
+          types: [...choice.types],
+        })),
+      },
+      floorNumber,
+    },
   );
 }
 
@@ -1123,6 +1302,10 @@ function sortTypeIds(typeIds: PokemonTypeId[]): PokemonTypeId[] {
 
     return leftIndex - rightIndex;
   });
+}
+
+function toTypingKey(typeIds: readonly PokemonTypeId[]): string {
+  return sortTypeIds([...typeIds]).join("/");
 }
 
 function toGeneratedBattlePokemon(

@@ -344,7 +344,7 @@ function printSummary(
 
   if (summary.failedRuns === 0) {
     console.log(
-      "No duplicate species, illegal encounters, missing reward choices, or dead-end floors were detected.",
+      "No duplicate species, illegal encounters, duplicate reward typings, missing reward choices, or dead-end floors were detected.",
     );
   } else {
     console.log("Failure counts:");

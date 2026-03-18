@@ -212,6 +212,7 @@ function runSingleFlow(
       ),
       "Expected every reward choice to match the next floor level",
     );
+    assertRewardChoicesHaveDistinctTypes(rewardContext.rewardOffer.choices);
 
     const chosenReward = chooseStrongestCandidate(rewardContext.rewardOffer.choices);
 
@@ -383,6 +384,22 @@ function assertAllowedUtilityMovesRemainSelectable(): void {
       `Expected allowed utility move ${moveId} to stay selectable in the prototype battle UI`,
     );
   });
+}
+
+function assertRewardChoicesHaveDistinctTypes(
+  choices: readonly GeneratedBattlePokemon[],
+): void {
+  const seenTypes = new Set<PokemonTypeId>();
+
+  for (const choice of choices) {
+    for (const typeId of choice.types) {
+      assert(
+        !seenTypes.has(typeId),
+        `Expected reward offer typings to stay unique, but ${typeId} appeared more than once`,
+      );
+      seenTypes.add(typeId);
+    }
+  }
 }
 
 function resolveBestTurn(
