@@ -55,11 +55,11 @@ Planned game link: [https://sleepyrayray.github.io/games/whosthespy/](https://sl
 
 The first version should ship with five starting themes:
 
-- Foods & Drinks
+- Foods
 - Animals
 - Countries
 - Jobs
-- Household Items
+- Home
 
 Each theme should contain 50 words.
 

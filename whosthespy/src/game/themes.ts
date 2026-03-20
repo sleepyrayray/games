@@ -3,7 +3,7 @@ import type { Theme } from './types';
 export const THEMES: Theme[] = [
   {
     id: 'foods',
-    name: 'Foods & Drinks',
+    name: 'Foods',
     words: [
       'coffee',
       'tea',
@@ -227,7 +227,7 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'household',
-    name: 'Household Items',
+    name: 'Home',
     words: [
       'chair',
       'table',
