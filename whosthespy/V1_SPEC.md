@@ -141,7 +141,7 @@ Validation copy:
 Notes:
 
 - Only one theme can be active at a time
-- Launch themes are Foods & Drinks, Animals, Countries, and Jobs
+- Launch themes are Foods & Drinks, Animals, Countries, Jobs, and Household Items
 
 ### 4. Player Entry Screen
 

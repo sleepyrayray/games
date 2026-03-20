@@ -1,7 +1,7 @@
 export const MIN_PLAYERS = 3;
 export const MAX_PLAYERS = 10;
 
-export type ThemeId = 'foods' | 'animals' | 'countries' | 'jobs';
+export type ThemeId = 'foods' | 'animals' | 'countries' | 'jobs' | 'household';
 export type PlayerRole = 'spy' | 'civilian';
 export type VotePhase = 'standard' | 'revote';
 export type GameResult = 'spy' | 'non-spies';
