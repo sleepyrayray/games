@@ -76,7 +76,7 @@ const INSTRUCTION_STEPS = [
   },
 ];
 
-const REVEAL_HIDE_DELAY_MS = 650;
+const WORD_REVEAL_DURATION_MS = 2000;
 const createThemeOrder = () => shuffleItems(THEMES.map((theme) => theme.id));
 
 function createInitialState(): AppState {
@@ -694,6 +694,7 @@ function getResultDetail(
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
   const [canHideRevealedWord, setCanHideRevealedWord] = useState(true);
+  const [isRevealWordVisible, setIsRevealWordVisible] = useState(true);
 
   const selectedTheme = state.setup.selectedThemeId
     ? getThemeById(state.setup.selectedThemeId)
@@ -787,14 +788,17 @@ export default function App() {
   useEffect(() => {
     if (state.screen !== 'revealWord' || !currentRevealPlayer) {
       setCanHideRevealedWord(true);
+      setIsRevealWordVisible(true);
       return;
     }
 
     setCanHideRevealedWord(false);
+    setIsRevealWordVisible(false);
 
     const timeoutId = window.setTimeout(() => {
+      setIsRevealWordVisible(true);
       setCanHideRevealedWord(true);
-    }, REVEAL_HIDE_DELAY_MS);
+    }, WORD_REVEAL_DURATION_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -1026,14 +1030,27 @@ export default function App() {
               </section>
               <div className="card-slot">
                 <button
-                  className={canHideRevealedWord ? 'word-card word-card-light attention-card' : 'word-card word-card-light'}
+                  className={
+                    canHideRevealedWord
+                      ? `word-card word-card-light reveal-card ${isRevealWordVisible ? 'reveal-card-revealed attention-card' : 'reveal-card-revealing'}`
+                      : `word-card word-card-light reveal-card ${isRevealWordVisible ? 'reveal-card-revealed' : 'reveal-card-revealing'}`
+                  }
                   disabled={!canHideRevealedWord}
                   onClick={() => dispatch({ type: 'hideWord' })}
                 >
-                  <span className="word-card-label">Your word</span>
-                  <strong className="word-card-value">{currentAssignment.word}</strong>
+                  <span className="word-card-label">{isRevealWordVisible ? 'Your word' : 'Get ready'}</span>
+                  <div className="reveal-stage">
+                    <strong className="word-card-value">{currentAssignment.word}</strong>
+                    <span className="reveal-scrim" aria-hidden="true" />
+                    <span className="reveal-shimmer" aria-hidden="true" />
+                    {!isRevealWordVisible ? (
+                      <span className="reveal-placeholder" aria-hidden="true">
+                        Revealing...
+                      </span>
+                    ) : null}
+                  </div>
                   <small className="word-card-note">
-                    {canHideRevealedWord ? 'Tap to hide and pass it on' : 'Hang on...'}
+                    {isRevealWordVisible ? 'Tap to hide and pass it on' : 'Hang on for the reveal...'}
                   </small>
                 </button>
               </div>
