@@ -47,12 +47,10 @@ button {
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(196, 93, 44, 0);
-    transform: translateY(0);
   }
 
   50% {
     box-shadow: 0 0 0 0.24rem rgba(196, 93, 44, 0.18);
-    transform: translateY(-2px);
   }
 }
 
