@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useState } from 'react';
 import {
   createRound,
   eliminatePlayer,
@@ -785,7 +785,7 @@ export default function App() {
     }
   })();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (state.screen !== 'revealWord' || !currentRevealPlayer) {
       setCanHideRevealedWord(true);
       setIsRevealWordVisible(true);
