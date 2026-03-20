@@ -91,13 +91,21 @@ button {
 
 .eyebrow,
 .hero-kicker,
-.summary-card span,
 .field-row span {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.74rem;
   color: #5d6458;
+}
+
+.summary-card span {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #7a8174;
 }
 
 .status-stack {
@@ -173,23 +181,6 @@ button {
 
 .button-stack {
   margin-top: 1.15rem;
-}
-
-.phase-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.phase-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.38rem 0.72rem;
-  border-radius: 999px;
-  background: rgba(24, 32, 24, 0.08);
-  color: #344034;
-  font-size: 0.78rem;
 }
 
 .instruction-card {
@@ -314,13 +305,14 @@ button {
 }
 
 .choice-card-active {
-  background: #20271b;
-  border-color: #20271b;
+  background: #bf552d;
+  border-color: #bf552d;
+  box-shadow: 0 0.7rem 1.5rem rgba(191, 85, 45, 0.16);
 }
 
 .choice-card-active span,
 .choice-card-active small {
-  color: #f9f7f1;
+  color: #fff8f4;
 }
 
 .choice-card-vote {
@@ -388,12 +380,6 @@ button {
 .icon-button-danger {
   background: #f4dfda;
   color: #9d4c3d;
-}
-
-.setup-helper {
-  margin: 0 0 1rem;
-  color: #566052;
-  text-align: center;
 }
 
 .inline-name {
@@ -551,14 +537,33 @@ button {
   text-align: center;
 }
 
+.tied-players-card {
+  gap: 0.55rem;
+}
+
+.tied-player-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.tied-player-list p {
+  margin: 0;
+}
+
 .summary-grid {
   margin-top: 1.1rem;
 }
 
 .summary-card {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.35rem;
   place-items: center;
+}
+
+.summary-card strong {
+  font-size: clamp(1.18rem, 4.5vw, 1.35rem);
+  line-height: 1.05;
+  font-weight: 800;
 }
 
 .notice {

@@ -730,13 +730,6 @@ export default function App() {
           state.voting.phase === 'revote' ? state.voting.tiedPlayerIds : [],
         )
       : [];
-  const revealStepLabel =
-    state.round && currentRevealPlayer
-      ? `${state.revealIndex + 1} of ${state.round.revealOrder.length}`
-      : null;
-  const votingStepLabel = state.voting
-    ? `${state.voting.currentVoterIndex + 1} of ${state.voting.voterOrder.length}`
-    : null;
   const revotePlayerNames =
     state.round && state.voting?.phase === 'revote'
       ? formatNames(state.round.players, state.voting.tiedPlayerIds)
@@ -756,21 +749,6 @@ export default function App() {
   const eliminatedPlayerName = state.round
     ? getPlayerName(state.round.players, state.lastEliminatedPlayerId)
     : null;
-  const setupHelperText = (() => {
-    if (duplicateNameKeys.size > 0) {
-      return 'Each name needs to be different.';
-    }
-
-    if (filledPlayerCount < MIN_PLAYERS) {
-      return `Add at least ${MIN_PLAYERS} players to get it going.`;
-    }
-
-    if (readyPlayerCount < state.setup.playerNames.length) {
-      return 'Fill every player slot or remove the extras.';
-    }
-
-    return "You're set. Start when the group is ready.";
-  })();
   const topStatusItems = state.round
     ? [state.round.theme.name, `Round ${state.round.roundNumber}`]
     : state.screen === 'playerEntry' && selectedTheme
@@ -942,7 +920,6 @@ export default function App() {
                   </strong>
                 </article>
               </section>
-              <p className="setup-helper">{setupHelperText}</p>
               <div className="field-list">
                 {state.setup.playerNames.map((playerName, index) => (
                   <label key={`player-field-${index}`} className="field-row">
@@ -1019,10 +996,6 @@ export default function App() {
           {state.screen === 'revealHandoff' && currentRevealPlayer ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Private reveal</span>
-                  {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
-                </div>
                 <h2>
                   Pass it to <span className="inline-name">{currentRevealPlayer.name}</span>
                 </h2>
@@ -1046,10 +1019,6 @@ export default function App() {
           {state.screen === 'revealWord' && currentRevealPlayer && currentAssignment ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Private word</span>
-                  {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
-                </div>
                 <h2>Lock it in.</h2>
                 <p>When you are ready, tap the card and pass it on.</p>
               </section>
@@ -1070,10 +1039,6 @@ export default function App() {
           {state.screen === 'hintRound' ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Clue time</span>
-                  {state.round ? <span className="phase-chip">{state.round.theme.name}</span> : null}
-                </div>
                 <h2>Everyone drops one clue.</h2>
                 <p>One clue each, out loud.</p>
               </section>
@@ -1096,12 +1061,6 @@ export default function App() {
           {state.screen === 'voteHandoff' && currentVotingPlayer ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">
-                    {state.voting?.phase === 'revote' ? 'Private revote' : 'Private vote'}
-                  </span>
-                  {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
-                </div>
                 <h2>
                   Pass it to <span className="inline-name">{currentVotingPlayer.name}</span>
                 </h2>
@@ -1131,12 +1090,6 @@ export default function App() {
           {state.screen === 'vote' && currentVotingPlayer ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">
-                    {state.voting?.phase === 'revote' ? 'Revote' : 'Vote'}
-                  </span>
-                  {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
-                </div>
                 <h2>
                   <span className="inline-name">{currentVotingPlayer.name}</span>, who is your pick?
                 </h2>
@@ -1183,12 +1136,6 @@ export default function App() {
           {state.screen === 'tie' && state.round ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">{state.tieStage === 1 ? 'Tie vote' : 'No elimination'}</span>
-                  <span className="phase-chip">
-                    {state.tieStage === 1 ? `${state.tiedPlayerIds.length} tied` : `Round ${state.round.roundNumber + 1}`}
-                  </span>
-                </div>
                 <h2>{state.tieStage === 1 ? "It's a tie." : 'Still tied.'}</h2>
                 {state.tieStage === 1 ? (
                   <p>One more quick vote between the tied players.</p>
@@ -1196,36 +1143,23 @@ export default function App() {
                   <p>Nobody is out. Same words, another clue round.</p>
                 )}
               </section>
-              {state.tieStage === 1 ? (
-                <div className="summary-grid">
-                  {tiedPlayerCards.map((player) => (
-                    <article key={player.id} className="summary-card">
-                      <span>Tied player</span>
-                      <strong>
+              {tiedPlayerCards.length > 0 ? (
+                <section className="detail-note tied-players-card">
+                  <span>Tied players</span>
+                  <div className="tied-player-list">
+                    {tiedPlayerCards.map((player) => (
+                      <p key={player.id}>
                         <span className="inline-name">{player.name}</span>
-                      </strong>
-                    </article>
-                  ))}
-                </div>
+                      </p>
+                    ))}
+                  </div>
+                </section>
               ) : null}
-              <section className="checklist-card">
-                <span>Next up</span>
-                <div className="checklist-list">
-                  {state.tieStage === 1 ? (
-                    <>
-                      <p>Everyone votes again in private.</p>
-                      <p>Only tied players are on the card.</p>
-                      <p>No vote totals show up.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p>Nobody leaves this round.</p>
-                      <p>Same words, same players.</p>
-                      <p>Go back to clues, then vote again.</p>
-                    </>
-                  )}
-                </div>
-              </section>
+              <p className="phase-followup">
+                {state.tieStage === 1
+                  ? 'Everyone votes again in private. Only the tied players show up on the ballot.'
+                  : 'Nobody is out. Go back to clues, then vote again with the same words.'}
+              </p>
               <div className="button-stack">
                 {state.tieStage === 1 ? (
                   <button className="button button-primary" onClick={() => dispatch({ type: 'startRevote' })}>
@@ -1243,12 +1177,6 @@ export default function App() {
           {state.screen === 'elimination' && state.round && eliminatedPlayerName ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Elimination</span>
-                  <span className="phase-chip">
-                    {state.lastEliminatedPlayerId === state.round.spyPlayerId ? 'Spy caught' : 'Round continues'}
-                  </span>
-                </div>
                 <h2>
                   <span className="inline-name">{eliminatedPlayerName}</span> is out.
                 </h2>
@@ -1292,10 +1220,6 @@ export default function App() {
           {state.screen === 'spyGuessHandoff' && eliminatedPlayerName ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Final guess</span>
-                  <span className="phase-chip">Private</span>
-                </div>
                 <h2>
                   Pass it to <span className="inline-name">{eliminatedPlayerName}</span>
                 </h2>
@@ -1316,10 +1240,6 @@ export default function App() {
           {state.screen === 'spyGuess' ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">Final guess</span>
-                  <span className="phase-chip">Known variants count</span>
-                </div>
                 <h2>Guess the common word</h2>
                 <p>You were the spy. Type the word or a known variant. Case does not matter.</p>
               </section>
@@ -1362,10 +1282,6 @@ export default function App() {
           {state.screen === 'result' && state.round && state.result ? (
             <>
               <section className="phase-hero">
-                <div className="phase-chip-row">
-                  <span className="phase-chip">{state.result === 'spy' ? 'Spy wins' : 'Crew wins'}</span>
-                  {resultDetail ? <span className="phase-chip">{resultDetail.chip}</span> : null}
-                </div>
                 <h2>{state.result === 'spy' ? 'Spy wins' : 'Crew wins'}</h2>
                 <p>{resultNote}</p>
               </section>
