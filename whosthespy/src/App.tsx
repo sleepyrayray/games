@@ -977,10 +977,14 @@ export default function App() {
                   <span className="phase-chip">Private reveal</span>
                   {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
                 </div>
-                <h2>Pass the phone to {currentRevealPlayer.name}</h2>
-                <p>Only {currentRevealPlayer.name} should look at the screen.</p>
+                <h2>
+                  Pass the phone to <span className="inline-name">{currentRevealPlayer.name}</span>
+                </h2>
+                <p>
+                  Only <span className="inline-name">{currentRevealPlayer.name}</span> should look at the screen.
+                </p>
               </section>
-              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showWord' })}>
+              <button className="tap-card handoff-card handoff-card-dark" onClick={() => dispatch({ type: 'showWord' })}>
                 <span className="handoff-label">Next player</span>
                 <strong>{currentRevealPlayer.name}</strong>
                 <small>Tap to view your word</small>
@@ -998,7 +1002,7 @@ export default function App() {
                 <h2>Memorize it, then hide it.</h2>
                 <p>Tap the card after you are ready to pass the phone.</p>
               </section>
-              <button className="word-card" onClick={() => dispatch({ type: 'hideWord' })}>
+              <button className="word-card word-card-light" onClick={() => dispatch({ type: 'hideWord' })}>
                 <span className="word-card-label">Your word</span>
                 <strong className="word-card-value">{currentAssignment.word}</strong>
                 <small className="word-card-note">Tap to hide and continue</small>
@@ -1041,8 +1045,13 @@ export default function App() {
                   </span>
                   {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
                 </div>
-                <h2>Pass the phone to {currentVotingPlayer.name}</h2>
-                <p>Only {currentVotingPlayer.name} should look while choosing a vote.</p>
+                <h2>
+                  Pass the phone to <span className="inline-name">{currentVotingPlayer.name}</span>
+                </h2>
+                <p>
+                  Only <span className="inline-name">{currentVotingPlayer.name}</span> should look while choosing a
+                  vote.
+                </p>
               </section>
               {state.voting?.phase === 'revote' && revotePlayerNames ? (
                 <section className="detail-note">
@@ -1070,7 +1079,7 @@ export default function App() {
                   {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
                 </div>
                 <h2>
-                  {currentVotingPlayer.name}, choose{' '}
+                  <span className="inline-name">{currentVotingPlayer.name}</span>, choose{' '}
                   {state.voting?.phase === 'revote' ? 'one tied player.' : 'one player.'}
                 </h2>
                 <p>
@@ -1180,9 +1189,13 @@ export default function App() {
                     {state.lastEliminatedPlayerId === state.round.spyPlayerId ? 'Spy caught' : 'Round continues'}
                   </span>
                 </div>
-                <h2>{eliminatedPlayerName} was eliminated</h2>
+                <h2>
+                  <span className="inline-name">{eliminatedPlayerName}</span> was eliminated
+                </h2>
                 {state.lastEliminatedPlayerId === state.round.spyPlayerId ? (
-                  <p>{eliminatedPlayerName} was the spy.</p>
+                  <p>
+                    <span className="inline-name">{eliminatedPlayerName}</span> was the spy.
+                  </p>
                 ) : (
                   <p>The hidden words stay the same. Start another hint round with the remaining players.</p>
                 )}
@@ -1219,8 +1232,12 @@ export default function App() {
                   <span className="phase-chip">Final guess</span>
                   <span className="phase-chip">Private</span>
                 </div>
-                <h2>Pass the device to {eliminatedPlayerName}</h2>
-                <p>Only {eliminatedPlayerName} should look at the guess screen.</p>
+                <h2>
+                  Pass the device to <span className="inline-name">{eliminatedPlayerName}</span>
+                </h2>
+                <p>
+                  Only <span className="inline-name">{eliminatedPlayerName}</span> should look at the guess screen.
+                </p>
               </section>
               <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
                 <span className="handoff-label">Final guess</span>

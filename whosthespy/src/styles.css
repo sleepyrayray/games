@@ -351,6 +351,16 @@ button {
   color: #566052;
 }
 
+.inline-name {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.08em 0.38em;
+  border-radius: 0.55em;
+  background: rgba(32, 39, 27, 0.12);
+  color: #20271b;
+  font-weight: 700;
+}
+
 .tap-card,
 .word-card {
   min-height: 10rem;
@@ -384,6 +394,20 @@ button {
   color: #596154;
 }
 
+.handoff-card-dark {
+  background: #20271b;
+  border-color: #20271b;
+}
+
+.handoff-card-dark .handoff-label {
+  color: rgba(249, 247, 241, 0.72);
+}
+
+.handoff-card-dark strong,
+.handoff-card-dark small {
+  color: #f9f7f1;
+}
+
 .word-card {
   gap: 0.55rem;
   background: #20271b;
@@ -412,6 +436,26 @@ button {
 .word-card-note,
 .word-card-label {
   color: #f9f7f1;
+}
+
+.word-card-light {
+  background: #f8f5eb;
+  border-color: rgba(24, 32, 24, 0.12);
+}
+
+.word-card-light,
+.word-card-light .word-card-value,
+.word-card-light .word-card-note,
+.word-card-light .word-card-label {
+  color: #20271b;
+}
+
+.word-card-light .word-card-label {
+  color: #606858;
+}
+
+.word-card-light .word-card-note {
+  color: #586054;
 }
 
 .checklist-card,
