@@ -57,70 +57,12 @@ button {
 }
 
 @keyframes revealWordFadeIn {
-  0%,
-  58% {
+  0% {
     opacity: 0;
-    transform: scale(0.92);
-    filter: blur(10px);
-  }
-
-  82% {
-    opacity: 0.8;
-    transform: scale(1.03);
-    filter: blur(2px);
   }
 
   100% {
     opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes revealScrimLift {
-  0%,
-  56% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-118%);
-  }
-}
-
-@keyframes revealShimmerSweep {
-  0%,
-  42% {
-    opacity: 0;
-    transform: translateX(-140%) skewX(-18deg);
-  }
-
-  60% {
-    opacity: 0.24;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(165%) skewX(-18deg);
-  }
-}
-
-@keyframes revealPlaceholderFade {
-  0%,
-  48% {
-    opacity: 0.92;
-    transform: scale(1);
-  }
-
-  76% {
-    opacity: 0.28;
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(0.96);
   }
 }
 
@@ -604,67 +546,17 @@ button {
   place-items: center;
 }
 
-.reveal-stage > * {
-  grid-area: 1 / 1;
-}
-
 .reveal-card .word-card-value {
   transition: none;
 }
 
-.reveal-card .reveal-scrim,
-.reveal-card .reveal-shimmer {
-  width: 100%;
-  height: 100%;
-  border-radius: 1.1rem;
-}
-
-.reveal-card .reveal-scrim {
-  background:
-    linear-gradient(180deg, rgba(30, 36, 25, 0.94), rgba(55, 68, 44, 0.92)),
-    #20271b;
-}
-
-.reveal-card .reveal-shimmer {
-  width: 42%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0));
-}
-
-.reveal-placeholder {
-  font-size: 0.94rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(249, 247, 241, 0.9);
-}
-
 .reveal-card-revealing .word-card-value {
   opacity: 0;
-  transform: scale(0.92);
-  filter: blur(10px);
-  animation: revealWordFadeIn 2000ms cubic-bezier(0.22, 0.9, 0.27, 1) forwards;
-}
-
-.reveal-card-revealing .reveal-scrim {
-  animation: revealScrimLift 2000ms cubic-bezier(0.22, 0.9, 0.27, 1) forwards;
-}
-
-.reveal-card-revealing .reveal-shimmer {
-  animation: revealShimmerSweep 2000ms ease-in-out forwards;
-}
-
-.reveal-card-revealing .reveal-placeholder {
-  animation: revealPlaceholderFade 2000ms ease forwards;
+  animation: revealWordFadeIn 2000ms ease forwards;
 }
 
 .reveal-card-revealed .word-card-value {
   opacity: 1;
-  transform: scale(1);
-  filter: blur(0);
-}
-
-.reveal-card-revealed .reveal-scrim,
-.reveal-card-revealed .reveal-shimmer {
-  opacity: 0;
 }
 
 .attention-card {
@@ -676,10 +568,7 @@ button {
     animation: none;
   }
 
-  .reveal-card-revealing .word-card-value,
-  .reveal-card-revealing .reveal-scrim,
-  .reveal-card-revealing .reveal-shimmer,
-  .reveal-card-revealing .reveal-placeholder {
+  .reveal-card-revealing .word-card-value {
     animation: none;
   }
 }

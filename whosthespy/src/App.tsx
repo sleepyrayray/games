@@ -1038,19 +1038,12 @@ export default function App() {
                   disabled={!canHideRevealedWord}
                   onClick={() => dispatch({ type: 'hideWord' })}
                 >
-                  <span className="word-card-label">{isRevealWordVisible ? 'Your word' : 'Get ready'}</span>
+                  <span className="word-card-label">Your word</span>
                   <div className="reveal-stage">
                     <strong className="word-card-value">{currentAssignment.word}</strong>
-                    <span className="reveal-scrim" aria-hidden="true" />
-                    <span className="reveal-shimmer" aria-hidden="true" />
-                    {!isRevealWordVisible ? (
-                      <span className="reveal-placeholder" aria-hidden="true">
-                        Revealing...
-                      </span>
-                    ) : null}
                   </div>
                   <small className="word-card-note">
-                    {isRevealWordVisible ? 'Tap to hide and pass it on' : 'Hang on for the reveal...'}
+                    {isRevealWordVisible ? 'Tap to hide and pass it on' : 'Hang on...'}
                   </small>
                 </button>
               </div>
