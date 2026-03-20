@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import {
   createRound,
   eliminatePlayer,
@@ -74,6 +74,8 @@ const INSTRUCTION_STEPS = [
     body: 'Each active player votes quietly on the device. If the spy is caught, they get one final guess.',
   },
 ];
+
+const REVEAL_HIDE_DELAY_MS = 650;
 
 function createInitialState(): AppState {
   return {
@@ -692,6 +694,7 @@ function getResultDetail(
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
+  const [canHideRevealedWord, setCanHideRevealedWord] = useState(true);
 
   const selectedTheme = state.setup.selectedThemeId
     ? getThemeById(state.setup.selectedThemeId)
@@ -774,6 +777,23 @@ export default function App() {
     : state.screen === 'playerEntry' && selectedTheme
       ? [selectedTheme.name, `${state.setup.playerNames.length} seats`]
       : [];
+
+  useEffect(() => {
+    if (state.screen !== 'revealWord' || !currentRevealPlayer) {
+      setCanHideRevealedWord(true);
+      return;
+    }
+
+    setCanHideRevealedWord(false);
+
+    const timeoutId = window.setTimeout(() => {
+      setCanHideRevealedWord(true);
+    }, REVEAL_HIDE_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [state.screen, currentRevealPlayer?.id]);
 
   return (
     <div className="app-shell">
@@ -987,7 +1007,7 @@ export default function App() {
               <button className="tap-card handoff-card handoff-card-dark" onClick={() => dispatch({ type: 'showWord' })}>
                 <span className="handoff-label">Next player</span>
                 <strong>{currentRevealPlayer.name}</strong>
-                <small>Tap to view your word</small>
+                <small className="instruction-pulse">Tap to view your word</small>
               </button>
             </>
           ) : null}
@@ -1002,10 +1022,18 @@ export default function App() {
                 <h2>Memorize it, then hide it.</h2>
                 <p>Tap the card after you are ready to pass the phone.</p>
               </section>
-              <button className="word-card word-card-light" onClick={() => dispatch({ type: 'hideWord' })}>
+              <button
+                className="word-card word-card-light"
+                disabled={!canHideRevealedWord}
+                onClick={() => dispatch({ type: 'hideWord' })}
+              >
                 <span className="word-card-label">Your word</span>
                 <strong className="word-card-value">{currentAssignment.word}</strong>
-                <small className="word-card-note">Tap to hide and continue</small>
+                <small
+                  className={canHideRevealedWord ? 'word-card-note instruction-pulse' : 'word-card-note'}
+                >
+                  {canHideRevealedWord ? 'Tap to hide and continue' : 'Hold for a moment...'}
+                </small>
               </button>
             </>
           ) : null}
@@ -1064,7 +1092,7 @@ export default function App() {
                   {state.voting?.phase === 'revote' ? 'Open revote' : 'Open ballot'}
                 </span>
                 <strong>{currentVotingPlayer.name}</strong>
-                <small>Tap to open the ballot</small>
+                <small className="instruction-pulse">Tap to open the ballot</small>
               </button>
             </>
           ) : null}

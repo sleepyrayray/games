@@ -39,6 +39,17 @@ button {
   cursor: pointer;
 }
 
+@keyframes instructionPulse {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 .app-shell {
   min-height: 100vh;
   min-height: 100dvh;
@@ -217,9 +228,15 @@ button {
 }
 
 .button:disabled,
-.icon-button:disabled {
+.icon-button:disabled,
+.tap-card:disabled,
+.word-card:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.word-card:disabled {
+  opacity: 1;
 }
 
 .button:active,
@@ -456,6 +473,16 @@ button {
 
 .word-card-light .word-card-note {
   color: #586054;
+}
+
+.instruction-pulse {
+  animation: instructionPulse 1.35s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instruction-pulse {
+    animation: none;
+  }
 }
 
 .checklist-card,
