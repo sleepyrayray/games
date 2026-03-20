@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://pokechamp.local/schemas/runtime/pokemon.schema.json",
-  "title": "PokeChamp Runtime Pokemon Dataset",
-  "type": "array",
-  "items": {
-    "$ref": "common.schema.json#/$defs/battleReadyPokemonRecord"
-  }
-}
