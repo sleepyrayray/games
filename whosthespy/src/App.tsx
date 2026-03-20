@@ -57,12 +57,12 @@ const INSTRUCTION_STEPS = [
   {
     step: '1',
     title: 'Set up the round',
-    body: 'Pick a theme and add 3 to 10 names on one phone.',
+    body: 'Pick a theme and add 3 to 10 names to get the round ready.',
   },
   {
     step: '2',
     title: 'Pass and peek',
-    body: 'Players check their words one at a time, hide them again, and pass the phone along.',
+    body: 'Players check their words one at a time, hide them again, and pass it along.',
   },
   {
     step: '3',
@@ -72,7 +72,7 @@ const INSTRUCTION_STEPS = [
   {
     step: '4',
     title: 'Vote in private',
-    body: 'Each active player votes quietly on the phone. Catch the spy and they get one last guess.',
+    body: 'Each active player votes in private. Catch the spy and they get one last guess.',
   },
 ];
 
@@ -668,26 +668,26 @@ function getResultDetail(
     if (lastEliminatedPlayerId === round.spyPlayerId) {
       return {
         chip: 'Final guess',
-        note: 'The spy nailed the common word and stole the round.',
+        noteKind: 'spyGuessedCorrectly',
       };
     }
 
     return {
       chip: 'Last two players',
-      note: 'The spy made it to the final two and took the round.',
+      noteKind: 'spySurvived',
     };
   }
 
   if (lastEliminatedPlayerId === round.spyPlayerId) {
     return {
       chip: 'Final guess missed',
-      note: 'The spy got caught and missed the last guess.',
+      noteKind: 'spyMissed',
     };
   }
 
   return {
     chip: 'Round complete',
-    note: 'The crew closed it out.',
+    noteKind: 'crewClosedItOut',
   };
 }
 
@@ -776,6 +776,35 @@ export default function App() {
     : state.screen === 'playerEntry' && selectedTheme
       ? [selectedTheme.name, `${state.setup.playerNames.length} seats`]
       : [];
+  const resultNote = (() => {
+    if (!resultDetail || !spyPlayerName) {
+      return 'The round is over. Review the final reveal below, then start again.';
+    }
+
+    switch (resultDetail.noteKind) {
+      case 'spyGuessedCorrectly':
+        return (
+          <>
+            <span className="inline-name">{spyPlayerName}</span> nailed the common word and stole the round.
+          </>
+        );
+      case 'spySurvived':
+        return (
+          <>
+            <span className="inline-name">{spyPlayerName}</span> made it to the final two and took the round.
+          </>
+        );
+      case 'spyMissed':
+        return (
+          <>
+            <span className="inline-name">{spyPlayerName}</span> got caught and missed the last guess.
+          </>
+        );
+      case 'crewClosedItOut':
+      default:
+        return 'The crew closed it out.';
+    }
+  })();
 
   useEffect(() => {
     if (state.screen !== 'revealWord' || !currentRevealPlayer) {
@@ -819,7 +848,7 @@ export default function App() {
           {state.screen === 'title' ? (
             <>
               <section className="hero hero-title">
-                <p className="hero-copy hero-copy-compact">One phone, quick clues, one odd word.</p>
+                <p className="hero-copy hero-copy-compact">Quick clues, one odd word.</p>
               </section>
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
@@ -995,7 +1024,7 @@ export default function App() {
                   {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
                 </div>
                 <h2>
-                  Pass the phone to <span className="inline-name">{currentRevealPlayer.name}</span>
+                  Pass it to <span className="inline-name">{currentRevealPlayer.name}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{currentRevealPlayer.name}</span> should peek at the screen.
@@ -1006,7 +1035,9 @@ export default function App() {
                 onClick={() => dispatch({ type: 'showWord' })}
               >
                 <span className="handoff-label">Up next</span>
-                <strong>{currentRevealPlayer.name}</strong>
+                <strong>
+                  <span className="inline-name">{currentRevealPlayer.name}</span>
+                </strong>
                 <small>Tap to peek at your word</small>
               </button>
             </>
@@ -1020,7 +1051,7 @@ export default function App() {
                   {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
                 </div>
                 <h2>Lock it in.</h2>
-                <p>When you are ready, tap the card and pass the phone.</p>
+                <p>When you are ready, tap the card and pass it on.</p>
               </section>
               <button
                 className={canHideRevealedWord ? 'word-card word-card-light attention-card' : 'word-card word-card-light'}
@@ -1072,7 +1103,7 @@ export default function App() {
                   {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
                 </div>
                 <h2>
-                  Pass the phone to <span className="inline-name">{currentVotingPlayer.name}</span>
+                  Pass it to <span className="inline-name">{currentVotingPlayer.name}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{currentVotingPlayer.name}</span> should peek while making the
@@ -1089,7 +1120,9 @@ export default function App() {
                 <span className="handoff-label">
                   {state.voting?.phase === 'revote' ? 'Open revote' : 'Open vote'}
                 </span>
-                <strong>{currentVotingPlayer.name}</strong>
+                <strong>
+                  <span className="inline-name">{currentVotingPlayer.name}</span>
+                </strong>
                 <small>Tap to make your pick</small>
               </button>
             </>
@@ -1234,15 +1267,17 @@ export default function App() {
                     <span className="inline-name">{eliminatedPlayerName}</span>
                   </strong>
                 </article>
-                <article className="summary-card">
-                  <span>Next up</span>
-                  <strong>
-                    {state.lastEliminatedPlayerId === state.round.spyPlayerId
-                      ? 'Final guess'
-                      : `Round ${state.round.roundNumber + 1}`}
-                  </strong>
-                </article>
               </div>
+              <p className="phase-followup">
+                {state.lastEliminatedPlayerId === state.round.spyPlayerId ? (
+                  <>
+                    <span className="inline-name">{eliminatedPlayerName}</span> gets one last shot to guess the common
+                    word.
+                  </>
+                ) : (
+                  `Round ${state.round.roundNumber + 1} starts with the remaining players.`
+                )}
+              </p>
               <div className="button-stack">
                 <button
                   className="button button-primary"
@@ -1262,7 +1297,7 @@ export default function App() {
                   <span className="phase-chip">Private</span>
                 </div>
                 <h2>
-                  Pass the device to <span className="inline-name">{eliminatedPlayerName}</span>
+                  Pass it to <span className="inline-name">{eliminatedPlayerName}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{eliminatedPlayerName}</span> gets this last shot.
@@ -1270,7 +1305,9 @@ export default function App() {
               </section>
               <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
                 <span className="handoff-label">Final guess</span>
-                <strong>{eliminatedPlayerName}</strong>
+                <strong>
+                  <span className="inline-name">{eliminatedPlayerName}</span>
+                </strong>
                 <small>Tap to take the guess</small>
               </button>
             </>
@@ -1330,7 +1367,7 @@ export default function App() {
                   {resultDetail ? <span className="phase-chip">{resultDetail.chip}</span> : null}
                 </div>
                 <h2>{state.result === 'spy' ? 'Spy wins' : 'Crew wins'}</h2>
-                <p>{resultDetail?.note ?? 'The round is over. Review the final reveal below, then start again.'}</p>
+                <p>{resultNote}</p>
               </section>
               <div className="summary-grid">
                 {eliminatedPlayerName ? (

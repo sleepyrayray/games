@@ -149,6 +149,12 @@ button {
   max-width: 26rem;
 }
 
+.phase-followup {
+  margin: 1.05rem 0 0;
+  color: #495046;
+  text-align: center;
+}
+
 .hero-copy-compact {
   max-width: 22rem;
   font-size: 1.08rem;
@@ -478,7 +484,6 @@ button {
 }
 
 .word-card-light,
-.word-card-light .word-card-value,
 .word-card-light .word-card-note,
 .word-card-light .word-card-label {
   color: #20271b;
@@ -486,6 +491,10 @@ button {
 
 .word-card-light .word-card-label {
   color: #606858;
+}
+
+.word-card-light .word-card-value {
+  color: #3d8050;
 }
 
 .word-card-light .word-card-note {
