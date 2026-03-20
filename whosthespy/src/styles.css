@@ -53,6 +53,9 @@ button {
 }
 
 .app-shell {
+  display: grid;
+  justify-items: center;
+  align-content: center;
   min-height: 100vh;
   min-height: 100dvh;
   padding:
@@ -560,8 +563,6 @@ button {
 
 @media (min-width: 760px) {
   .app-shell {
-    display: grid;
-    place-items: center;
     padding: 2rem;
   }
 
