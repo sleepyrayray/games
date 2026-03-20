@@ -2,7 +2,7 @@
 
 Who's the Spy? is a small local multiplayer social deduction game built around hidden words, spoken hints, and elimination voting. Everyone plays on one shared device, but the actual hint-giving happens face to face in real life.
 
-Planned game link: [https://sleepyrayray.github.io/games/whosthespy/](https://sleepyrayray.github.io/games/whosthespy/)
+Planned game link: [Play Who's the Spy?](https://sleepyrayray.github.io/games/whosthespy/)
 
 ## Core Idea
 
