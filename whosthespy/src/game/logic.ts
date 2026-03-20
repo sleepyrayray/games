@@ -15,6 +15,40 @@ export function normalizeForCompare(value: string) {
   return normalizeInput(value).toLowerCase();
 }
 
+export function normalizeSpyGuess(value: string) {
+  return normalizeInput(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const SPY_GUESS_ALIASES = new Map(
+  Object.entries({
+    'united states': ['us', 'usa', 'united states of america', 'america'],
+    'south korea': ['korea'],
+    'police officer': ['cop'],
+    'mail carrier': ['mailman', 'postman'],
+    omelet: ['omelette'],
+    donut: ['doughnut'],
+    soda: ['pop'],
+  }).map(([word, aliases]) => [
+    normalizeSpyGuess(word),
+    new Set(aliases.map((alias) => normalizeSpyGuess(alias))),
+  ]),
+);
+
+export function isSpyGuessCorrect(guess: string, commonWord: string) {
+  const normalizedGuess = normalizeSpyGuess(guess);
+  const normalizedCommonWord = normalizeSpyGuess(commonWord);
+
+  if (normalizedGuess === normalizedCommonWord) {
+    return true;
+  }
+
+  return SPY_GUESS_ALIASES.get(normalizedCommonWord)?.has(normalizedGuess) ?? false;
+}
+
 export function validatePlayerNames(playerNames: string[]) {
   const sanitizedNames = playerNames.map(normalizeInput);
 

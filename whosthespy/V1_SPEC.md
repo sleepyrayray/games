@@ -23,7 +23,7 @@ The app should support the real-life social gameplay, not compete with it.
 - Reveal order is randomized each round
 - The word reveal screen shows only the assigned word, not an explicit spy or non-spy label
 - After seeing their word, the player taps the word card to hide it and advance to the next player
-- Final spy guess must match the common word exactly after case-insensitive comparison
+- Final spy guess must match the common word after case-insensitive comparison, with a small approved set of common variants accepted for specific words
 - The app never shows vote counts or who voted for whom
 - If only two active players remain and the spy is still in the game, the spy wins immediately
 
@@ -357,9 +357,10 @@ Primary actions:
 
 Input rules:
 
-- Compare using a case-insensitive exact match
+- Compare using a case-insensitive match
 - Trim surrounding whitespace before comparing
-- Do not accept fuzzy matches, synonyms, hints, or near-matches
+- Accept only a small approved set of common variants for specific words
+- Do not accept broad fuzzy matches, open-ended synonyms, hints, or near-matches
 
 Notes:
 
@@ -426,7 +427,7 @@ Replay behavior:
 
 ### Final Guess Resolution
 
-- If the submitted guess exactly matches the common word after case-insensitive comparison, the spy wins
+- If the submitted guess matches the common word after case-insensitive comparison, or matches an approved variant for that word, the spy wins
 - Otherwise, the non-spies win
 
 ## Tone And UI Guardrails

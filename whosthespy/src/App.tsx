@@ -6,6 +6,7 @@ import {
   getAssignment,
   getVoteOptions,
   incrementRound,
+  isSpyGuessCorrect,
   normalizeInput,
   normalizeForCompare,
   resolveVotes,
@@ -487,10 +488,9 @@ function reducer(state: AppState, action: Action): AppState {
         };
       }
 
-      const result: GameResult =
-        normalizeForCompare(state.spyGuess) === normalizeForCompare(state.round.commonWord)
-          ? 'spy'
-          : 'non-spies';
+      const result: GameResult = isSpyGuessCorrect(state.spyGuess, state.round.commonWord)
+        ? 'spy'
+        : 'non-spies';
 
       return {
         ...state,
@@ -1280,10 +1280,10 @@ export default function App() {
               <section className="phase-hero">
                 <div className="phase-chip-row">
                   <span className="phase-chip">Final guess</span>
-                  <span className="phase-chip">Exact match only</span>
+                  <span className="phase-chip">Known variants okay</span>
                 </div>
                 <h2>Guess the common word</h2>
-                <p>You were the spy. Enter one exact word. Case does not matter.</p>
+                <p>You were the spy. Enter the word or a common accepted variant. Case does not matter.</p>
               </section>
               <section className="detail-note">
                 <span>Private input</span>

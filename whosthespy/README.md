@@ -36,7 +36,7 @@ Planned game link: [https://sleepyrayray.github.io/games/whosthespy/](https://sl
 9. The app reveals only the eliminated player, not the full vote tally.
 10. If the eliminated player was not the spy, that player is out and the game continues.
 11. If the eliminated player was the spy, the spy gets one chance to type the common word.
-12. If the spy guesses the common word correctly, the spy wins. Otherwise the non-spy players win.
+12. If the spy guesses the common word correctly, or matches a small accepted variant for that word, the spy wins. Otherwise the non-spy players win.
 13. After game over, players can restart and play again.
 
 ## Rule Set
