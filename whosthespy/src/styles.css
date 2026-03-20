@@ -223,6 +223,13 @@ button {
   gap: 0.9rem;
 }
 
+.theme-grid,
+.vote-grid,
+.summary-grid,
+.setup-summary {
+  --split-grid-gap: 0.9rem;
+}
+
 .button-stack {
   margin-top: 1.15rem;
 }
@@ -670,6 +677,15 @@ button {
   .vote-grid,
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .theme-grid > :last-child:nth-child(odd),
+  .vote-grid > :last-child:nth-child(odd),
+  .summary-grid > :last-child:nth-child(odd),
+  .setup-summary > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, calc((100% - var(--split-grid-gap)) / 2));
   }
 
   .field-control {
