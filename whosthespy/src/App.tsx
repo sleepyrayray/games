@@ -991,7 +991,7 @@ export default function App() {
                   Start Round
                 </button>
                 <button className="button button-ghost" onClick={() => dispatch({ type: 'backToTheme' })}>
-                  Back
+                  Pick Another Theme
                 </button>
               </div>
             </>
