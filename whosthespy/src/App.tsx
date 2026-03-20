@@ -77,6 +77,7 @@ const INSTRUCTION_STEPS = [
 ];
 
 const REVEAL_HIDE_DELAY_MS = 650;
+const createThemeOrder = () => shuffleItems(THEMES.map((theme) => theme.id));
 
 function createInitialState(): AppState {
   return {
@@ -84,7 +85,7 @@ function createInitialState(): AppState {
     setup: {
       selectedThemeId: null,
       playerNames: ['', '', ''],
-      themeOrder: shuffleItems(THEMES.map((theme) => theme.id)),
+      themeOrder: createThemeOrder(),
     },
     round: null,
     revealIndex: 0,
@@ -105,6 +106,10 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         screen: 'themeSelection',
+        setup: {
+          ...state.setup,
+          themeOrder: createThemeOrder(),
+        },
         notice: null,
       };
 
@@ -159,6 +164,10 @@ function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         screen: 'themeSelection',
+        setup: {
+          ...state.setup,
+          themeOrder: createThemeOrder(),
+        },
         notice: null,
       };
 
@@ -655,34 +664,24 @@ function getResultDetail(
   round: NonNullable<AppState['round']>,
   lastEliminatedPlayerId: string | null,
 ) {
-  const spyName = getPlayerName(round.players, round.spyPlayerId) ?? 'The spy';
-  const lastEliminatedName = getPlayerName(round.players, lastEliminatedPlayerId);
-
   if (result === 'spy') {
     if (lastEliminatedPlayerId === round.spyPlayerId) {
       return {
         chip: 'Final guess',
-        note: `${spyName} nailed the common word and stole the round.`,
-      };
-    }
-
-    if (lastEliminatedName) {
-      return {
-        chip: 'Last two players',
-        note: `${spyName} made it to the final two after ${lastEliminatedName} went out.`,
+        note: 'The spy nailed the common word and stole the round.',
       };
     }
 
     return {
       chip: 'Last two players',
-      note: `${spyName} made it to the final two and took the round.`,
+      note: 'The spy made it to the final two and took the round.',
     };
   }
 
   if (lastEliminatedPlayerId === round.spyPlayerId) {
     return {
       chip: 'Final guess missed',
-      note: `${spyName} got caught and missed the last guess.`,
+      note: 'The spy got caught and missed the last guess.',
     };
   }
 
@@ -955,7 +954,7 @@ export default function App() {
                       />
                       {state.setup.playerNames.length > MIN_PLAYERS ? (
                         <button
-                          className="icon-button"
+                          className="icon-button icon-button-danger"
                           type="button"
                           onClick={() => dispatch({ type: 'removePlayer', index })}
                         >
@@ -1169,7 +1168,9 @@ export default function App() {
                   {tiedPlayerCards.map((player) => (
                     <article key={player.id} className="summary-card">
                       <span>Tied player</span>
-                      <strong>{player.name}</strong>
+                      <strong>
+                        <span className="inline-name">{player.name}</span>
+                      </strong>
                     </article>
                   ))}
                 </div>
@@ -1229,7 +1230,9 @@ export default function App() {
               <div className="summary-grid">
                 <article className="summary-card">
                   <span>Out</span>
-                  <strong>{eliminatedPlayerName}</strong>
+                  <strong>
+                    <span className="inline-name">{eliminatedPlayerName}</span>
+                  </strong>
                 </article>
                 <article className="summary-card">
                   <span>Next up</span>
@@ -1333,12 +1336,16 @@ export default function App() {
                 {eliminatedPlayerName ? (
                   <article className="summary-card">
                     <span>Out last</span>
-                    <strong>{eliminatedPlayerName}</strong>
+                    <strong>
+                      <span className="inline-name">{eliminatedPlayerName}</span>
+                    </strong>
                   </article>
                 ) : null}
                 <article className="summary-card">
                   <span>Spy</span>
-                  <strong>{spyPlayerName}</strong>
+                  <strong>
+                    <span className="inline-name">{spyPlayerName}</span>
+                  </strong>
                 </article>
                 <article className="summary-card">
                   <span>Common word</span>
