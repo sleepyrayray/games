@@ -994,8 +994,8 @@ export default function App() {
           ) : null}
 
           {state.screen === 'revealHandoff' && currentRevealPlayer ? (
-            <>
-              <section className="phase-hero">
+            <section className="card-scene">
+              <section className="phase-hero phase-hero-lock">
                 <h2>
                   Pass it to <span className="inline-name">{currentRevealPlayer.name}</span>
                 </h2>
@@ -1003,37 +1003,41 @@ export default function App() {
                   Only <span className="inline-name">{currentRevealPlayer.name}</span> should peek at the screen.
                 </p>
               </section>
-              <button
-                className="tap-card handoff-card handoff-card-dark attention-card"
-                onClick={() => dispatch({ type: 'showWord' })}
-              >
-                <span className="handoff-label">Up next</span>
-                <strong>
-                  <span className="inline-name">{currentRevealPlayer.name}</span>
-                </strong>
-                <small>Tap to peek at your word</small>
-              </button>
-            </>
+              <div className="card-slot">
+                <button
+                  className="tap-card handoff-card handoff-card-dark attention-card"
+                  onClick={() => dispatch({ type: 'showWord' })}
+                >
+                  <span className="handoff-label">Up next</span>
+                  <strong>
+                    <span className="inline-name">{currentRevealPlayer.name}</span>
+                  </strong>
+                  <small>Tap to peek at your word</small>
+                </button>
+              </div>
+            </section>
           ) : null}
 
           {state.screen === 'revealWord' && currentRevealPlayer && currentAssignment ? (
-            <>
-              <section className="phase-hero">
+            <section className="card-scene">
+              <section className="phase-hero phase-hero-lock">
                 <h2>Lock it in.</h2>
                 <p>When you are ready, tap the card and pass it on.</p>
               </section>
-              <button
-                className={canHideRevealedWord ? 'word-card word-card-light attention-card' : 'word-card word-card-light'}
-                disabled={!canHideRevealedWord}
-                onClick={() => dispatch({ type: 'hideWord' })}
-              >
-                <span className="word-card-label">Your word</span>
-                <strong className="word-card-value">{currentAssignment.word}</strong>
-                <small className="word-card-note">
-                  {canHideRevealedWord ? 'Tap to hide and pass it on' : 'Hang on...'}
-                </small>
-              </button>
-            </>
+              <div className="card-slot">
+                <button
+                  className={canHideRevealedWord ? 'word-card word-card-light attention-card' : 'word-card word-card-light'}
+                  disabled={!canHideRevealedWord}
+                  onClick={() => dispatch({ type: 'hideWord' })}
+                >
+                  <span className="word-card-label">Your word</span>
+                  <strong className="word-card-value">{currentAssignment.word}</strong>
+                  <small className="word-card-note">
+                    {canHideRevealedWord ? 'Tap to hide and pass it on' : 'Hang on...'}
+                  </small>
+                </button>
+              </div>
+            </section>
           ) : null}
 
           {state.screen === 'hintRound' ? (
@@ -1059,8 +1063,8 @@ export default function App() {
           ) : null}
 
           {state.screen === 'voteHandoff' && currentVotingPlayer ? (
-            <>
-              <section className="phase-hero">
+            <section className="card-scene">
+              <section className="phase-hero phase-hero-lock">
                 <h2>
                   Pass it to <span className="inline-name">{currentVotingPlayer.name}</span>
                 </h2>
@@ -1075,16 +1079,18 @@ export default function App() {
                   <strong>{revotePlayerNames}</strong>
                 </section>
               ) : null}
-              <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
-                <span className="handoff-label">
-                  {state.voting?.phase === 'revote' ? 'Open revote' : 'Open vote'}
-                </span>
-                <strong>
-                  <span className="inline-name">{currentVotingPlayer.name}</span>
-                </strong>
-                <small>Tap to make your pick</small>
-              </button>
-            </>
+              <div className="card-slot">
+                <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
+                  <span className="handoff-label">
+                    {state.voting?.phase === 'revote' ? 'Open revote' : 'Open vote'}
+                  </span>
+                  <strong>
+                    <span className="inline-name">{currentVotingPlayer.name}</span>
+                  </strong>
+                  <small>Tap to make your pick</small>
+                </button>
+              </div>
+            </section>
           ) : null}
 
           {state.screen === 'vote' && currentVotingPlayer ? (
@@ -1218,8 +1224,8 @@ export default function App() {
           ) : null}
 
           {state.screen === 'spyGuessHandoff' && eliminatedPlayerName ? (
-            <>
-              <section className="phase-hero">
+            <section className="card-scene">
+              <section className="phase-hero phase-hero-lock">
                 <h2>
                   Pass it to <span className="inline-name">{eliminatedPlayerName}</span>
                 </h2>
@@ -1227,14 +1233,16 @@ export default function App() {
                   Only <span className="inline-name">{eliminatedPlayerName}</span> gets this last shot.
                 </p>
               </section>
-              <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
-                <span className="handoff-label">Final guess</span>
-                <strong>
-                  <span className="inline-name">{eliminatedPlayerName}</span>
-                </strong>
-                <small>Tap to take the guess</small>
-              </button>
-            </>
+              <div className="card-slot">
+                <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
+                  <span className="handoff-label">Final guess</span>
+                  <strong>
+                    <span className="inline-name">{eliminatedPlayerName}</span>
+                  </strong>
+                  <small>Tap to take the guess</small>
+                </button>
+              </div>
+            </section>
           ) : null}
 
           {state.screen === 'spyGuess' ? (
