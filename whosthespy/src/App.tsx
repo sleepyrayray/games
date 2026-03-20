@@ -648,6 +648,48 @@ function getScreenLabel(screen: ScreenId) {
   }
 }
 
+function getResultDetail(
+  result: GameResult,
+  round: NonNullable<AppState['round']>,
+  lastEliminatedPlayerId: string | null,
+) {
+  const spyName = getPlayerName(round.players, round.spyPlayerId) ?? 'The spy';
+  const lastEliminatedName = getPlayerName(round.players, lastEliminatedPlayerId);
+
+  if (result === 'spy') {
+    if (lastEliminatedPlayerId === round.spyPlayerId) {
+      return {
+        chip: 'Final guess',
+        note: `${spyName} guessed the common word and stole the round.`,
+      };
+    }
+
+    if (lastEliminatedName) {
+      return {
+        chip: 'Last two players',
+        note: `${spyName} reached the final two players after ${lastEliminatedName} was eliminated.`,
+      };
+    }
+
+    return {
+      chip: 'Last two players',
+      note: `${spyName} reached the final two players and survived.`,
+    };
+  }
+
+  if (lastEliminatedPlayerId === round.spyPlayerId) {
+    return {
+      chip: 'Final guess missed',
+      note: `${spyName} was caught and missed the final guess.`,
+    };
+  }
+
+  return {
+    chip: 'Round complete',
+    note: 'The non-spies closed out the round.',
+  };
+}
+
 export default function App() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
 
@@ -702,6 +744,13 @@ export default function App() {
     id: playerId,
     name: getPlayerName(roundPlayers, playerId) ?? 'Unknown player',
   }));
+  const spyPlayerName = state.round
+    ? getPlayerName(state.round.players, state.round.spyPlayerId)
+    : null;
+  const resultDetail =
+    state.round && state.result
+      ? getResultDetail(state.result, state.round, state.lastEliminatedPlayerId)
+      : null;
   const eliminatedPlayerName = state.round
     ? getPlayerName(state.round.players, state.lastEliminatedPlayerId)
     : null;
@@ -1124,14 +1173,34 @@ export default function App() {
 
           {state.screen === 'elimination' && state.round && eliminatedPlayerName ? (
             <>
-              <section className="section-copy">
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Elimination</span>
+                  <span className="phase-chip">
+                    {state.lastEliminatedPlayerId === state.round.spyPlayerId ? 'Spy caught' : 'Round continues'}
+                  </span>
+                </div>
                 <h2>{eliminatedPlayerName} was eliminated</h2>
                 {state.lastEliminatedPlayerId === state.round.spyPlayerId ? (
                   <p>{eliminatedPlayerName} was the spy.</p>
                 ) : (
-                  <p>The game continues.</p>
+                  <p>The hidden words stay the same. Start another hint round with the remaining players.</p>
                 )}
               </section>
+              <div className="summary-grid">
+                <article className="summary-card">
+                  <span>Eliminated</span>
+                  <strong>{eliminatedPlayerName}</strong>
+                </article>
+                <article className="summary-card">
+                  <span>Next</span>
+                  <strong>
+                    {state.lastEliminatedPlayerId === state.round.spyPlayerId
+                      ? 'Final guess'
+                      : `Round ${state.round.roundNumber + 1}`}
+                  </strong>
+                </article>
+              </div>
               <div className="button-stack">
                 <button
                   className="button button-primary"
@@ -1145,22 +1214,35 @@ export default function App() {
 
           {state.screen === 'spyGuessHandoff' && eliminatedPlayerName ? (
             <>
-              <section className="section-copy">
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Final guess</span>
+                  <span className="phase-chip">Private</span>
+                </div>
                 <h2>Pass the device to {eliminatedPlayerName}</h2>
-                <p>Tap to enter your guess.</p>
+                <p>Only {eliminatedPlayerName} should look at the guess screen.</p>
               </section>
-              <button className="tap-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
-                Tap to continue
+              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
+                <span className="handoff-label">Final guess</span>
+                <strong>{eliminatedPlayerName}</strong>
+                <small>Tap to enter the guess</small>
               </button>
             </>
           ) : null}
 
           {state.screen === 'spyGuess' ? (
             <>
-              <section className="section-copy">
-                <p className="eyebrow">You were the spy.</p>
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">Final guess</span>
+                  <span className="phase-chip">Exact match only</span>
+                </div>
                 <h2>Guess the common word</h2>
-                <p>Use the exact word. Case does not matter.</p>
+                <p>You were the spy. Enter one exact word. Case does not matter.</p>
+              </section>
+              <section className="detail-note">
+                <span>Private input</span>
+                <strong>The guess stays hidden until you submit it.</strong>
               </section>
               <label className="field-row">
                 <span>Your guess</span>
@@ -1169,6 +1251,7 @@ export default function App() {
                     className="input"
                     type="text"
                     value={state.spyGuess}
+                    placeholder="Type the word"
                     autoCapitalize="off"
                     autoCorrect="off"
                     spellCheck={false}
@@ -1182,7 +1265,11 @@ export default function App() {
                 </div>
               </label>
               <div className="button-stack">
-                <button className="button button-primary" onClick={() => dispatch({ type: 'submitSpyGuess' })}>
+                <button
+                  className="button button-primary"
+                  disabled={!state.spyGuess.trim()}
+                  onClick={() => dispatch({ type: 'submitSpyGuess' })}
+                >
                   Submit Guess
                 </button>
               </div>
@@ -1191,14 +1278,24 @@ export default function App() {
 
           {state.screen === 'result' && state.round && state.result ? (
             <>
-              <section className="section-copy">
+              <section className="phase-hero">
+                <div className="phase-chip-row">
+                  <span className="phase-chip">{state.result === 'spy' ? 'Spy wins' : 'Non-spies win'}</span>
+                  {resultDetail ? <span className="phase-chip">{resultDetail.chip}</span> : null}
+                </div>
                 <h2>{state.result === 'spy' ? 'Spy wins' : 'Non-spies win'}</h2>
-                <p>The round is over. Review the final reveal below, then start again.</p>
+                <p>{resultDetail?.note ?? 'The round is over. Review the final reveal below, then start again.'}</p>
               </section>
               <div className="summary-grid">
+                {eliminatedPlayerName ? (
+                  <article className="summary-card">
+                    <span>Last eliminated</span>
+                    <strong>{eliminatedPlayerName}</strong>
+                  </article>
+                ) : null}
                 <article className="summary-card">
                   <span>Spy</span>
-                  <strong>{getPlayerName(state.round.players, state.round.spyPlayerId)}</strong>
+                  <strong>{spyPlayerName}</strong>
                 </article>
                 <article className="summary-card">
                   <span>Common word</span>
