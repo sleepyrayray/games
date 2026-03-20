@@ -57,22 +57,22 @@ const INSTRUCTION_STEPS = [
   {
     step: '1',
     title: 'Set up the round',
-    body: 'Pick a theme and add 3 to 10 players on the same device.',
+    body: 'Pick a theme and add 3 to 10 names on one phone.',
   },
   {
     step: '2',
-    title: 'Pass and reveal',
-    body: 'Players check their words in a random order, see only the word, then hide it before passing the device.',
+    title: 'Pass and peek',
+    body: 'Players check their words one at a time, hide them again, and pass the phone along.',
   },
   {
     step: '3',
-    title: 'Listen for the mismatch',
-    body: 'Everyone gives one spoken hint, and that is when the odd word should start to stand out.',
+    title: 'Drop a clue',
+    body: 'Everyone says one clue out loud. That is when the odd word should start to show.',
   },
   {
     step: '4',
     title: 'Vote in private',
-    body: 'Each active player votes quietly on the device. If the spy is caught, they get one final guess.',
+    body: 'Each active player votes quietly on the phone. Catch the spy and they get one last guess.',
   },
 ];
 
@@ -662,33 +662,33 @@ function getResultDetail(
     if (lastEliminatedPlayerId === round.spyPlayerId) {
       return {
         chip: 'Final guess',
-        note: `${spyName} guessed the common word and stole the round.`,
+        note: `${spyName} nailed the common word and stole the round.`,
       };
     }
 
     if (lastEliminatedName) {
       return {
         chip: 'Last two players',
-        note: `${spyName} reached the final two players after ${lastEliminatedName} was eliminated.`,
+        note: `${spyName} made it to the final two after ${lastEliminatedName} went out.`,
       };
     }
 
     return {
       chip: 'Last two players',
-      note: `${spyName} reached the final two players and survived.`,
+      note: `${spyName} made it to the final two and took the round.`,
     };
   }
 
   if (lastEliminatedPlayerId === round.spyPlayerId) {
     return {
       chip: 'Final guess missed',
-      note: `${spyName} was caught and missed the final guess.`,
+      note: `${spyName} got caught and missed the last guess.`,
     };
   }
 
   return {
     chip: 'Round complete',
-    note: 'The non-spies closed out the round.',
+    note: 'The crew closed it out.',
   };
 }
 
@@ -759,18 +759,18 @@ export default function App() {
     : null;
   const setupHelperText = (() => {
     if (duplicateNameKeys.size > 0) {
-      return 'Each player name needs to be unique.';
+      return 'Each name needs to be different.';
     }
 
     if (filledPlayerCount < MIN_PLAYERS) {
-      return `Name at least ${MIN_PLAYERS} players to start.`;
+      return `Add at least ${MIN_PLAYERS} players to get it going.`;
     }
 
     if (readyPlayerCount < state.setup.playerNames.length) {
       return 'Fill every player slot or remove the extras.';
     }
 
-    return 'Ready. Start the round when the group is set.';
+    return "You're set. Start when the group is ready.";
   })();
   const topStatusItems = state.round
     ? [state.round.theme.name, `Round ${state.round.roundNumber}`]
@@ -820,16 +820,14 @@ export default function App() {
           {state.screen === 'title' ? (
             <>
               <section className="hero hero-title">
-                <p className="hero-copy hero-copy-compact">
-                  Pass one phone around, give one clue each, and find the odd word.
-                </p>
+                <p className="hero-copy hero-copy-compact">One phone, quick clues, one odd word.</p>
               </section>
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
-                  {hasSetupProgress ? 'Continue Setup' : 'Start Setup'}
+                  {hasSetupProgress ? 'Keep Setting Up' : 'Start a Game'}
                 </button>
                 <button className="button button-secondary" onClick={() => dispatch({ type: 'openInstructions' })}>
-                  Instructions
+                  How to Play
                 </button>
               </div>
             </>
@@ -838,7 +836,7 @@ export default function App() {
           {state.screen === 'instructions' ? (
             <>
               <section className="section-copy">
-                <p>Read this once, then the table can mostly play from the flow on screen.</p>
+                <p>Read this once and you are good to go.</p>
               </section>
               <section className="instruction-list">
                 {INSTRUCTION_STEPS.map((item) => (
@@ -856,7 +854,7 @@ export default function App() {
                   Back
                 </button>
                 <button className="button button-primary" onClick={() => dispatch({ type: 'openPlay' })}>
-                  Start Setup
+                  Start a Game
                 </button>
               </div>
             </>
@@ -865,7 +863,7 @@ export default function App() {
           {state.screen === 'themeSelection' ? (
             <>
               <section className="section-copy">
-                <p>Pick one theme.</p>
+                <p>Pick a theme for this round.</p>
               </section>
               <div className="theme-grid">
                 {orderedThemes.map((theme) => (
@@ -893,7 +891,7 @@ export default function App() {
                   disabled={!canContinueFromTheme}
                   onClick={() => dispatch({ type: 'continueFromTheme' })}
                 >
-                  Continue
+                  Next
                 </button>
               </div>
             </>
@@ -902,7 +900,7 @@ export default function App() {
           {state.screen === 'playerEntry' ? (
             <>
               <section className="section-copy">
-                <p>Add player names.</p>
+                <p>Add everyone who is in.</p>
               </section>
               <section className="setup-summary">
                 <article className="summary-card">
@@ -981,7 +979,7 @@ export default function App() {
                   disabled={!canStartGame}
                   onClick={() => dispatch({ type: 'startGame' })}
                 >
-                  Start Game
+                  Start Round
                 </button>
                 <button className="button button-ghost" onClick={() => dispatch({ type: 'backToTheme' })}>
                   Back
@@ -1001,13 +999,16 @@ export default function App() {
                   Pass the phone to <span className="inline-name">{currentRevealPlayer.name}</span>
                 </h2>
                 <p>
-                  Only <span className="inline-name">{currentRevealPlayer.name}</span> should look at the screen.
+                  Only <span className="inline-name">{currentRevealPlayer.name}</span> should peek at the screen.
                 </p>
               </section>
-              <button className="tap-card handoff-card handoff-card-dark" onClick={() => dispatch({ type: 'showWord' })}>
-                <span className="handoff-label">Next player</span>
+              <button
+                className="tap-card handoff-card handoff-card-dark attention-card"
+                onClick={() => dispatch({ type: 'showWord' })}
+              >
+                <span className="handoff-label">Up next</span>
                 <strong>{currentRevealPlayer.name}</strong>
-                <small className="instruction-pulse">Tap to view your word</small>
+                <small>Tap to peek at your word</small>
               </button>
             </>
           ) : null}
@@ -1019,20 +1020,18 @@ export default function App() {
                   <span className="phase-chip">Private word</span>
                   {revealStepLabel ? <span className="phase-chip">{revealStepLabel}</span> : null}
                 </div>
-                <h2>Memorize it, then hide it.</h2>
-                <p>Tap the card after you are ready to pass the phone.</p>
+                <h2>Lock it in.</h2>
+                <p>When you are ready, tap the card and pass the phone.</p>
               </section>
               <button
-                className="word-card word-card-light"
+                className={canHideRevealedWord ? 'word-card word-card-light attention-card' : 'word-card word-card-light'}
                 disabled={!canHideRevealedWord}
                 onClick={() => dispatch({ type: 'hideWord' })}
               >
                 <span className="word-card-label">Your word</span>
                 <strong className="word-card-value">{currentAssignment.word}</strong>
-                <small
-                  className={canHideRevealedWord ? 'word-card-note instruction-pulse' : 'word-card-note'}
-                >
-                  {canHideRevealedWord ? 'Tap to hide and continue' : 'Hold for a moment...'}
+                <small className="word-card-note">
+                  {canHideRevealedWord ? 'Tap to hide and pass it on' : 'Hang on...'}
                 </small>
               </button>
             </>
@@ -1042,18 +1041,18 @@ export default function App() {
             <>
               <section className="phase-hero">
                 <div className="phase-chip-row">
-                  <span className="phase-chip">Phones down</span>
+                  <span className="phase-chip">Clue time</span>
                   {state.round ? <span className="phase-chip">{state.round.theme.name}</span> : null}
                 </div>
-                <h2>Hint Round</h2>
-                <p>Everyone gives one spoken hint.</p>
+                <h2>Everyone drops one clue.</h2>
+                <p>One clue each, out loud.</p>
               </section>
               <section className="checklist-card">
-                <span>Quick reminder</span>
+                <span>Keep it simple</span>
                 <div className="checklist-list">
-                  <p>Give one spoken hint each.</p>
-                  <p>No extra app input until the group is ready.</p>
-                  <p>Start voting once the table wants to lock in guesses.</p>
+                  <p>One clue each.</p>
+                  <p>No more app taps until the table is ready.</p>
+                  <p>Vote when everyone feels locked in.</p>
                 </div>
               </section>
               <div className="button-stack">
@@ -1077,22 +1076,22 @@ export default function App() {
                   Pass the phone to <span className="inline-name">{currentVotingPlayer.name}</span>
                 </h2>
                 <p>
-                  Only <span className="inline-name">{currentVotingPlayer.name}</span> should look while choosing a
-                  vote.
+                  Only <span className="inline-name">{currentVotingPlayer.name}</span> should peek while making the
+                  pick.
                 </p>
               </section>
               {state.voting?.phase === 'revote' && revotePlayerNames ? (
                 <section className="detail-note">
-                  <span>Revote between</span>
+                  <span>Tied players</span>
                   <strong>{revotePlayerNames}</strong>
                 </section>
               ) : null}
-              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
+              <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
                 <span className="handoff-label">
-                  {state.voting?.phase === 'revote' ? 'Open revote' : 'Open ballot'}
+                  {state.voting?.phase === 'revote' ? 'Open revote' : 'Open vote'}
                 </span>
                 <strong>{currentVotingPlayer.name}</strong>
-                <small className="instruction-pulse">Tap to open the ballot</small>
+                <small>Tap to make your pick</small>
               </button>
             </>
           ) : null}
@@ -1107,18 +1106,17 @@ export default function App() {
                   {votingStepLabel ? <span className="phase-chip">{votingStepLabel}</span> : null}
                 </div>
                 <h2>
-                  <span className="inline-name">{currentVotingPlayer.name}</span>, choose{' '}
-                  {state.voting?.phase === 'revote' ? 'one tied player.' : 'one player.'}
+                  <span className="inline-name">{currentVotingPlayer.name}</span>, who is your pick?
                 </h2>
                 <p>
                   {state.voting?.phase === 'revote'
-                    ? 'Only tied players appear in this revote. The result stays hidden until every ballot is in.'
-                    : 'Your choice stays private until every vote is in.'}
+                    ? 'Only the tied players are up this time. Nobody sees the result until every vote is in.'
+                    : 'Your pick stays private until everybody is done.'}
                 </p>
               </section>
               {state.voting?.phase === 'revote' && revotePlayerNames ? (
                 <section className="detail-note">
-                  <span>Revote between</span>
+                  <span>Tied players</span>
                   <strong>{revotePlayerNames}</strong>
                 </section>
               ) : null}
@@ -1144,7 +1142,7 @@ export default function App() {
                   disabled={!state.selectedVoteTargetId}
                   onClick={() => dispatch({ type: 'submitVote' })}
                 >
-                  {state.voting?.phase === 'revote' ? 'Submit Revote' : 'Submit Vote'}
+                  {state.voting?.phase === 'revote' ? 'Lock In Revote' : 'Lock In Vote'}
                 </button>
               </div>
             </>
@@ -1159,11 +1157,11 @@ export default function App() {
                     {state.tieStage === 1 ? `${state.tiedPlayerIds.length} tied` : `Round ${state.round.roundNumber + 1}`}
                   </span>
                 </div>
-                <h2>{state.tieStage === 1 ? 'No one is out yet.' : 'Still tied after the revote.'}</h2>
+                <h2>{state.tieStage === 1 ? "It's a tie." : 'Still tied.'}</h2>
                 {state.tieStage === 1 ? (
-                  <p>Run one more private vote between the tied players.</p>
+                  <p>One more quick vote between the tied players.</p>
                 ) : (
-                  <p>No one is eliminated. Keep the same hidden words and start another hint round.</p>
+                  <p>Nobody is out. Same words, another clue round.</p>
                 )}
               </section>
               {state.tieStage === 1 ? (
@@ -1177,19 +1175,19 @@ export default function App() {
                 </div>
               ) : null}
               <section className="checklist-card">
-                <span>What happens next</span>
+                <span>Next up</span>
                 <div className="checklist-list">
                   {state.tieStage === 1 ? (
                     <>
                       <p>Everyone votes again in private.</p>
-                      <p>Only tied players appear on the ballot.</p>
-                      <p>No vote totals are shown.</p>
+                      <p>Only tied players are on the card.</p>
+                      <p>No vote totals show up.</p>
                     </>
                   ) : (
                     <>
-                      <p>No one leaves the game this round.</p>
-                      <p>All active players stay in.</p>
-                      <p>Go back to spoken hints, then vote again.</p>
+                      <p>Nobody leaves this round.</p>
+                      <p>Same words, same players.</p>
+                      <p>Go back to clues, then vote again.</p>
                     </>
                   )}
                 </div>
@@ -1218,23 +1216,23 @@ export default function App() {
                   </span>
                 </div>
                 <h2>
-                  <span className="inline-name">{eliminatedPlayerName}</span> was eliminated
+                  <span className="inline-name">{eliminatedPlayerName}</span> is out.
                 </h2>
                 {state.lastEliminatedPlayerId === state.round.spyPlayerId ? (
                   <p>
-                    <span className="inline-name">{eliminatedPlayerName}</span> was the spy.
+                    And yep, <span className="inline-name">{eliminatedPlayerName}</span> was the spy.
                   </p>
                 ) : (
-                  <p>The hidden words stay the same. Start another hint round with the remaining players.</p>
+                  <p>Not the spy. Keep the clues coming.</p>
                 )}
               </section>
               <div className="summary-grid">
                 <article className="summary-card">
-                  <span>Eliminated</span>
+                  <span>Out</span>
                   <strong>{eliminatedPlayerName}</strong>
                 </article>
                 <article className="summary-card">
-                  <span>Next</span>
+                  <span>Next up</span>
                   <strong>
                     {state.lastEliminatedPlayerId === state.round.spyPlayerId
                       ? 'Final guess'
@@ -1247,7 +1245,7 @@ export default function App() {
                   className="button button-primary"
                   onClick={() => dispatch({ type: 'continueAfterElimination' })}
                 >
-                  {state.lastEliminatedPlayerId === state.round.spyPlayerId ? 'Continue' : 'Next Round'}
+                  {state.lastEliminatedPlayerId === state.round.spyPlayerId ? 'Continue' : 'Keep Going'}
                 </button>
               </div>
             </>
@@ -1264,13 +1262,13 @@ export default function App() {
                   Pass the device to <span className="inline-name">{eliminatedPlayerName}</span>
                 </h2>
                 <p>
-                  Only <span className="inline-name">{eliminatedPlayerName}</span> should look at the guess screen.
+                  Only <span className="inline-name">{eliminatedPlayerName}</span> gets this last shot.
                 </p>
               </section>
-              <button className="tap-card handoff-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
+              <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
                 <span className="handoff-label">Final guess</span>
                 <strong>{eliminatedPlayerName}</strong>
-                <small>Tap to enter the guess</small>
+                <small>Tap to take the guess</small>
               </button>
             </>
           ) : null}
@@ -1280,14 +1278,14 @@ export default function App() {
               <section className="phase-hero">
                 <div className="phase-chip-row">
                   <span className="phase-chip">Final guess</span>
-                  <span className="phase-chip">Known variants okay</span>
+                  <span className="phase-chip">Known variants count</span>
                 </div>
                 <h2>Guess the common word</h2>
-                <p>You were the spy. Enter the word or a common accepted variant. Case does not matter.</p>
+                <p>You were the spy. Type the word or a known variant. Case does not matter.</p>
               </section>
               <section className="detail-note">
-                <span>Private input</span>
-                <strong>The guess stays hidden until you submit it.</strong>
+                <span>Private guess</span>
+                <strong>Keep this one hidden until you lock it in.</strong>
               </section>
               <label className="field-row">
                 <span>Your guess</span>
@@ -1315,7 +1313,7 @@ export default function App() {
                   disabled={!state.spyGuess.trim()}
                   onClick={() => dispatch({ type: 'submitSpyGuess' })}
                 >
-                  Submit Guess
+                  Lock In Guess
                 </button>
               </div>
             </>
@@ -1325,16 +1323,16 @@ export default function App() {
             <>
               <section className="phase-hero">
                 <div className="phase-chip-row">
-                  <span className="phase-chip">{state.result === 'spy' ? 'Spy wins' : 'Non-spies win'}</span>
+                  <span className="phase-chip">{state.result === 'spy' ? 'Spy wins' : 'Crew wins'}</span>
                   {resultDetail ? <span className="phase-chip">{resultDetail.chip}</span> : null}
                 </div>
-                <h2>{state.result === 'spy' ? 'Spy wins' : 'Non-spies win'}</h2>
+                <h2>{state.result === 'spy' ? 'Spy wins' : 'Crew wins'}</h2>
                 <p>{resultDetail?.note ?? 'The round is over. Review the final reveal below, then start again.'}</p>
               </section>
               <div className="summary-grid">
                 {eliminatedPlayerName ? (
                   <article className="summary-card">
-                    <span>Last eliminated</span>
+                    <span>Out last</span>
                     <strong>{eliminatedPlayerName}</strong>
                   </article>
                 ) : null}
