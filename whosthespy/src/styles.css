@@ -54,6 +54,17 @@ button {
   }
 }
 
+@keyframes blinkText {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.38;
+  }
+}
+
 @keyframes revealWordFadeIn {
   0% {
     opacity: 0;
@@ -154,6 +165,7 @@ button {
   background: rgba(251, 249, 243, 0.92);
   border: 1px solid rgba(24, 32, 24, 0.08);
   box-shadow: 0 1.2rem 2.4rem rgba(67, 61, 45, 0.12);
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -173,6 +185,7 @@ button {
   display: grid;
   gap: 1rem;
   align-content: start;
+  min-width: 0;
 }
 
 .card-scene .phase-hero {
@@ -187,6 +200,7 @@ button {
 .card-slot {
   display: grid;
   align-items: start;
+  min-width: 0;
 }
 
 .hero-title {
@@ -205,6 +219,17 @@ button {
   margin: 1.05rem 0 0;
   color: #495046;
   text-align: center;
+}
+
+.phase-followup-action {
+  max-width: 24rem;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: clamp(1.2rem, 5vw, 1.55rem);
+  line-height: 1.25;
+  font-weight: 800;
+  color: #20271b;
+  animation: blinkText 1.35s ease-in-out infinite;
 }
 
 .hero-copy-compact {
@@ -234,6 +259,10 @@ button {
   margin-top: 1.15rem;
 }
 
+.field-list {
+  margin-top: 0.45rem;
+}
+
 .instruction-card {
   padding: 0.95rem 1rem;
   border-radius: 1.2rem;
@@ -261,9 +290,7 @@ button {
 }
 
 .instruction-copy {
-  display: grid;
-  gap: 0.25rem;
-  justify-items: center;
+  max-width: 28rem;
 }
 
 .instruction-copy strong {
@@ -273,6 +300,7 @@ button {
 .instruction-copy p {
   margin: 0;
   color: #576054;
+  line-height: 1.55;
 }
 
 .button-row {
@@ -438,8 +466,20 @@ button {
   font-weight: 800;
 }
 
+.handoff-heading {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+}
+
+.handoff-name {
+  font-size: clamp(2.45rem, 10vw, 3.35rem);
+  line-height: 0.95;
+}
+
 .tap-card,
 .word-card {
+  min-width: 0;
   min-height: 10rem;
   display: grid;
   place-items: center;
@@ -469,6 +509,14 @@ button {
 
 .handoff-card small {
   color: #596154;
+}
+
+.handoff-card .handoff-action {
+  max-width: 100%;
+  font-size: clamp(1.05rem, 6vw, 2.15rem);
+  line-height: 1.08;
+  white-space: nowrap;
+  animation: blinkText 1.35s ease-in-out infinite;
 }
 
 .handoff-card-dark {
@@ -506,6 +554,11 @@ button {
 .word-card-note {
   color: rgba(249, 247, 241, 0.78);
   font-size: 0.86rem;
+  min-height: 1.3em;
+}
+
+.word-card-note-action {
+  animation: blinkText 1.35s ease-in-out infinite;
 }
 
 .word-card,
@@ -570,6 +623,18 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .attention-card {
+    animation: none;
+  }
+
+  .handoff-action {
+    animation: none;
+  }
+
+  .word-card-note-action {
+    animation: none;
+  }
+
+  .phase-followup-action {
     animation: none;
   }
 

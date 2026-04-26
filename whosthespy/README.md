@@ -7,6 +7,7 @@ Planned game link: [Play Who's the Spy?](https://sleepyrayray.github.io/games/wh
 ## Core Idea
 
 - The game supports 3 to 10 players.
+- Player names are capped at 12 characters.
 - Players choose a public theme before the game starts.
 - One player is secretly the spy.
 - The spy gets a different word from everyone else, but both words come from the same theme.
@@ -28,7 +29,7 @@ Planned game link: [Play Who's the Spy?](https://sleepyrayray.github.io/games/wh
 1. Choose a theme.
 2. Enter player names.
 3. Start the game.
-4. Show a clickable player card for the next player in a randomized reveal order.
+4. Show a handoff screen for the next player in a randomized reveal order.
 5. The player taps their card to privately reveal their word.
 6. The player taps their word to hide it and move to the next player's reveal card.
 7. Once all players have seen their word, the app tells players to begin the real-life hint round.

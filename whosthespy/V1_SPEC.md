@@ -19,7 +19,7 @@ The app should support the real-life social gameplay, not compete with it.
 - Neutral, clean on-screen copy
 - Mobile-first UI with desktop support
 - One shared device for all setup, reveals, voting, and endgame input
-- Each player sees their name first, then taps to reveal their word
+- Each player sees a handoff screen with their name first, then taps to reveal their word
 - Reveal order is randomized each round
 - The word reveal screen shows only the assigned word, not an explicit spy or non-spy label
 - After seeing their word, the player taps the word card to hide it and advance to the next player
@@ -48,8 +48,8 @@ The app should support the real-life social gameplay, not compete with it.
 ## Turn Order
 
 - Secret word reveals happen in a randomized order each round
-- Voting happens in player entry order, skipping eliminated players
-- Revotes also use player entry order, skipping eliminated players
+- Voting order is randomized for each voting phase, skipping eliminated players
+- Revotes also randomize voter order, skipping eliminated players
 
 ## Setup Validation
 
@@ -156,8 +156,8 @@ Primary actions:
 
 - Enter player names
 - `Add Player`
-- `Start Game`
-- `Back`
+- `Start Round`
+- `Pick Another Theme`
 
 Validation copy:
 
@@ -169,6 +169,7 @@ Validation copy:
 Notes:
 
 - Names should be trimmed before validation and storage
+- Player names are capped at 12 characters
 - Keep the screen focused on speed and readability
 
 ### 5. Player Reveal Handoff Screen
@@ -177,8 +178,8 @@ Purpose: safely hand the device to the next player before any secret appears.
 
 Main copy:
 
-- Title: the current player's name
-- Helper text: `Tap to view your word`
+- Title: `Pass it to [Name]`, with the player name visually emphasized below the text
+- Main card action: `Reveal your word`
 
 Primary actions:
 
@@ -188,6 +189,7 @@ Notes:
 
 - This screen is safe to show publicly
 - No role or word appears yet
+- The main card should not repeat the player's name
 
 ### 6. Player Word Reveal Screen
 
@@ -196,7 +198,7 @@ Purpose: show the current player's word privately without explicitly revealing t
 Main copy:
 
 - Show the assigned word in large text
-- Instruction: `Tap the word to hide it and pass the device.`
+- Instruction: `Tap to hide and pass it on`
 
 Primary actions:
 
@@ -206,6 +208,7 @@ Notes:
 
 - No spy or non-spy label appears on this screen
 - There is no separate next-player button in v1
+- The instruction is visible immediately and starts blinking once the card can be tapped
 - If more players remain, tapping the word card advances to the next player's handoff screen
 - If this is the last player, tapping the word card advances to the hint round screen
 
@@ -215,9 +218,8 @@ Purpose: pause app interaction while the real-life hint round happens.
 
 Main copy:
 
-- Title: `Hint Round`
-- Line: `Everyone gives one spoken hint.`
-- Line: `Continue when the group is ready to vote.`
+- Title: `Everyone drops one clue.`
+- Line: `Say one clue each and vote when everyone is ready.`
 
 Primary actions:
 
@@ -234,8 +236,9 @@ Purpose: safely hand the device to the current voter before vote options appear.
 
 Main copy:
 
-- Title: the current voter's name
-- Helper text: `Tap to vote`
+- Title: `Pass it to [Name]`, with the voter name visually emphasized below the text
+- Main card action: `Open your ballot`
+- Revote card action: `Open revote`
 
 Primary actions:
 
@@ -245,6 +248,7 @@ Notes:
 
 - This screen is safe to show publicly
 - No vote options appear until the tap
+- The main card should not repeat the voter's name
 
 ### 9. Voting Screen
 
@@ -252,7 +256,7 @@ Purpose: collect one private vote from the current voter.
 
 Main copy:
 
-- Title: `Choose who to eliminate`
+- Title: `[Name], who's the spy?`
 
 Primary actions:
 
@@ -318,6 +322,7 @@ Main copy if the spy is eliminated:
 
 - Title: `[Name] was eliminated`
 - Line: `[Name] was the spy.`
+- Follow-up line: `[Name] gets one last shot to guess the common word.`
 
 Primary actions:
 
@@ -334,8 +339,8 @@ Purpose: hand the device to the eliminated spy before the final guess input appe
 
 Main copy:
 
-- Title: `Pass the device to [Name]`
-- Helper text: `Tap to enter your guess`
+- Title: `Pass it to [Name]`, with the spy name visually emphasized below the text
+- Main card action: `Make your guess`
 
 Primary actions:
 
@@ -375,15 +380,15 @@ Main copy if the spy wins:
 
 - Title: `Spy wins`
 
-Main copy if the non-spies win:
+Main copy if the crew wins:
 
-- Title: `Non-spies win`
+- Title: `Crew wins`
 
 Round reveal:
 
-- Show who the spy was
 - Show the common word
 - Show the spy word
+- The result note can name the spy and explain why the round ended
 
 Primary actions:
 

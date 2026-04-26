@@ -77,6 +77,7 @@ const INSTRUCTION_STEPS = [
 ];
 
 const WORD_REVEAL_DURATION_MS = 2000;
+const MAX_NAME_LENGTH = 12;
 const createThemeOrder = () => shuffleItems(THEMES.map((theme) => theme.id));
 
 function createInitialState(): AppState {
@@ -177,7 +178,7 @@ function reducer(state: AppState, action: Action): AppState {
         setup: {
           ...state.setup,
           playerNames: state.setup.playerNames.map((name, index) =>
-            index === action.index ? action.value : name,
+            index === action.index ? action.value.slice(0, MAX_NAME_LENGTH) : name,
           ),
         },
         notice: null,
@@ -853,8 +854,9 @@ export default function App() {
                   <article key={item.step} className="instruction-card">
                     <span className="instruction-step">{item.step}</span>
                     <div className="instruction-copy">
-                      <strong>{item.title}</strong>
-                      <p>{item.body}</p>
+                      <p>
+                        <strong>{item.title}!</strong> {item.body}
+                      </p>
                     </div>
                   </article>
                 ))}
@@ -951,6 +953,7 @@ export default function App() {
                         type="text"
                         value={playerName}
                         placeholder={`Player ${index + 1}`}
+                        maxLength={MAX_NAME_LENGTH}
                         autoCapitalize="words"
                         autoCorrect="off"
                         spellCheck={false}
@@ -1000,8 +1003,9 @@ export default function App() {
           {state.screen === 'revealHandoff' && currentRevealPlayer ? (
             <section className="card-scene">
               <section className="phase-hero phase-hero-lock">
-                <h2>
-                  Pass it to <span className="inline-name">{currentRevealPlayer.name}</span>
+                <h2 className="handoff-heading">
+                  <span>Pass it to</span>
+                  <span className="inline-name handoff-name">{currentRevealPlayer.name}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{currentRevealPlayer.name}</span> should peek at the screen.
@@ -1012,11 +1016,7 @@ export default function App() {
                   className="tap-card handoff-card handoff-card-dark attention-card"
                   onClick={() => dispatch({ type: 'showWord' })}
                 >
-                  <span className="handoff-label">Up next</span>
-                  <strong>
-                    <span className="inline-name">{currentRevealPlayer.name}</span>
-                  </strong>
-                  <small>Tap to peek at your word</small>
+                  <strong className="handoff-action">Reveal your word</strong>
                 </button>
               </div>
             </section>
@@ -1042,8 +1042,14 @@ export default function App() {
                   <div className="reveal-stage">
                     <strong className="word-card-value">{currentAssignment.word}</strong>
                   </div>
-                  <small className="word-card-note">
-                    {isRevealWordVisible ? 'Tap to hide and pass it on' : 'Hang on...'}
+                  <small
+                    className={
+                      canHideRevealedWord
+                        ? 'word-card-note word-card-note-action'
+                        : 'word-card-note'
+                    }
+                  >
+                    Tap to hide and pass it on
                   </small>
                 </button>
               </div>
@@ -1054,15 +1060,7 @@ export default function App() {
             <>
               <section className="phase-hero">
                 <h2>Everyone drops one clue.</h2>
-                <p>One clue each, out loud.</p>
-              </section>
-              <section className="checklist-card">
-                <span>Keep it simple</span>
-                <div className="checklist-list">
-                  <p>One clue each.</p>
-                  <p>No more app taps until the table is ready.</p>
-                  <p>Vote when everyone feels locked in.</p>
-                </div>
+                <p>Say one clue each and vote when everyone is ready.</p>
               </section>
               <div className="button-stack">
                 <button className="button button-primary" onClick={() => dispatch({ type: 'continueToVoting' })}>
@@ -1075,8 +1073,9 @@ export default function App() {
           {state.screen === 'voteHandoff' && currentVotingPlayer ? (
             <section className="card-scene">
               <section className="phase-hero phase-hero-lock">
-                <h2>
-                  Pass it to <span className="inline-name">{currentVotingPlayer.name}</span>
+                <h2 className="handoff-heading">
+                  <span>Pass it to</span>
+                  <span className="inline-name handoff-name">{currentVotingPlayer.name}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{currentVotingPlayer.name}</span> should peek while making the
@@ -1091,13 +1090,9 @@ export default function App() {
               ) : null}
               <div className="card-slot">
                 <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showVoteOptions' })}>
-                  <span className="handoff-label">
-                    {state.voting?.phase === 'revote' ? 'Open revote' : 'Open vote'}
-                  </span>
-                  <strong>
-                    <span className="inline-name">{currentVotingPlayer.name}</span>
+                  <strong className="handoff-action">
+                    {state.voting?.phase === 'revote' ? 'Open revote' : 'Open your ballot'}
                   </strong>
-                  <small>Tap to make your pick</small>
                 </button>
               </div>
             </section>
@@ -1107,7 +1102,7 @@ export default function App() {
             <>
               <section className="phase-hero">
                 <h2>
-                  <span className="inline-name">{currentVotingPlayer.name}</span>, who is your pick?
+                  <span className="inline-name">{currentVotingPlayer.name}</span>, who's the spy?
                 </h2>
                 <p>
                   {state.voting?.phase === 'revote'
@@ -1204,15 +1199,13 @@ export default function App() {
                   <p>Not the spy. Keep the clues coming.</p>
                 )}
               </section>
-              <div className="summary-grid">
-                <article className="summary-card">
-                  <span>Out</span>
-                  <strong>
-                    <span className="inline-name">{eliminatedPlayerName}</span>
-                  </strong>
-                </article>
-              </div>
-              <p className="phase-followup">
+              <p
+                className={
+                  state.lastEliminatedPlayerId === state.round.spyPlayerId
+                    ? 'phase-followup phase-followup-action'
+                    : 'phase-followup'
+                }
+              >
                 {state.lastEliminatedPlayerId === state.round.spyPlayerId ? (
                   <>
                     <span className="inline-name">{eliminatedPlayerName}</span> gets one last shot to guess the common
@@ -1236,8 +1229,9 @@ export default function App() {
           {state.screen === 'spyGuessHandoff' && eliminatedPlayerName ? (
             <section className="card-scene">
               <section className="phase-hero phase-hero-lock">
-                <h2>
-                  Pass it to <span className="inline-name">{eliminatedPlayerName}</span>
+                <h2 className="handoff-heading">
+                  <span>Pass it to</span>
+                  <span className="inline-name handoff-name">{eliminatedPlayerName}</span>
                 </h2>
                 <p>
                   Only <span className="inline-name">{eliminatedPlayerName}</span> gets this last shot.
@@ -1245,11 +1239,7 @@ export default function App() {
               </section>
               <div className="card-slot">
                 <button className="tap-card handoff-card attention-card" onClick={() => dispatch({ type: 'showSpyGuess' })}>
-                  <span className="handoff-label">Final guess</span>
-                  <strong>
-                    <span className="inline-name">{eliminatedPlayerName}</span>
-                  </strong>
-                  <small>Tap to take the guess</small>
+                  <strong className="handoff-action">Make your guess</strong>
                 </button>
               </div>
             </section>
@@ -1260,10 +1250,6 @@ export default function App() {
               <section className="phase-hero">
                 <h2>Guess the common word</h2>
                 <p>You were the spy. Type the word or a known variant. Case does not matter.</p>
-              </section>
-              <section className="detail-note">
-                <span>Private guess</span>
-                <strong>Keep this one hidden until you lock it in.</strong>
               </section>
               <label className="field-row">
                 <span>Your guess</span>
@@ -1304,20 +1290,6 @@ export default function App() {
                 <p>{resultNote}</p>
               </section>
               <div className="summary-grid">
-                {eliminatedPlayerName ? (
-                  <article className="summary-card">
-                    <span>Out last</span>
-                    <strong>
-                      <span className="inline-name">{eliminatedPlayerName}</span>
-                    </strong>
-                  </article>
-                ) : null}
-                <article className="summary-card">
-                  <span>Spy</span>
-                  <strong>
-                    <span className="inline-name">{spyPlayerName}</span>
-                  </strong>
-                </article>
                 <article className="summary-card">
                   <span>Common word</span>
                   <strong>{state.round.commonWord}</strong>
