@@ -26,7 +26,9 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 - Done: fullscreen canvas layout.
 - Done: first scene foundation with camera, renderer, resize handling, lights, stars, faint dust, and OrbitControls.
 - Done: placeholder comet nucleus and glow.
-- Next: build the straight streaming particle tail.
+- Done: first straight streaming particle tail prototype.
+- Started: slow one-color-at-a-time rainbow cycling for the comet glow and tail.
+- Next: tune the tail shape, motion, color pacing, and mobile performance.
 
 ## Phase 1: Project Setup
 

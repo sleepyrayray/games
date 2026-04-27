@@ -70,6 +70,6 @@ npm run build
 
 ## Project Status
 
-The project now has its initial Vite and Three.js scaffold. The first visual pass includes a fullscreen space scene, stars, faint dust, OrbitControls with limited zoom, and a placeholder comet nucleus with glow.
+The project now has its initial Vite and Three.js scaffold. The first visual pass includes a fullscreen space scene, stars, faint dust, OrbitControls with limited zoom, a placeholder comet nucleus with glow, and a straight shader-based particle tail.
 
-The next goal is the straight streaming particle tail.
+The tail has an early one-color-at-a-time rainbow cycle. The next goal is to tune the tail shape, motion, and color pacing so it feels more comet-like and less like a generic particle stream.
