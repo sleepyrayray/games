@@ -20,6 +20,14 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 - Balance performance for both mobile and desktop.
 - Deploy through GitHub Pages.
 
+## Current Progress
+
+- Done: initial Vite and Three.js scaffold.
+- Done: fullscreen canvas layout.
+- Done: first scene foundation with camera, renderer, resize handling, lights, stars, faint dust, and OrbitControls.
+- Done: placeholder comet nucleus and glow.
+- Next: build the straight streaming particle tail.
+
 ## Phase 1: Project Setup
 
 - Set up the project with Vite and Three.js.

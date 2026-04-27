@@ -44,6 +44,32 @@ That should make the scene read clearly as a comet while still keeping the styli
 - Stars and faint space dust
 - Simple responsive full-screen presentation
 
+## Development
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Start the local dev server:
+
+```sh
+npm run dev
+```
+
+The Vite app is configured for the GitHub Pages subpath, so the local URL is:
+
+[http://localhost:5173/games/rainbow-comet/](http://localhost:5173/games/rainbow-comet/)
+
+Build the production version:
+
+```sh
+npm run build
+```
+
 ## Project Status
 
-This project is currently in planning and pre-production. The first goal is a clean prototype that proves out the comet body, the straight particle tail, the slow color shifting, the endless travel illusion, and the camera interaction.
+The project now has its initial Vite and Three.js scaffold. The first visual pass includes a fullscreen space scene, stars, faint dust, OrbitControls with limited zoom, and a placeholder comet nucleus with glow.
+
+The next goal is the straight streaming particle tail.
