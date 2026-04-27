@@ -4,7 +4,7 @@
 
 Build a polished, purely visual Three.js experience where a glowing comet travels endlessly through space. The comet stays mostly centered while stars, faint dust, and a streaming particle tail create the feeling of endless forward motion.
 
-The visual focus is a small rocky or icy comet nucleus with a bright glowing head and a straight particle tail. The tail should transition slowly through the colors of the rainbow, using one dominant color phase at a time instead of showing a busy full-rainbow mix.
+The visual focus is a small rocky or icy comet nucleus with a bright glowing head and a straight particle tail. The tail should transition slowly through the colors of the rainbow by giving newly spawned particles new hues while older particles keep their previous hues, creating a gradual gradient through the stream.
 
 Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.io/zadvorsky/pen/qOYqGv)
 
@@ -13,9 +13,9 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 - Use Vite and Three.js.
 - Build a fullscreen visual experience, not a traditional game.
 - Keep the experience purely visual with no visible UI controls.
-- Allow the user to rotate around the comet and zoom in or out within limits.
+- Allow the user to rotate around the comet from a steady camera distance.
 - Use a straight streaming comet tail.
-- Cycle the tail color slowly through the rainbow.
+- Cycle the tail slowly through the rainbow with per-particle birth colors.
 - Use stars only, with faint dust for depth.
 - Balance performance for both mobile and desktop.
 - Deploy through GitHub Pages.
@@ -25,10 +25,13 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 - Done: initial Vite and Three.js scaffold.
 - Done: fullscreen canvas layout.
 - Done: first scene foundation with camera, renderer, resize handling, lights, stars, faint dust, and OrbitControls.
-- Done: placeholder comet nucleus and glow.
+- Done: first comet body polish with an irregular faceted nucleus, layered glow, tail-side glow, and rim light.
 - Done: first straight streaming particle tail prototype.
-- Started: slow one-color-at-a-time rainbow cycling for the comet glow and tail.
-- Next: tune the tail shape, motion, color pacing, and mobile performance.
+- Done: per-particle tail color cycling where new particles receive newer hues.
+- Done: first tail shape polish pass for softer drift, taper, and head connection.
+- Done: steady responsive camera framing without user zoom.
+- Done: bounded rotation so the comet and tail stay readable.
+- Next: strengthen the endless travel illusion with background depth and motion polish.
 
 ## Phase 1: Project Setup
 
@@ -42,7 +45,7 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 
 - Create the Three.js renderer, scene, camera, and animation loop.
 - Add responsive resize handling.
-- Add OrbitControls for rotation and limited zoom.
+- Add OrbitControls for rotation without user zoom.
 - Tune the camera framing so the comet is immediately visible.
 - Add baseline lighting for the comet body and glow.
 
@@ -73,8 +76,8 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 ## Phase 6: Slow Rainbow Color Cycling
 
 - Implement a slow color cycle through red, orange, yellow, green, blue, indigo, and violet.
-- Use one dominant tail color at a time.
-- Blend gradually between colors.
+- Give each particle the color phase active when it spawns.
+- Let the tail form a gradual gradient as older particles move away from the comet.
 - Let older particles fade naturally so transitions feel smooth.
 - Avoid fast flashing or noisy rainbow effects.
 
@@ -88,7 +91,7 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 
 ## Phase 8: Interaction Polish
 
-- Limit camera zoom to keep the composition readable.
+- Keep the camera distance fixed so the comet and tail stay readable.
 - Tune OrbitControls damping for smooth rotation.
 - Prevent awkward camera angles where the comet or tail disappears.
 - Keep all interaction direct through the canvas with no visible UI.
@@ -125,10 +128,10 @@ The first milestone is a working fullscreen scene with:
 - a centered comet with a rocky or icy nucleus
 - a bright glowing comet head
 - a straight streaming particle tail
-- slow one-color-at-a-time rainbow cycling
+- slow per-particle rainbow gradient cycling
 - stars and faint dust
 - endless travel illusion
-- rotate and limited zoom controls
+- rotate-only controls
 - responsive mobile and desktop layout
 
 ## Later Ideas

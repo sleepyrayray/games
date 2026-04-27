@@ -12,15 +12,15 @@ Reference inspiration: [THREE.js particle stream by zadvorsky](https://codepen.i
 
 - Show a comet flying endlessly through deep space.
 - Use a straight, particle-heavy tail inspired by the reference effect.
-- Shift the tail through one slow rainbow color phase at a time.
-- Let the user rotate the view around the comet and zoom within limits.
+- Shift the tail through slow rainbow color phases, with each particle keeping the color it was born with.
+- Let the user rotate the view around the comet from a steady camera distance.
 - Focus on mood, motion, and polish over game systems.
 
 ## Visual Direction
 
 - A dark space background with stars and faint dust.
 - A glowing particle tail that feels smooth and alive.
-- A visible comet core so the effect reads as a real object instead of only a stream.
+- A faceted icy comet core so the effect reads as a real object instead of only a stream.
 - Slow, elegant color transitions rather than fast flashing rainbow changes.
 - No visible UI controls, menus, or buttons.
 
@@ -38,8 +38,8 @@ That should make the scene read clearly as a comet while still keeping the styli
 
 - Built with Vite and Three.js
 - Endless looping flight animation
-- User rotation with limited zoom
-- Slow one-color-at-a-time rainbow cycling
+- User rotation at a fixed camera distance
+- Slow per-particle rainbow gradient cycling
 - Particle trail and glow
 - Stars and faint space dust
 - Simple responsive full-screen presentation
@@ -70,6 +70,8 @@ npm run build
 
 ## Project Status
 
-The project now has its initial Vite and Three.js scaffold. The first visual pass includes a fullscreen space scene, stars, faint dust, OrbitControls with limited zoom, a placeholder comet nucleus with glow, and a straight shader-based particle tail.
+The project now has its initial Vite and Three.js scaffold. The first visual pass includes a fullscreen space scene, stars, faint dust, rotate-only OrbitControls with bounded rotation, a faceted icy comet nucleus with layered glow, and a straight shader-based particle tail.
 
-The tail has an early one-color-at-a-time rainbow cycle. The next goal is to tune the tail shape, motion, and color pacing so it feels more comet-like and less like a generic particle stream.
+The tail now uses per-particle birth colors: older particles keep earlier hues while newly spawned particles enter with newer hues, creating a gradual rainbow transition inspired by the reference. The first tail polish pass softened the head connection, added subtle drift, improved the taper, and switched the scene to steady responsive framing without user zoom.
+
+The first comet body polish pass replaced the placeholder head with an irregular vertex-colored nucleus, a brighter inner glow, a wider soft coma, a tail-side glow, and a small rim light so the head stays readable while the rainbow hue changes.
